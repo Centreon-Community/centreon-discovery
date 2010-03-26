@@ -9,7 +9,7 @@ echo '
 '
 
 # Sélection du répertoire centreon
-read -p "entrez le chemin du répertoire dans lequel est installé Centreon: (ex:/usr/share/centreon): " choix_rep_centreon
+read -p "entrez le chemin du repertoire dans lequel est installe Centreon: (ex:/usr/share/centreon): " choix_rep_centreon
 
 echo "PATH_MODULE : "$choix_rep_centreon"/www/modules"
 

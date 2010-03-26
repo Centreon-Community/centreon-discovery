@@ -1,0 +1,8 @@
+##
+# Before installation
+##
+
+Set HTTP rights in your module directory and install TeamReon plugins :
+# cd /usr/local/centreon/www/modules
+# chmod +x ./CentreonDiscovery/install/install.sh
+# CentreonDiscovery/install/install.sh

@@ -85,7 +85,7 @@
 		else if ( $group_description == "Partitions" ) {
 			$arguments = '"!'.$elt_name.'!80!90!$USER2$!1"';
 		}
-		else if ( $group_description == "Process" ) {
+		else if ( $group_description == "Processus" ) {
 			$arguments =  '"!$USER2$!'.$elt_name.'!"';
 		}
 		

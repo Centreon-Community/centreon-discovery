@@ -118,6 +118,7 @@
 						echo '	</tr>'," \n ";					
 					}
 					
+					$processus[] = '';
 					for($i=1; $i<$sizeretour; $i++) {
 					// Pour chaque éléments supervisables
 						$elt_number++;
@@ -145,6 +146,22 @@
 								}
 
 								/* ELEMENTS - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="'. $disk_desc[0] .'"/>'," \n ";
+						}
+						else if ( $oid_desc == "Processus" ) {
+							if ( !in_array($eltname[0],$processus) ) {
+								echo '	<tr class="list_one">'," \n ";
+								echo '  	<td class="ListColCenter"></td>'," \n ";
+								echo ' 		<td class="ListCol">'," \n ";
+								echo '			<table WIDTH=100% BORDER="0" ALIGN="LEFT" VALIGN="MIDDLE" CELLPADDING="0" CELLSPACING="0">'," \n ";
+								echo '				<tr>'," \n ";
+								echo '  				<td WIDTH=30px ALIGN="CENTER">'," \n ";
+								echo '						<img style="border: 0px solid; width: 15px;" alt="-" src="./modules/CentreonDiscovery/pictures/double_puce.png">'," \n ";
+								echo ' 					</td>'," \n ";
+								echo '  				<td><b>' . $eltname[0] .' :</b></td>'," \n ";
+								echo '				</tr>'," \n ";
+
+								/* ELEMENTS - Processus */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="'. $eltname[0] .'"/>'," \n ";
+							}
 						}
 						else {
 							echo '	<tr class="list_one">'," \n ";
@@ -182,6 +199,21 @@
 									echo '	</tr>'," \n ";
 																		
 									/* SERVICES  - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="services['.$group_number.']['.($i-1).']['.$n_service.']" VALUE="'. $oid_service_id .'"/>'," \n ";								
+								}
+							}
+							else if ( $oid_desc == "Processus" ) {	
+								if ( !in_array($eltname[0],$processus) ) {				
+									$processus[] =  $eltname[0];
+									echo '				<tr>'," \n ";
+									echo '					<td WIDTH=30px ALIGN="CENTER"><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="'. $eltname[0] .'|'. $oid_service_id .'|'. $oid_service_alias .'" onChange="checkone(document.getElementsByName(\'cb'.$cbgroup.'[]\'));"  CHECKED /></td>'," \n ";
+									echo '					<td>'.$oid_service_alias.'</td>'," \n ";
+									echo '				</tr>'," \n ";
+									echo '				<tr HEIGHT="5px";></tr>'," \n ";
+									echo '			</table>'," \n ";
+									echo '		</td>'," \n ";
+									echo '	</tr>'," \n ";		
+									
+									/* SERVICES - Autres */ echo '<INPUT TYPE=HIDDEN NAME="services['.$group_number.']['.($i-1).']['.$n_service.']" VALUE="'. $oid_service_id .'"/>'," \n ";								
 								}
 							}
 							else {

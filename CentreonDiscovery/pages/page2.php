@@ -162,6 +162,9 @@
 
 								/* ELEMENTS - Processus */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="'. $eltname[0] .'"/>'," \n ";
 							}
+							else {
+								/* ELEMENTS - Processus - false */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="NULL"/>'," \n ";
+							}
 						}
 						else {
 							echo '	<tr class="list_one">'," \n ";

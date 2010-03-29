@@ -35,7 +35,7 @@
 				
 				// Mise en forme des informations
 				echo '<tr class="list_one">';
-				echo '  <td class="ListColCenter">' . $host_name . '<INPUT TYPE=HIDDEN NAME="host_id" VALUE="'. $host_id .'"/></td>'," \n ";
+				echo '  <td class="ListColCenter">' . $host_name . '<INPUT TYPE=HIDDEN NAME="host_name" VALUE="'. $host_name .'"/><INPUT TYPE=HIDDEN NAME="host_id" VALUE="'. $host_id .'"/></td>'," \n ";
 				echo '  <td class="ListColCenter">' . $host_snmp_community . '</td>'," \n ";
 				echo '  <td class="ListColCenter">' . $host_address . '</td>'," \n ";
 				echo '  <td class="ListColCenter">' . $type . '<INPUT TYPE=HIDDEN NAME="type" VALUE="'. $type .'"/></td>'," \n ";

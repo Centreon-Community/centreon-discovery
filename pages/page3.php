@@ -137,7 +137,7 @@
 								
 								if ( $test_service_checked == 0 ) {
 								// Si le service a été sélectionné							
-									/* PARAM */ echo '<INPUT TYPE=HIDDEN NAME="services['.$group_checked_number.']['.$elt_checked_number.']['.$service_checked_number.']" VALUE="'. $service_id .'"/>'," \n ";								
+									/* PARAM */ echo '<INPUT TYPE=HIDDEN NAME="services['.$group_checked_number.']['.$elt_checked_number.']['.$service_checked_number.']" VALUE="'. $service_id .'|'.$service_alias.'"/>'," \n ";								
 									echo '				<tr>'," \n ";
 									echo '					<td class="ListColHeaderCenter" width=30px><INPUT TYPE=CHECKBOX disabled="disabled" CHECKED /></td>'," \n ";
 									echo '					<td>'.$service_alias.'</td>'," \n ";

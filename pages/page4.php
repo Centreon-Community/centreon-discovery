@@ -42,16 +42,18 @@
 				/* TEST */ //echo '<p>elt_name = '.$elt_name[$i][$j].'</p>';
 				/* TEST */ //echo '<p>services = '.$services[$i][$j][$k].'</p><br>';
 				
-				$insert = InsertionRelationServiceBDD($host_id,$services[$i][$j][$k],$elt_name[$i][$j],$group_description[$i]);
-				$service_name = substr(strrchr($insert[1], "_"), 1);		
+				$service_alias = substr(strrchr($services[$i][$j][$k], "|"), 1);
+				$service_id = substr($services[$i][$j][$k],0,strpos($services[$i][$j][$k], "|"));
+				$insert = InsertionRelationServiceBDD($host_id,$service_id,$elt_name[$i][$j],$group_description[$i]);
+				
 				echo '				<tr>'," \n ";
 				if ( $insert[0] == 0 ) {
 					echo '					<td class="ListColHeaderCenter" width=30px><img style="border: 0px solid; width: 15px;" alt="-" src="./modules/CentreonDiscovery/pictures/true.png"></td>'," \n ";
-					echo '					<td>'.$service_name.' : ce service est d&eacute;sormais configur&eacute; !</td>'," \n ";
+					echo '					<td>'.$service_alias.' : ce service est d&eacute;sormais configur&eacute; !</td>'," \n ";
 				}
 				else {
 					echo '					<td class="ListColHeaderCenter" width=30px><img style="border: 0px solid; width: 15px;" alt="-" src="./modules/CentreonDiscovery/pictures/false.png"></td>'," \n ";
-					echo '					<td>'.$service_name.' : ce service existe d&eacute;j&agrave; !</td>'," \n ";
+					echo '					<td>'.$service_alias.' : ce service existe d&eacute;j&agrave; !</td>'," \n ";
 				}
 				echo '				</tr>'," \n ";
 				echo '				<tr HEIGHT="10px";></tr>'," \n ";

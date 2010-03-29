@@ -19,27 +19,6 @@ DELETE FROM `topology` WHERE `topology_page` = '61003';
 
 /*
 * DATABASE : Centreon2
-* TABLE : service, extended_service_information 
-*	
-*	Suppression des services et templates de service créés via le module
-*/
-DELETE FROM extended_service_information WHERE service_service_id = (SELECT service_id FROM service WHERE service_description LIKE "%TeamReon%");
-DELETE FROM service WHERE service_description LIKE "%TeamReon%";
-
-
-
-/*
-* DATABASE : Centreon2
-* TABLE : command
-*	
-*	Suppression des commandes créées via le module
-*/
-DELETE FROM command WHERE command_name LIKE "%teamreon%";
-
-
-
-/*
-* DATABASE : Centreon2
 * TABLE : CommandOID
 *	
 *	Suppression de la table CommandOID
@@ -65,6 +44,3 @@ DROP TABLE `OIDGroup`;
 *	Suppression de la table CDType
 */
 DROP TABLE `CDType`;
-
-
-DELETE FROM extended_service_information WHERE service_service_id = (SELECT service_id FROM service WHERE service_description LIKE "%TeamReon%");

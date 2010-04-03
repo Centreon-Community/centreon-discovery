@@ -1,12 +1,20 @@
-/*
-* DATABASE : Centreon2
-* TABLE : topology
-*	
-*	Insertion des pages du module Centreon Discovery
+/*  This file is part of CentreonDiscovery.
 *
-*
-*	Page principale du module Centreon Discovery
+*	 CentreonDiscovery is developped with GPL Licence 3.0 :
+*	 Developped by : Jonathan Teste - Cedric Dupre
+*   
 */
+
+
+/*
+ * DATABASE : Centreon2
+ * TABLE : topology
+ *	
+ *	Insertion des pages du module Centreon Discovery
+ *
+ *
+ *	Page principale du module Centreon Discovery
+ */
 INSERT INTO `topology` (`topology_id`, `topology_name`, `topology_icone`, `topology_parent`, `topology_page`, `topology_order`, `topology_group`, `topology_url`, `topology_url_opt`, `topology_popup`, `topology_modules`, `topology_show`) VALUES ('', 'Centreon Discovery', NULL, 6, 610, 100, 1, './modules/CentreonDiscovery/pages/CentreonDiscovery.php', NULL, '0', '1', '1');
 /*
 *	Pages secondaires du module Centreon Discovery

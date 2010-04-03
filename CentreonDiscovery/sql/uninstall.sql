@@ -1,3 +1,11 @@
+/*  This file is part of CentreonDiscovery.
+*
+*	 CentreonDiscovery is developped with GPL Licence 3.0 :
+*	 Developped by : Jonathan Teste - Cedric Dupre
+*   
+*/
+
+
 /*
 * DATABASE : Centreon2
 * TABLE : topology

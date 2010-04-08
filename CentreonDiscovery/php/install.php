@@ -214,9 +214,9 @@ function queryIsEmpty($cmd) {
 			if ( !mysql_query('INSERT INTO ServiceOID (ServiceOID_id, OIDGroup_id_id) VALUES ((SELECT service_id FROM service WHERE service_description = "Template_TeamReon_Win2K3_Process" LIMIT 1),105)')  ) { echo mysql_error(); }
 		/* Linux */
 			if ( !mysql_query('INSERT INTO ServiceOID (ServiceOID_id, OIDGroup_id_id) VALUES ((SELECT service_id FROM service WHERE service_description = "Template_TeamReon_Linux_CPU" LIMIT 1),202)')  ) { echo mysql_error(); }
+			if ( !mysql_query('INSERT INTO ServiceOID (ServiceOID_id, OIDGroup_id_id) VALUES ((SELECT service_id FROM service WHERE service_description = "Template_TeamReon_Linux_Disk" LIMIT 1),203)')  ) { echo mysql_error(); }
 			if ( !mysql_query('INSERT INTO ServiceOID (ServiceOID_id, OIDGroup_id_id) VALUES ((SELECT service_id FROM service WHERE service_description = "Template_TeamReon_Linux_Memory" LIMIT 1),204)')  ) { echo mysql_error(); }
 			if ( !mysql_query('INSERT INTO ServiceOID (ServiceOID_id, OIDGroup_id_id) VALUES ((SELECT service_id FROM service WHERE service_description = "Template_TeamReon_Linux_Process" LIMIT 1),205)')  ) { echo mysql_error(); }
-			if ( !mysql_query('INSERT INTO ServiceOID (ServiceOID_id, OIDGroup_id_id) VALUES ((SELECT service_id FROM service WHERE service_description = "Template_TeamReon_Linux_Disk" LIMIT 1),206)')  ) { echo mysql_error(); }
 
 		/* Router-Cisco */
 			if ( !mysql_query('INSERT INTO ServiceOID (ServiceOID_id, OIDGroup_id_id) VALUES ((SELECT service_id FROM service WHERE service_description = "Template_TeamReon_Cisco_NIC_router" LIMIT 1),301)')  ) { echo mysql_error(); }

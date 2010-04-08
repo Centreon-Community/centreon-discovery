@@ -150,7 +150,7 @@
 						if ( $oid_desc == "Partitions" ) {
 							$elt_path_disk_desc = substr($oid_path,0,strlen($oid_path)-1)."3.".$index;
 								$disk_desc = HostConnectPartitions($host_snmp_community,$host_address,$elt_path_disk_desc);				
-								if ( $eltname[0] == "hrStorageFixedDisk" ) {
+								if ( $eltname[0] == "hrStorageFixedDisk" || $eltname[0] == "hrStorageVirtualMemory" || $eltname[0] == "hrStorageRam" ) {
 									echo '	<tr class="list_one">'," \n ";
 									echo '  	<td class="ListColCenter"></td>'," \n ";
 									echo ' 		<td class="ListCol">'," \n ";
@@ -159,7 +159,15 @@
 									echo '  				<td WIDTH=30px ALIGN="CENTER">'," \n ";
 									echo '						<img style="border: 0px solid; width: 15px;" alt="-" src="./modules/CentreonDiscovery/pictures/double_puce.png">'," \n ";									
 									echo ' 					</td>'," \n ";
-									echo '  				<td><b>' . $eltname[0] . '     ( '. $disk_desc[0] .' ) :</b></td>'," \n ";
+									if ( $eltname[0] == "hrStorageVirtualMemory" ) {
+										echo '  				<td><b>Swap :</b></td>'," \n ";
+									}
+									else if ( $eltname[0] == "hrStorageRam" ) {
+										echo '  				<td><b>RAM :</b></td>'," \n ";
+									}
+									else {
+										echo '  				<td><b>' . $eltname[0] . '     ( '. $disk_desc[0] .' ) :</b></td>'," \n ";
+									}
 									echo '				</tr>'," \n ";	
 								}
 
@@ -209,7 +217,7 @@
 							$oid_service_description =  $dataoidservice['service_description'];	
 							
 							if ( $oid_desc == "Partitions" ) {			
-								if ( $eltname[0] == "hrStorageFixedDisk" ) {
+								if ( $eltname[0] == "hrStorageFixedDisk" || $eltname[0] == "hrStorageVirtualMemory" || $eltname[0] == "hrStorageRam" ) {
 									echo '				<tr>'," \n ";
 									echo '					<td WIDTH=30px ALIGN="CENTER"><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="'. $disk_desc[0] .'|'. $oid_service_id .'|'. $oid_service_alias .'" onChange="checkone(document.getElementsByName(\'cb'.$cbgroup.'[]\'));"  CHECKED /></td>'," \n ";
 									echo '					<td>'.$oid_service_alias.'</td>'," \n ";

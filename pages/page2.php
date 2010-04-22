@@ -166,6 +166,8 @@
 										echo ' 					</td>'," \n ";
 										echo '  				<td><b>Swap :</b></td>'," \n ";
 										echo '				</tr>'," \n ";	
+										
+										/* ELEMENTS - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="Swap"/>'," \n ";
 									}
 								}
 								else if ( $eltname[0] == "hrStorageRam" ) {
@@ -181,6 +183,8 @@
 										echo ' 					</td>'," \n ";
 										echo '  				<td><b>RAM :</b></td>'," \n ";
 										echo '				</tr>'," \n ";
+										
+										/* ELEMENTS - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="RAM"/>'," \n ";
 									}
 								}
 								else {
@@ -196,13 +200,12 @@
 										echo ' 					</td>'," \n ";
 										echo '  				<td><b>' . $eltname[0] . '     ( '. $disk_desc[0] .' ) :</b></td>'," \n ";
 										echo '				</tr>'," \n ";
+										
+										/* ELEMENTS - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="'. $disk_desc[0] .'"/>'," \n ";
 									}
 								}
 							}
-							if ( $intablepartition == 0 ) {
-								/* ELEMENTS - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="'. $disk_desc[0] .'"/>'," \n ";
-							}
-							else {
+							if ( $intablepartition == 1 ) {
 								/* ELEMENTS - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="NULL"/>'," \n ";
 							}
 						}
@@ -256,7 +259,7 @@
 										if ( !in_array('Swap',$partition) ) {
 											$partition[] = 'Swap';
 											echo '				<tr>'," \n ";
-											echo '					<td WIDTH=30px ALIGN="CENTER"><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="'. $disk_desc[0] .'|'. $oid_service_id .'|'. $oid_service_alias .'" onChange="checkone(document.getElementsByName(\'cb'.$cbgroup.'[]\'));"  CHECKED /></td>'," \n ";
+											echo '					<td WIDTH=30px ALIGN="CENTER"><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="Swap|'. $oid_service_id .'|'. $oid_service_alias .'" onChange="checkone(document.getElementsByName(\'cb'.$cbgroup.'[]\'));"  CHECKED /></td>'," \n ";
 											echo '					<td>'.$oid_service_alias.'</td>'," \n ";
 											echo '				</tr>'," \n ";
 																				
@@ -268,7 +271,7 @@
 										if ( !in_array('RAM',$partition) ) {
 											$partition[] = 'RAM';
 											echo '				<tr>'," \n ";
-											echo '					<td WIDTH=30px ALIGN="CENTER"><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="'. $disk_desc[0] .'|'. $oid_service_id .'|'. $oid_service_alias .'" onChange="checkone(document.getElementsByName(\'cb'.$cbgroup.'[]\'));"  CHECKED /></td>'," \n ";
+											echo '					<td WIDTH=30px ALIGN="CENTER"><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="RAM|'. $oid_service_id .'|'. $oid_service_alias .'" onChange="checkone(document.getElementsByName(\'cb'.$cbgroup.'[]\'));"  CHECKED /></td>'," \n ";
 											echo '					<td>'.$oid_service_alias.'</td>'," \n ";
 											echo '				</tr>'," \n ";
 																				

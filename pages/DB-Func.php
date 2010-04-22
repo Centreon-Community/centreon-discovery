@@ -104,7 +104,8 @@
 		//$service_description = $host_name.'_'.substr($description,18,strlen($description)).'_'.$elt_name;
 		$service_description = substr($description,18,strlen($description)).'_'.$elt_name;
 		
-		if ( queryIsEmpty('SELECT service_id FROM service WHERE service_description = "'.$service_description.'"') == 0 ) {
+		//if ( queryIsEmpty('SELECT service_id FROM service WHERE service_description = "'.$service_description.'"') == 0 ) {
+		if ( queryIsEmpty('SELECT host_host_id,service_id FROM service JOIN host_service_relation ON service.service_id = host_service_relation.service_service_id WHERE service_description = "'.$service_description.'" AND host_host_id = '.$host_id) == 0 ) {
 					
 			if ( $group_description == "Interface Reseaux" ) {
 				if ( $action == "state" ) {

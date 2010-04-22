@@ -160,14 +160,16 @@
 									echo '					<td class="ListColHeaderCenter" width=30px><INPUT TYPE=CHECKBOX disabled="disabled" CHECKED /></td>'," \n ";
 									echo '					<td>'.$service_alias.'</td>'," \n ";
 									echo '				</tr>'," \n ";
-									echo '				<tr HEIGHT="10px";></tr>'," \n ";
-									echo '			</table>'," \n ";
-									echo '		</td>'," \n ";
-									echo '	</tr>'," \n ";
 									
 									$service_checked_number++;
 								}
-							}		
+							}
+							
+							echo '				<tr HEIGHT="10px";></tr>'," \n ";
+							echo '			</table>'," \n ";
+							echo '		</td>'," \n ";
+							echo '	</tr>'," \n ";
+							
 							$elt_checked_number++;
 						}
 					}

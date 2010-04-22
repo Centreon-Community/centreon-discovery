@@ -19,7 +19,7 @@
 
 $module_conf['CentreonDiscovery']["name"] = "CentreonDiscovery";
 $module_conf['CentreonDiscovery']["rname"] = "CentreonDiscovery Module";
-$module_conf['CentreonDiscovery']["mod_release"] = "1.0";
+$module_conf['CentreonDiscovery']["mod_release"] = "1.1";
 $module_conf['CentreonDiscovery']["infos"] = "First of all";
 $module_conf['CentreonDiscovery']["is_removeable"] = "1";
 $module_conf['CentreonDiscovery']["author"] = "TeamReon";

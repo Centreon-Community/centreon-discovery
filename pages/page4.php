@@ -78,11 +78,12 @@
 					echo '					<td>'.$service_alias.' : ce service existe d&eacute;j&agrave; !</td>'," \n ";
 				}
 				echo '				</tr>'," \n ";
-				echo '				<tr HEIGHT="10px";></tr>'," \n ";
-				echo '			</table>'," \n ";
-				echo '		</td>'," \n ";
-				echo '	</tr>'," \n ";
 			}			
+			
+			echo '				<tr HEIGHT="10px";></tr>'," \n ";
+			echo '			</table>'," \n ";
+			echo '		</td>'," \n ";
+			echo '	</tr>'," \n ";
 		}
 		echo '</table>'," \n ";
 		echo '<br>'," \n ";

@@ -99,12 +99,20 @@
 			$host_name = $data['host_name'];
 		}
 
-		$service_description = $host_name.'_'.substr($description,18,strlen($description)).'_'.$elt_name;
+		$action = substr($description,(strrpos($description,"_")+1),strlen($description));
+		
+		//$service_description = $host_name.'_'.substr($description,18,strlen($description)).'_'.$elt_name;
+		$service_description = substr($description,18,strlen($description)).'_'.$elt_name;
 		
 		if ( queryIsEmpty('SELECT service_id FROM service WHERE service_description = "'.$service_description.'"') == 0 ) {
-			
+					
 			if ( $group_description == "Interface Reseaux" ) {
-				$arguments = '"!$USER2$!'.substr($elt_name,1).'!"';
+				if ( $action == "state" ) {
+					$arguments = '"!'.substr($elt_name,1).'"';
+				}
+				else if ( $action == "traffic" ) {
+					$arguments = '"!'.substr($elt_name,1).'!80!90!1"';
+				}
 			}
 			else if ( $group_description == "Partitions" ) {
 				$arguments = '"!'.$elt_name.'!80!90!$USER2$!1"';

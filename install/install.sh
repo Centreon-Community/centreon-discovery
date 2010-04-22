@@ -56,7 +56,8 @@ chown $user_apache.$group_nagios $choix_rep_plugins/check_teamreon_ping.pl
 chown $user_apache.$group_nagios $choix_rep_plugins/check_teamreon_process_win.pl
 chown $user_apache.$group_nagios $choix_rep_plugins/check_teamreon_snmp_storage_linux.pl
 chown $user_apache.$group_nagios $choix_rep_plugins/check_teamreon_snmp_storage_win.pl
-chown $user_apache.$group_nagios $choix_rep_plugins/check_teamreon_interface_ping
+chown $user_apache.$group_nagios $choix_rep_plugins/check_teamreon_interface_ping.pl
+chown $user_apache.$group_nagios $choix_rep_plugins/check_teamreon_snmp_traffic.pl
 
 chmod 770 $choix_rep_plugins/check_teamreon_snmp_int.pl
 chmod 770 $choix_rep_plugins/check_teamreon_snmp_mem_cisco.pl
@@ -76,7 +77,8 @@ chmod 770 $choix_rep_plugins/check_teamreon_ping.pl
 chmod 770 $choix_rep_plugins/check_teamreon_process_win.pl
 chmod 770 $choix_rep_plugins/check_teamreon_snmp_storage_linux.pl
 chmod 770 $choix_rep_plugins/check_teamreon_snmp_storage_win.pl
-chmod 770 $choix_rep_plugins/check_teamreon_interface_ping
+chmod 770 $choix_rep_plugins/check_teamreon_interface_ping.pl
+chmod 770 $choix_rep_plugins/check_teamreon_snmp_traffic.pl
 
 
 

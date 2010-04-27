@@ -47,6 +47,8 @@
 	
 		for($j=0;$j<sizeof($elt_name[$i]);$j++) {
 		
+			$elt_index = substr(strrchr($elt_name[$i][$j],'|'),1);
+			$elt_alias = substr($elt_name[$i][$j],0,strrpos($elt_name[$i][$j],'|'));
 		
 			echo '	<tr class="list_one">'," \n ";
 			echo '  	<td class="ListColCenter"></td>'," \n ";
@@ -56,17 +58,13 @@
 			echo '  				<td WIDTH=30px ALIGN="CENTER">'," \n ";
 			echo '						<img style="border: 0px solid; width: 15px;" alt="-" src="./modules/CentreonDiscovery/pictures/double_puce.png">'," \n ";
 			echo ' 					</td>'," \n ";
-			echo '  				<td><b>' . $elt_name[$i][$j] .' :</b></td>'," \n ";
+			echo '  				<td><b>' . $elt_alias .' :</b></td>'," \n ";
 
 		
-			for($k=0;$k<sizeof($services[$i][$j]);$k++) {
-				/* TEST */ //echo '<br><p>group_description = '.$group_description[$i].'</p>';
-				/* TEST */ //echo '<p>elt_name = '.$elt_name[$i][$j].'</p>';
-				/* TEST */ //echo '<p>services = '.$services[$i][$j][$k].'</p><br>';
-				
+			for($k=0;$k<sizeof($services[$i][$j]);$k++) {				
 				$service_alias = substr(strrchr($services[$i][$j][$k], "|"), 1);
 				$service_id = substr($services[$i][$j][$k],0,strpos($services[$i][$j][$k], "|"));
-				$insert = InsertionRelationServiceBDD($host_id,$service_id,$elt_name[$i][$j],$group_description[$i]);
+				$insert = InsertionRelationServiceBDD($host_id,$service_id,$elt_alias,$group_description[$i],$elt_index);
 				
 				echo '				<tr>'," \n ";
 				if ( $insert[0] == 0 ) {

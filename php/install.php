@@ -38,7 +38,7 @@ function queryIsEmpty($cmd) {
 			if ( !mysql_query('INSERT INTO command (command_id,command_name,command_line,command_example,command_type,graph_id,cmd_cat_id) VALUES (NULL,"check_teamreon_interface_state_win","$USER1$#S#check_teamreon_snmp_int.pl -H $HOSTADDRESS$ -C $USER2$ -n $ARG1$","!eth0",2,NULL,NULL)') ) { echo mysql_error(); }
 		}
 		if ( queryIsEmpty('SELECT command_id FROM command WHERE command_name = "check_teamreon_snmp_traffic_win"') == 0 ) {
-			if ( !mysql_query('INSERT INTO command (command_id,command_name,command_line,command_example,command_type,graph_id,cmd_cat_id) VALUES (NULL,"check_teamreon_snmp_traffic_win","$USER1$#S#check_teamreon_snmp_traffic.pl -H $HOSTADDRESS$ -n -i $ARG1$ -w $ARG2$ -c $ARG3$ -C $USER2$ -v $ARG4$","!eth0!80!90!1",2,7,NULL)') ) { echo mysql_error(); }
+			if ( !mysql_query('INSERT INTO command (command_id,command_name,command_line,command_example,command_type,graph_id,cmd_cat_id) VALUES (NULL,"check_teamreon_snmp_traffic_win","$USER1$#S#check_teamreon_snmp_traffic.pl -H $HOSTADDRESS$ -i $ARG1$ -w $ARG2$ -c $ARG3$ -C $USER2$ -v $ARG4$","!eth0!80!90!1",2,7,NULL)') ) { echo mysql_error(); }
 		}
 		//if ( queryIsEmpty('SELECT command_id FROM command WHERE command_name = "check_teamreon_snmp_load_CPU_Window"') == 0 ) {
 		//	mysql_query('INSERT INTO command (command_id,command_name,command_line,command_example,command_type,graph_id,cmd_cat_id) VALUES (NULL,"check_teamreon_snmp_load_CPU_Window","$USER1$#S#check_centreon_snmp_cpu.pl -H $HOSTADDRESS$ -v 1 -C $ARG1$ -c $ARG2$ -w $ARG3$","!$USER2$!95!96!",2,NULL,NULL)');
@@ -57,7 +57,7 @@ function queryIsEmpty($cmd) {
 			if ( !mysql_query('INSERT INTO command (command_id,command_name,command_line,command_example,command_type,graph_id,cmd_cat_id) VALUES (NULL,"check_teamreon_interface_state_linux","$USER1$#S#check_teamreon_snmp_int.pl -H $HOSTADDRESS$ -C $USER2$ -n $ARG1$","!eth0",2,NULL,NULL)') ) { echo mysql_error(); }
 		}
 		if ( queryIsEmpty('SELECT command_id FROM command WHERE command_name = "check_teamreon_snmp_traffic_linux"') == 0 ) {
-			if ( !mysql_query('INSERT INTO command (command_id,command_name,command_line,command_example,command_type,graph_id,cmd_cat_id) VALUES (NULL,"check_teamreon_snmp_traffic_linux","$USER1$#S#check_teamreon_snmp_traffic.pl -H $HOSTADDRESS$ -n -i $ARG1$ -w $ARG2$ -c $ARG3$ -C $USER2$ -v $ARG4$","!eth0!80!90!1",2,7,NULL)') ) { echo mysql_error(); }
+			if ( !mysql_query('INSERT INTO command (command_id,command_name,command_line,command_example,command_type,graph_id,cmd_cat_id) VALUES (NULL,"check_teamreon_snmp_traffic_linux","$USER1$#S#check_teamreon_snmp_traffic.pl -H $HOSTADDRESS$ -i $ARG1$ -w $ARG2$ -c $ARG3$ -C $USER2$ -v $ARG4$","!eth0!80!90!1",2,7,NULL)') ) { echo mysql_error(); }
 		}
 		if ( queryIsEmpty('SELECT command_id FROM command WHERE command_name = "check_teamreon_CPU_linux"') == 0 ) {
 			if ( !mysql_query('INSERT INTO command (command_id,command_name,command_line,command_example,command_type,graph_id,cmd_cat_id) VALUES (NULL,"check_teamreon_CPU_linux","$USER1$#S#check_teamreon_CPU_linux.pl -H $HOSTADDRESS$ -v $ARG1$ -C $ARG2$ -w $ARG3$ -c $ARG4$","!1!$USER2$!4,3,2!6,5,4",2,NULL,NULL)')  ) { echo mysql_error(); }
@@ -233,7 +233,7 @@ function queryIsEmpty($cmd) {
 		
 		/* Windows */
 			if ( !mysql_query('INSERT INTO ServiceOID (ServiceOID_id, OIDGroup_id_id) VALUES ((SELECT service_id FROM service WHERE service_description = "Template_TeamReon_Win2K3_int_state" LIMIT 1),101)')  ) { echo mysql_error(); }
-/*TEST*///				if ( !mysql_query('INSERT INTO ServiceOID (ServiceOID_id, OIDGroup_id_id) VALUES ((SELECT service_id FROM service WHERE service_description = "Template_TeamReon_Win2K3_traffic" LIMIT 1),101)')  ) { echo mysql_error(); }
+			if ( !mysql_query('INSERT INTO ServiceOID (ServiceOID_id, OIDGroup_id_id) VALUES ((SELECT service_id FROM service WHERE service_description = "Template_TeamReon_Win2K3_traffic" LIMIT 1),101)')  ) { echo mysql_error(); }
 			
 //			if ( !mysql_query('INSERT INTO ServiceOID (ServiceOID_id, OIDGroup_id_id) VALUES ((SELECT service_id FROM service WHERE service_description = "Template_TeamReon_Win2K3_CPU" LIMIT 1),102)')  ) { echo mysql_error(); }
 

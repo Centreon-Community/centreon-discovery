@@ -110,11 +110,14 @@
 					for($j=0;$j<sizeof($elt_name[$i]);$j++) {
 					// Pour chaque élement de ce groupe
 						$test_element_checked = 1;
-						$eltschecked = $_POST["cb$g"];		
+						$eltschecked = $_POST["cb$g"];	
+
+						$elt_index = substr(strrchr($elt_name[$i][$j],'|'),1);
+						$elt_alias = substr($elt_name[$i][$j],0,strrpos($elt_name[$i][$j],'|'));
 				
 						for($e=1;$e<sizeof($eltschecked);$e++) {
 							$element_name = substr($eltschecked[$e],0,strpos($eltschecked[$e],'|'));
-							if ( $elt_name[$i][$j] == $element_name ) { 
+							if ( $elt_alias == $element_name ) { 
 								$test_element_checked = 0;
 								break 1;
 							}
@@ -134,8 +137,8 @@
 							echo '  				<td WIDTH=30px ALIGN="CENTER">'," \n ";
 							echo '						<img style="border: 0px solid; width: 15px;" alt="-" src="./modules/CentreonDiscovery/pictures/double_puce.png">'," \n ";
 							echo ' 					</td>'," \n ";
-							echo '  				<td><b>' . $element_name .' :</b></td>'," \n ";								
-							/* PARAM */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_checked_number.']['.$elt_checked_number.']" VALUE="'. $element_name .'"/>'," \n ";
+							echo '  				<td><b>' . $elt_alias .' :</b></td>'," \n ";								
+							/* PARAM */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_checked_number.']['.$elt_checked_number.']" VALUE="'. $elt_alias .'|'. $elt_index .'"/>'," \n ";
 						
 							$service_checked_number = 0;
 							for($k=0;$k<sizeof($services[$i][$j]);$k++) {

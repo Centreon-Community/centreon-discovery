@@ -167,7 +167,7 @@
 										echo '  				<td><b>Swap :</b></td>'," \n ";
 										echo '				</tr>'," \n ";	
 										
-										/* ELEMENTS - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="Swap"/>'," \n ";
+										/* ELEMENTS - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="Swap|'.$index.'"/>'," \n ";
 									}
 								}
 								else if ( $eltname[0] == "hrStorageRam" ) {
@@ -184,7 +184,7 @@
 										echo '  				<td><b>RAM :</b></td>'," \n ";
 										echo '				</tr>'," \n ";
 										
-										/* ELEMENTS - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="RAM"/>'," \n ";
+										/* ELEMENTS - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="RAM|'.$index.'"/>'," \n ";
 									}
 								}
 								else {
@@ -201,12 +201,12 @@
 										echo '  				<td><b>' . $eltname[0] . '     ( '. $disk_desc[0] .' ) :</b></td>'," \n ";
 										echo '				</tr>'," \n ";
 										
-										/* ELEMENTS - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="'. $disk_desc[0] .'"/>'," \n ";
+										/* ELEMENTS - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="'. $disk_desc[0] .'|'.$index.'"/>'," \n ";
 									}
 								}
 							}
 							if ( $intablepartition == 1 ) {
-								/* ELEMENTS - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="NULL"/>'," \n ";
+								/* ELEMENTS - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="NULL|'.$index.'"/>'," \n ";
 							}
 						}
 						else if ( $oid_desc == "Processus" ) {
@@ -222,10 +222,10 @@
 								echo '  				<td><b>' . $eltname[0] .' :</b></td>'," \n ";
 								echo '				</tr>'," \n ";
 
-								/* ELEMENTS - Processus */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="'. $eltname[0] .'"/>'," \n ";
+								/* ELEMENTS - Processus */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="'. $eltname[0] .'|'.$index.'"/>'," \n ";
 							}
 							else {
-								/* ELEMENTS - Processus - false */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="NULL"/>'," \n ";
+								/* ELEMENTS - Processus - false */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="NULL|'.$index.'"/>'," \n ";
 							}
 						}
 						else {
@@ -240,7 +240,7 @@
 							echo '  				<td><b>' . $eltname[0] .' :</b></td>'," \n ";
 							echo '				</tr>'," \n ";
 							
-							/* ELEMENTS - Autres */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="'. $eltname[0] .'"/>'," \n ";							
+							/* ELEMENTS - Autres */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="'. $eltname[0] .'|'.$index.'"/>'," \n ";							
 						}
 						
 						

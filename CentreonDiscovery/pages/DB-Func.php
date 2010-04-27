@@ -86,7 +86,7 @@
 	 * @parm : $host_id - ID de l'host
 	 * @parm : $service_id - ID du template de service
 	*/
-	function InsertionRelationServiceBDD($host_id,$service_id,$elt_name,$group_description) {
+	function InsertionRelationServiceBDD($host_id,$service_id,$elt_name,$group_description,$index) {
 		$arguments = 'NULL';
 		
 		$template_description = mysql_query("SELECT service_description FROM service WHERE service_id = ".$service_id." LIMIT 1");
@@ -112,7 +112,7 @@
 					$arguments = '"!'.substr($elt_name,1).'"';
 				}
 				else if ( $action == "traffic" ) {
-					$arguments = '"!'.substr($elt_name,1).'!80!90!1"';
+					$arguments = '"!'.$index.'!80!90!1"';
 				}
 			}
 			else if ( $group_description == "Partitions" ) {

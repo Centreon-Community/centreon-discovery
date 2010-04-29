@@ -57,15 +57,37 @@
 					<hr align="left" color="black" size="5" width="400">
 				</div>			
 			</div>
-			<br>	  
+			<br>
 <?	
 			// Test de la validité de la session utilisateur Centreon
 			if (!isset ($oreon)) exit ();
 			 
 			// Librairie d'accès aux bases de données 
-			require_once("DB-Func.php");		
+			require_once("DB-Func.php");	
 			
-			?><p>En cours de d&eacute;veloppement...</p><?
+			$services = mysql_query('SELECT service_id,command_id,service_description,command_name FROM service JOIN command ON command.command_id = service.command_command_id WHERE service.service_description LIKE "%Template_TeamReon%"');
+
+			if ( mysql_num_rows($services) > 0 ) {
+				echo '<span style="font-family: Candara; font-size: 1.25em; font-weight: bold; color: black; font-style: italic;">Templates de service & Commandes : </span><br><br>';
+				echo '    <table class="ListTable" align="left">'," \n ";
+				echo '		<tr class="ListHeader">'," \n ";
+				echo '			<td class="ListColHeaderCenter">Templates de service</td>'," \n ";
+				echo '			<td class="ListColHeaderCenter">Commandes</td>'," \n ";
+				echo '		</tr>'," \n ";
+				
+				while ( $dataservices = mysql_fetch_assoc($services) ) {
+					$service_id = $dataservices['service_id'];
+					$command_id = $dataservices['command_id'];
+					$service_description = $dataservices['service_description'];
+					$command_name = $dataservices['command_name'];
+					echo '		<tr class="list_one">'," \n ";
+					echo '			<td class="ListColHeaderCenter"><a href="?p=60206&o=c&service_id='.$service_id.'">'.$service_description.'</a></td>'," \n ";
+					echo '			<td class="ListColHeaderCenter"><a href="?p=60801&o=c&command_id='.$command_id.'&type=2">'.$command_name.'</a></td>'," \n ";
+					echo '		</tr>'," \n ";
+				}
+			}
+			
+			
 ?>	  
 	</span>
   </body>

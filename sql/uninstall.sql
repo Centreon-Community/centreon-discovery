@@ -21,7 +21,8 @@ DELETE FROM `topology` WHERE `topology_page` = '610';
 */
 DELETE FROM `topology` WHERE `topology_page` = '61001';
 DELETE FROM `topology` WHERE `topology_page` = '61002';
-DELETE FROM `topology` WHERE `topology_page` = '61003';
+DELETE FROM `topology` WHERE `topology_page` = '61009';
+DELETE FROM `topology` WHERE `topology_page` = '61010';
 
 
 

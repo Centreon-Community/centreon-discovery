@@ -26,6 +26,7 @@
 	$group_description = $_POST["group_description"];
 	$elt_name = $_POST["elt_name"];
 	$services = $_POST["services"];
+	$service_display = $_POST["service_display2"];
 
 	echo '<br><br>'," \n ";
 	echo '	<span style="font-family: Candara; font-weight: bold; font-size: 24px; color: black; font-style: italic;">'," \n ";
@@ -64,7 +65,7 @@
 			for($k=0;$k<sizeof($services[$i][$j]);$k++) {				
 				$service_alias = substr(strrchr($services[$i][$j][$k], "|"), 1);
 				$service_id = substr($services[$i][$j][$k],0,strpos($services[$i][$j][$k], "|"));
-				$insert = InsertionRelationServiceBDD($host_id,$service_id,$elt_alias,$group_description[$i],$elt_index);
+				$insert = InsertionRelationServiceBDD($host_id,$service_id,$elt_alias,$group_description[$i],$elt_index,$service_display[$i][$j][$k]);
 				
 				echo '				<tr>'," \n ";
 				if ( $insert[0] == 0 ) {

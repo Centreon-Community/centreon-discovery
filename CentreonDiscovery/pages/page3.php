@@ -79,6 +79,7 @@
 			$group_description = $_POST["group_description"];
 			$elt_name = $_POST["elt_name"];
 			$services = $_POST["services"];
+			$service_display = $_POST["service_display"];
 
 			$group_checked_number = 0;
 			for($i=0;$i<sizeof($group_description);$i++) {
@@ -137,7 +138,10 @@
 							echo '  				<td WIDTH=30px ALIGN="CENTER">'," \n ";
 							echo '						<img style="border: 0px solid; width: 15px;" alt="-" src="./modules/CentreonDiscovery/pictures/double_puce.png">'," \n ";
 							echo ' 					</td>'," \n ";
-							echo '  				<td><b>' . $elt_alias .' :</b></td>'," \n ";								
+							echo '  				<td><b>' . $elt_alias .' :</b></td>'," \n ";
+
+/* TEST */					echo '  				<td WIDTH=250px><b>Services</b></td>'," \n ";
+							
 							/* PARAM */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_checked_number.']['.$elt_checked_number.']" VALUE="'. $elt_alias .'|'. $elt_index .'"/>'," \n ";
 						
 							$service_checked_number = 0;
@@ -162,6 +166,9 @@
 									echo '				<tr>'," \n ";
 									echo '					<td class="ListColHeaderCenter" width=30px><INPUT TYPE=CHECKBOX disabled="disabled" CHECKED /></td>'," \n ";
 									echo '					<td>'.$service_alias.'</td>'," \n ";
+									
+/* TEST */							echo '  				<td><INPUT type=text name="display" value='.$service_display[$i][$j][$k].' size=40 disabled><INPUT TYPE=HIDDEN NAME="service_display2['.$group_checked_number.']['.$elt_checked_number.']['.$service_checked_number.']" VALUE="'.$service_display[$i][$j][$k].'"/></td>'," \n ";									
+									
 									echo '				</tr>'," \n ";
 									
 									$service_checked_number++;

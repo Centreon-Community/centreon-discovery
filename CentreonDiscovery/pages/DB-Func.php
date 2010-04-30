@@ -86,7 +86,7 @@
 	 * @parm : $host_id - ID de l'host
 	 * @parm : $service_id - ID du template de service
 	*/
-	function InsertionRelationServiceBDD($host_id,$service_id,$elt_name,$group_description,$index) {
+	function InsertionRelationServiceBDD($host_id,$service_id,$elt_name,$group_description,$index,$service_display) {
 		$arguments = 'NULL';
 		
 		$template_description = mysql_query("SELECT service_description FROM service WHERE service_id = ".$service_id." LIMIT 1");
@@ -100,12 +100,13 @@
 		}
 
 		$action = substr($description,(strrpos($description,"_")+1),strlen($description));
+		//$service_description = substr($description,18,strlen($description)).'_'.$elt_name;
 		
-		//$service_description = $host_name.'_'.substr($description,18,strlen($description)).'_'.$elt_name;
-		$service_description = substr($description,18,strlen($description)).'_'.$elt_name;
+		if ( strlen($service_display) == 0 ) {
+			$service_display = substr($description,18,strlen($description)).'_'.$elt_name;
+		}
 		
-		//if ( queryIsEmpty('SELECT service_id FROM service WHERE service_description = "'.$service_description.'"') == 0 ) {
-		if ( queryIsEmpty('SELECT host_host_id,service_id FROM service JOIN host_service_relation ON service.service_id = host_service_relation.service_service_id WHERE service_description = "'.$service_description.'" AND host_host_id = '.$host_id) == 0 ) {
+		if ( queryIsEmpty('SELECT service_id FROM host_service_relation INNER JOIN service ON service_service_id = service_id WHERE service_template_model_stm_id = '.$service_id.' AND host_host_id = '.$host_id.' AND service_description = '.$service_display) == 0 ) {
 					
 			if ( $group_description == "Interface Reseaux" ) {
 				if ( $action == "state" ) {
@@ -122,16 +123,27 @@
 				$arguments =  '"!$USER2$!'.$elt_name.'!"';
 			}
 			
-			if ( !mysql_query("INSERT INTO service (service_id,service_template_model_stm_id,command_command_id,timeperiod_tp_id,command_command_id2,timeperiod_tp_id2,service_description,service_alias,display_name,service_is_volatile,service_max_check_attempts,service_normal_check_interval,service_retry_check_interval,service_active_checks_enabled,service_passive_checks_enabled,initial_state,service_parallelize_check,service_obsess_over_service,service_check_freshness,service_freshness_threshold,service_event_handler_enabled,service_low_flap_threshold,service_high_flap_threshold,service_flap_detection_enabled,service_process_perf_data,service_retain_status_information,service_retain_nonstatus_information,service_notification_interval,service_notification_options,service_notifications_enabled,service_first_notification_delay,service_stalking_options,service_comment,command_command_id_arg,command_command_id_arg2,service_register,service_activate) VALUES (NULL,".$service_id.",NULL,NULL,NULL,NULL,'".$service_description."',NULL,NULL,'2',NULL,NULL,NULL,'2','2',NULL,'2','2','2',NULL,'2',NULL,NULL,'2','2','2','2',NULL,NULL,'2',NULL,NULL,NULL,".$arguments.",NULL,'1','1')") ) { echo mysql_error(); }
-			if ( !mysql_query("INSERT INTO extended_service_information (esi_id,service_service_id,esi_notes,esi_notes_url,esi_action_url,esi_icon_image,esi_icon_image_alt,graph_id) VALUES (NULL,(SELECT service_id FROM service WHERE service_description = '".$service_description."' LIMIT 1),NULL,NULL,NULL,NULL,NULL,NULL)") ) { echo mysql_error(); }
-			if ( !mysql_query("INSERT INTO host_service_relation (hsr_id,hostgroup_hg_id,host_host_id,servicegroup_sg_id,service_service_id) VALUES (NULL,NULL,".$host_id.",NULL,(SELECT service_id FROM service WHERE service_description = '".$service_description."' LIMIT 1))") ) { echo mysql_error(); }	
+			/* Insertion du nouveau service */
+			if ( !mysql_query("INSERT INTO service (service_id,service_template_model_stm_id,command_command_id,timeperiod_tp_id,command_command_id2,timeperiod_tp_id2,service_description,service_alias,display_name,service_is_volatile,service_max_check_attempts,service_normal_check_interval,service_retry_check_interval,service_active_checks_enabled,service_passive_checks_enabled,initial_state,service_parallelize_check,service_obsess_over_service,service_check_freshness,service_freshness_threshold,service_event_handler_enabled,service_low_flap_threshold,service_high_flap_threshold,service_flap_detection_enabled,service_process_perf_data,service_retain_status_information,service_retain_nonstatus_information,service_notification_interval,service_notification_options,service_notifications_enabled,service_first_notification_delay,service_stalking_options,service_comment,command_command_id_arg,command_command_id_arg2,service_register,service_activate) VALUES (NULL,".$service_id.",NULL,NULL,NULL,NULL,'".$service_display."',NULL,NULL,'2',NULL,NULL,NULL,'2','2',NULL,'2','2','2',NULL,'2',NULL,NULL,'2','2','2','2',NULL,NULL,'2',NULL,NULL,NULL,".$arguments.",NULL,'1','1')") ) { echo mysql_error(); }
+			
+			/* Recherche de l'ID du nouveau service */
+			$newservice = mysql_query("SELECT service_id FROM service ORDER BY service_id desc LIMIT 1");
+			while ( $data = mysql_fetch_assoc($newservice) ) {
+				$newservice_id = $data['service_id'];
+			}
+			
+			/* Insertion de l'extention du nouveau service */
+			if ( !mysql_query("INSERT INTO extended_service_information (esi_id,service_service_id,esi_notes,esi_notes_url,esi_action_url,esi_icon_image,esi_icon_image_alt,graph_id) VALUES (NULL,".$newservice_id.",NULL,NULL,NULL,NULL,NULL,NULL)") ) { echo mysql_error(); }
+			
+			/* Association Service - Host */
+			if ( !mysql_query("INSERT INTO host_service_relation (hsr_id,hostgroup_hg_id,host_host_id,servicegroup_sg_id,service_service_id) VALUES (NULL,NULL,".$host_id.",NULL,".$newservice_id.")") ) { echo mysql_error(); }	
 			
 			$result[0] = 0;
-			$result[1] = $service_description;
+			$result[1] = $service_display;
 		}
 		else {
 			$result[0] = 1;
-			$result[1] = $service_description;
+			$result[1] = $service_display;
 		}
 		
 		return $result;

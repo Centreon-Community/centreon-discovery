@@ -165,6 +165,9 @@
 										echo '						<img style="border: 0px solid; width: 15px;" alt="-" src="./modules/CentreonDiscovery/pictures/double_puce.png">'," \n ";									
 										echo ' 					</td>'," \n ";
 										echo '  				<td><b>Swap :</b></td>'," \n ";
+										
+/* TEST */								echo '  				<td WIDTH=250px><b>Services</b></td>'," \n ";
+										
 										echo '				</tr>'," \n ";	
 										
 										/* ELEMENTS - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="Swap|'.$index.'"/>'," \n ";
@@ -182,6 +185,9 @@
 										echo '						<img style="border: 0px solid; width: 15px;" alt="-" src="./modules/CentreonDiscovery/pictures/double_puce.png">'," \n ";									
 										echo ' 					</td>'," \n ";
 										echo '  				<td><b>RAM :</b></td>'," \n ";
+										
+/* TEST */								echo '  				<td WIDTH=250px><b>Services</b></td>'," \n ";										
+										
 										echo '				</tr>'," \n ";
 										
 										/* ELEMENTS - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="RAM|'.$index.'"/>'," \n ";
@@ -199,6 +205,9 @@
 										echo '						<img style="border: 0px solid; width: 15px;" alt="-" src="./modules/CentreonDiscovery/pictures/double_puce.png">'," \n ";									
 										echo ' 					</td>'," \n ";
 										echo '  				<td><b>' . $eltname[0] . '     ( '. $disk_desc[0] .' ) :</b></td>'," \n ";
+										
+/* TEST */								echo '  				<td WIDTH=250px><b>Services</b></td>'," \n ";										
+										
 										echo '				</tr>'," \n ";
 										
 										/* ELEMENTS - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="'. $disk_desc[0] .'|'.$index.'"/>'," \n ";
@@ -220,6 +229,9 @@
 								echo '						<img style="border: 0px solid; width: 15px;" alt="-" src="./modules/CentreonDiscovery/pictures/double_puce.png">'," \n ";
 								echo ' 					</td>'," \n ";
 								echo '  				<td><b>' . $eltname[0] .' :</b></td>'," \n ";
+
+/* TEST */						echo '  				<td WIDTH=250px><b>Services</b></td>'," \n ";								
+								
 								echo '				</tr>'," \n ";
 
 								/* ELEMENTS - Processus */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="'. $eltname[0] .'|'.$index.'"/>'," \n ";
@@ -238,6 +250,9 @@
 							echo '						<img style="border: 0px solid; width: 15px;" alt="-" src="./modules/CentreonDiscovery/pictures/double_puce.png">'," \n ";
 							echo ' 					</td>'," \n ";
 							echo '  				<td><b>' . $eltname[0] .' :</b></td>'," \n ";
+							
+/* TEST */					echo '  				<td WIDTH=250px><b>Services</b></td>'," \n ";							
+							
 							echo '				</tr>'," \n ";
 							
 							/* ELEMENTS - Autres */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="'. $eltname[0] .'|'.$index.'"/>'," \n ";							
@@ -251,16 +266,22 @@
 						// Pour chaque service porposé
 							$oid_service_alias =  $dataoidservice['service_alias'];
 							$oid_service_id =  $dataoidservice['service_id'];
-							$oid_service_description =  $dataoidservice['service_description'];	
+							$oid_service_description =  $dataoidservice['service_description'];
 							
 							if ( $oid_desc == "Partitions" ) {			
 								if ( $eltname[0] == "hrStorageFixedDisk" || $eltname[0] == "hrStorageVirtualMemory" || $eltname[0] == "hrStorageRam" ) {
 									if ( $eltname[0] == "hrStorageVirtualMemory" ) {
 										if ( !in_array('Swap',$partition) ) {
+										
+/* TEST */									$service_display = substr($oid_service_description,18,strlen($oid_service_description)).'_Swap';
+										
 											$partition[] = 'Swap';
 											echo '				<tr>'," \n ";
 											echo '					<td WIDTH=30px ALIGN="CENTER"><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="Swap|'. $oid_service_id .'|'. $oid_service_alias .'" onChange="checkone(document.getElementsByName(\'cb'.$cbgroup.'[]\'));"  CHECKED /></td>'," \n ";
 											echo '					<td>'.$oid_service_alias.'</td>'," \n ";
+											
+/* TEST */									echo '  				<td><INPUT type=text name="service_display['.$group_number.']['.($i-1).']['.$n_service.']" value='.$service_display.' size=40></td>'," \n ";
+											
 											echo '				</tr>'," \n ";
 																				
 											/* SERVICES  - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="services['.$group_number.']['.($i-1).']['.$n_service.']" VALUE="'. $oid_service_id .'"/>'," \n ";								
@@ -269,10 +290,16 @@
 									}
 									else if ( $eltname[0] == "hrStorageRam" ) {
 										if ( !in_array('RAM',$partition) ) {
+										
+/* TEST */									$service_display = substr($oid_service_description,18,strlen($oid_service_description)).'_RAM';										
+										
 											$partition[] = 'RAM';
 											echo '				<tr>'," \n ";
 											echo '					<td WIDTH=30px ALIGN="CENTER"><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="RAM|'. $oid_service_id .'|'. $oid_service_alias .'" onChange="checkone(document.getElementsByName(\'cb'.$cbgroup.'[]\'));"  CHECKED /></td>'," \n ";
 											echo '					<td>'.$oid_service_alias.'</td>'," \n ";
+											
+/* TEST */									echo '  				<td><INPUT type=text name="service_display['.$group_number.']['.($i-1).']['.$n_service.']" value='.$service_display.' size=40></td>'," \n ";
+											
 											echo '				</tr>'," \n ";
 																				
 											/* SERVICES  - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="services['.$group_number.']['.($i-1).']['.$n_service.']" VALUE="'. $oid_service_id .'"/>'," \n ";								
@@ -281,10 +308,16 @@
 									}
 									else {
 										if ( !in_array($disk_desc[0],$partition) ) {
+										
+/* TEST */									$service_display = substr($oid_service_description,18,strlen($oid_service_description)).'_'.$disk_desc[0];										
+										
 											$partition[] = $disk_desc[0];
 											echo '				<tr>'," \n ";
 											echo '					<td WIDTH=30px ALIGN="CENTER"><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="'. $disk_desc[0] .'|'. $oid_service_id .'|'. $oid_service_alias .'" onChange="checkone(document.getElementsByName(\'cb'.$cbgroup.'[]\'));"  CHECKED /></td>'," \n ";
 											echo '					<td>'.$oid_service_alias.'</td>'," \n ";
+											
+/* TEST */									echo '  				<td><INPUT type=text name="service_display['.$group_number.']['.($i-1).']['.$n_service.']" value='.$service_display.' size=40></td>'," \n ";
+											
 											echo '				</tr>'," \n ";
 																				
 											/* SERVICES  - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="services['.$group_number.']['.($i-1).']['.$n_service.']" VALUE="'. $oid_service_id .'"/>'," \n ";								
@@ -294,21 +327,48 @@
 								}
 							}
 							else if ( $oid_desc == "Processus" ) {	
-								if ( !in_array($eltname[0],$processus) ) {				
+								if ( !in_array($eltname[0],$processus) ) {	
+
+/* TEST */							$service_display = substr($oid_service_description,18,strlen($oid_service_description)).'_'.$eltname[0];
+								
 									$processus[] =  $eltname[0];
 									echo '				<tr>'," \n ";
 									echo '					<td WIDTH=30px ALIGN="CENTER"><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="'. $eltname[0] .'|'. $oid_service_id .'|'. $oid_service_alias .'" onChange="checkone(document.getElementsByName(\'cb'.$cbgroup.'[]\'));"  CHECKED /></td>'," \n ";
 									echo '					<td>'.$oid_service_alias.'</td>'," \n ";
+									
+/* TEST */							echo '  				<td><INPUT type=text name="service_display['.$group_number.']['.($i-1).']['.$n_service.']" value='.$service_display.' size=40></td>'," \n ";
+									
 									echo '				</tr>'," \n ";
 									
 									/* SERVICES - Autres */ echo '<INPUT TYPE=HIDDEN NAME="services['.$group_number.']['.($i-1).']['.$n_service.']" VALUE="'. $oid_service_id .'"/>'," \n ";								
 									$end_table = 0;
 								}
 							}
-							else {
+							else if ( $oid_desc == "Interface Reseaux" ) {	
+							
+/* TEST */						$service_display = substr($oid_service_description,18,strlen($oid_service_description)).'_'.substr($eltname[0],1);							
+							
 								echo '				<tr>'," \n ";
 								echo '					<td WIDTH=30px ALIGN="CENTER"><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="'. $eltname[0] .'|'. $oid_service_id .'|'. $oid_service_alias .'" onChange="checkone(document.getElementsByName(\'cb'.$cbgroup.'[]\'));"  CHECKED /></td>'," \n ";
 								echo '					<td>'.$oid_service_alias.'</td>'," \n ";
+								
+/* TEST */						echo '  				<td><INPUT type=text name="service_display['.$group_number.']['.($i-1).']['.$n_service.']" value='.$service_display.' size=40></td>'," \n ";
+								
+								echo '				</tr>'," \n ";	
+								
+								/* SERVICES - Autres */ echo '<INPUT TYPE=HIDDEN NAME="services['.$group_number.']['.($i-1).']['.$n_service.']" VALUE="'. $oid_service_id .'"/>'," \n ";								
+								$end_table = 0;	
+							}
+							else {
+							
+/* TEST */						$service_display = substr($oid_service_description,18,strlen($oid_service_description)).'_'.$eltname[0];							
+							
+								echo '				<tr>'," \n ";
+								echo '					<td WIDTH=30px ALIGN="CENTER"><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="'. $eltname[0] .'|'. $oid_service_id .'|'. $oid_service_alias .'" onChange="checkone(document.getElementsByName(\'cb'.$cbgroup.'[]\'));"  CHECKED /></td>'," \n ";
+								echo '					<td>'.$oid_service_alias.'</td>'," \n ";
+								
+/* TEST */						echo '  				<td><INPUT type=text name="service_display['.$group_number.']['.($i-1).']['.$n_service.']" value='.$service_display.' size=40></td>'," \n ";
+								
 								echo '				</tr>'," \n ";	
 								
 								/* SERVICES - Autres */ echo '<INPUT TYPE=HIDDEN NAME="services['.$group_number.']['.($i-1).']['.$n_service.']" VALUE="'. $oid_service_id .'"/>'," \n ";								

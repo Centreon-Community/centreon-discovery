@@ -41,6 +41,8 @@ INSERT INTO CDType (CDType_id, CDType_type) VALUES (10,"Servers-Win2K3");
 INSERT INTO CDType (CDType_id, CDType_type) VALUES (20,"Servers-Linux");
 INSERT INTO CDType (CDType_id, CDType_type) VALUES (30,"Router-Cisco");
 INSERT INTO CDType (CDType_id, CDType_type) VALUES (40,"Switchs-Cisco");
+INSERT INTO CDType (CDType_id, CDType_type) VALUES (50,"Router-Nortel");
+INSERT INTO CDType (CDType_id, CDType_type) VALUES (60,"Switchs-Nortel");
 
 
 
@@ -69,3 +71,7 @@ INSERT INTO OIDGroup (OIDGroup_id, OIDGroup_type, OIDGroup_name, OIDGroup_path, 
 /*Switch-Cisco */
 INSERT INTO OIDGroup (OIDGroup_id, OIDGroup_type, OIDGroup_name, OIDGroup_path, OIDGroup_device) VALUES (401,"NIC","Interface Reseaux","1.3.6.1.2.1.2.2.1.1",40);
 INSERT INTO OIDGroup (OIDGroup_id, OIDGroup_type, OIDGroup_name, OIDGroup_path, OIDGroup_device) VALUES (402,"CPU","CPU","1.3.6.1.4.1.9.9.109.1.1.1.1.6.1",40);
+/* Router-Nortel */
+INSERT INTO OIDGroup (OIDGroup_id, OIDGroup_type, OIDGroup_name, OIDGroup_path, OIDGroup_device) VALUES (501,"NIC","Interface Reseaux","1.3.6.1.2.1.2.2.1.1",50);
+/*Switch-Nortel */
+INSERT INTO OIDGroup (OIDGroup_id, OIDGroup_type, OIDGroup_name, OIDGroup_path, OIDGroup_device) VALUES (601,"NIC","Interface Reseaux","1.3.6.1.2.1.2.2.1.1",60);

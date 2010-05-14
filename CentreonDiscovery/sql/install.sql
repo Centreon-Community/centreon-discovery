@@ -57,13 +57,13 @@ CREATE TABLE IF NOT EXISTS OIDGroup (OIDGroup_id INT UNSIGNED NOT NULL PRIMARY K
 INSERT INTO OIDGroup (OIDGroup_id, OIDGroup_type, OIDGroup_name, OIDGroup_path, OIDGroup_device) VALUES (101,"NIC","Interface Reseaux","1.3.6.1.2.1.2.2.1.1",10);
 /*INSERT INTO OIDGroup (OIDGroup_id, OIDGroup_type, OIDGroup_name, OIDGroup_path, OIDGroup_device) VALUES (102,"CPU","CPU","1.3.6.1.2.1.25.3.3.1.2.3",10);*/
 INSERT INTO OIDGroup (OIDGroup_id, OIDGroup_type, OIDGroup_name, OIDGroup_path, OIDGroup_device) VALUES (103,"Disk","Partitions","1.3.6.1.2.1.25.2.3.1.1",10);
-INSERT INTO OIDGroup (OIDGroup_id, OIDGroup_type, OIDGroup_name, OIDGroup_path, OIDGroup_device) VALUES (104,"Memory","Memoire","1.3.6.1.2.1.25.2.2",10);
+INSERT INTO OIDGroup (OIDGroup_id, OIDGroup_type, OIDGroup_name, OIDGroup_path, OIDGroup_device) VALUES (104,"Memory","Memoire","1.3.6.1.2.1.25.2.3.1.1",10);
 INSERT INTO OIDGroup (OIDGroup_id, OIDGroup_type, OIDGroup_name, OIDGroup_path, OIDGroup_device) VALUES (105,"Process","Processus","1.3.6.1.2.1.25.4.2.1.1",10);
 /* Linux */
 INSERT INTO OIDGroup (OIDGroup_id, OIDGroup_type, OIDGroup_name, OIDGroup_path, OIDGroup_device) VALUES (201,"NIC","Interface Reseaux","1.3.6.1.2.1.2.2.1.1",20);
 INSERT INTO OIDGroup (OIDGroup_id, OIDGroup_type, OIDGroup_name, OIDGroup_path, OIDGroup_device) VALUES (202,"CPU","CPU","1.3.6.1.4.1.2021.10.1.3",20);
 INSERT INTO OIDGroup (OIDGroup_id, OIDGroup_type, OIDGroup_name, OIDGroup_path, OIDGroup_device) VALUES (203,"Disk","Partitions","1.3.6.1.2.1.25.2.3.1.1",20);
-INSERT INTO OIDGroup (OIDGroup_id, OIDGroup_type, OIDGroup_name, OIDGroup_path, OIDGroup_device) VALUES (204,"Memory","Memoire","1.3.6.1.4.1.2021.4.11",20);
+INSERT INTO OIDGroup (OIDGroup_id, OIDGroup_type, OIDGroup_name, OIDGroup_path, OIDGroup_device) VALUES (204,"Memory","Memoire","1.3.6.1.2.1.25.2.3.1.1",20);
 INSERT INTO OIDGroup (OIDGroup_id, OIDGroup_type, OIDGroup_name, OIDGroup_path, OIDGroup_device) VALUES (205,"Process","Processus","1.3.6.1.2.1.25.4.2.1.1",20);
 /* Router-Cisco */
 INSERT INTO OIDGroup (OIDGroup_id, OIDGroup_type, OIDGroup_name, OIDGroup_path, OIDGroup_device) VALUES (301,"NIC","Interface Reseaux","1.3.6.1.2.1.2.2.1.1",30);

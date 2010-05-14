@@ -91,7 +91,7 @@
 				for($g=1;$g<=$group_number;$g++) {
 					$eltschecked = $_POST["cb$g"];					
 					for($g1=0;$g1<sizeof($eltschecked);$g1++) {				
-						if ( $eltschecked[0] == $group_path ) { 
+						if ( $eltschecked[0] == $group_name ) { 
 							$test_groupe_checked = 0;						
 							break 2;
 						}

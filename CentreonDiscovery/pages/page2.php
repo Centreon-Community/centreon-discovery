@@ -122,8 +122,8 @@
 					$retour = HostConnect($host_snmp_community,$host_address,$oid_path);
 					$sizeretour = sizeof($retour);
 					
-					if ( $oid_desc == 'CPU' || $oid_desc == 'Memoire' ) {
-						if ( $sizeretour > 0 ) { $sizeretour = 2; }
+					if ( $oid_desc == 'CPU' ) {
+						if ( $sizeretour > 0 ) { $sizeretour = 1; }
 						else { $sizeretour = 0; }
 					}
 					
@@ -131,13 +131,14 @@
 						echo '<br>'," \n ";
 						echo '<table class="ListTable">'," \n ";
 						echo '	<tr class="ListHeader">'," \n ";
-						echo '		<td class="ListColHeaderCenter" width=30px><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="'. $oid_path .'" OnClick="checkall(document.getElementsByName(\'cb'.$cbgroup.'[]\'));"  CHECKED /></td>'," \n ";
+						echo '		<td class="ListColHeaderCenter" width=30px><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="'. $oid_desc .'" OnClick="checkall(document.getElementsByName(\'cb'.$cbgroup.'[]\'));"  CHECKED /></td>'," \n ";
 						echo '		<td class="ListColHeader"><big>' . $oid_desc . '</big></td>'," \n ";
 						echo '	</tr>'," \n ";					
 					}
 					
 					$processus[] = '';
 					$partition[] = '';
+					$memoire[] = '';
 					for($i=1; $i<=$sizeretour; $i++) {
 					// Pour chaque éléments supervisables
 						$elt_number++;
@@ -145,77 +146,70 @@
 						$elt_path_name = substr($oid_path,0,strlen($oid_path)-1)."2.".$index;
 						$eltname = HostConnect($host_snmp_community,$host_address,$elt_path_name);
 						
-						if ( $oid_desc == 'CPU' || $oid_desc == 'Memoire' ) { $eltname[0] = $oid_desc.' '.$i; }
+						if ( $oid_desc == 'CPU' ) { $eltname[0] = $oid_desc.' '.$i; }
 						else if ( $oid_desc == 'Processus' ) { $eltname[0] = substr($eltname[0],2,strlen($eltname[0])-3); }
 
 						if ( $oid_desc == "Partitions" ) {
 							$intablepartition = 1;
 							$elt_path_disk_desc = substr($oid_path,0,strlen($oid_path)-1)."3.".$index;
-							$disk_desc = HostConnectPartitions($host_snmp_community,$host_address,$elt_path_disk_desc);				
-							if ( $eltname[0] == "hrStorageFixedDisk" || $eltname[0] == "hrStorageVirtualMemory" || $eltname[0] == "hrStorageRam" ) {
-								if ( $eltname[0] == "hrStorageVirtualMemory" ) {
-									if ( !in_array('Swap',$partition) ) {
-										$intablepartition = 0;
-										echo '	<tr class="list_one">'," \n ";
-										echo '  	<td class="ListColCenter"></td>'," \n ";
-										echo ' 		<td class="ListCol">'," \n ";
-										echo '			<table WIDTH=100% BORDER="0" ALIGN="LEFT" VALIGN="MIDDLE" CELLPADDING="0" CELLSPACING="0">'," \n ";
-										echo '				<tr>'," \n ";
-										echo '  				<td WIDTH=30px ALIGN="CENTER">'," \n ";
-										echo '						<img style="border: 0px solid; width: 15px;" alt="-" src="./modules/CentreonDiscovery/pictures/double_puce.png">'," \n ";									
-										echo ' 					</td>'," \n ";
-										echo '  				<td><b>Swap :</b></td>'," \n ";
-										
-/* TEST */								echo '  				<td WIDTH=250px><b>Services</b></td>'," \n ";
-										
-										echo '				</tr>'," \n ";	
-										
-										/* ELEMENTS - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="Swap|'.$index.'"/>'," \n ";
-									}
-								}
-								else if ( $eltname[0] == "hrStorageRam" ) {
-									if ( !in_array('RAM',$partition) ) {
-										$intablepartition = 0;
-										echo '	<tr class="list_one">'," \n ";
-										echo '  	<td class="ListColCenter"></td>'," \n ";
-										echo ' 		<td class="ListCol">'," \n ";
-										echo '			<table WIDTH=100% BORDER="0" ALIGN="LEFT" VALIGN="MIDDLE" CELLPADDING="0" CELLSPACING="0">'," \n ";
-										echo '				<tr>'," \n ";
-										echo '  				<td WIDTH=30px ALIGN="CENTER">'," \n ";
-										echo '						<img style="border: 0px solid; width: 15px;" alt="-" src="./modules/CentreonDiscovery/pictures/double_puce.png">'," \n ";									
-										echo ' 					</td>'," \n ";
-										echo '  				<td><b>RAM :</b></td>'," \n ";
-										
+							$disk_desc = HostConnectPartitions($host_snmp_community,$host_address,$elt_path_disk_desc);	
+							if ( !($disk_desc[0] == "Swap") && !($disk_desc[0] == "Memory") && !($disk_desc[0] == "Real") && !($disk_desc[0] == "Virtual") && !($disk_desc[0] == "Physical") ) {
+								if ( !in_array($disk_desc[0],$partition) ) {
+									$intablepartition = 0;
+									echo '	<tr class="list_one">'," \n ";
+									echo '  	<td class="ListColCenter"></td>'," \n ";
+									echo ' 		<td class="ListCol">'," \n ";
+									echo '			<table WIDTH=100% BORDER="0" ALIGN="LEFT" VALIGN="MIDDLE" CELLPADDING="0" CELLSPACING="0">'," \n ";
+									echo '				<tr>'," \n ";
+									echo '  				<td WIDTH=30px ALIGN="CENTER">'," \n ";
+									echo '						<img style="border: 0px solid; width: 15px;" alt="-" src="./modules/CentreonDiscovery/pictures/double_puce.png">'," \n ";									
+									echo ' 					</td>'," \n ";
+									echo '  				<td><b>'. $disk_desc[0] .' :</b></td>'," \n ";
+									
 /* TEST */								echo '  				<td WIDTH=250px><b>Services</b></td>'," \n ";										
-										
-										echo '				</tr>'," \n ";
-										
-										/* ELEMENTS - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="RAM|'.$index.'"/>'," \n ";
-									}
-								}
-								else {
-									if ( !in_array($disk_desc[0],$partition) ) {
-										$intablepartition = 0;
-										echo '	<tr class="list_one">'," \n ";
-										echo '  	<td class="ListColCenter"></td>'," \n ";
-										echo ' 		<td class="ListCol">'," \n ";
-										echo '			<table WIDTH=100% BORDER="0" ALIGN="LEFT" VALIGN="MIDDLE" CELLPADDING="0" CELLSPACING="0">'," \n ";
-										echo '				<tr>'," \n ";
-										echo '  				<td WIDTH=30px ALIGN="CENTER">'," \n ";
-										echo '						<img style="border: 0px solid; width: 15px;" alt="-" src="./modules/CentreonDiscovery/pictures/double_puce.png">'," \n ";									
-										echo ' 					</td>'," \n ";
-										echo '  				<td><b>' . $eltname[0] . '     ( '. $disk_desc[0] .' ) :</b></td>'," \n ";
-										
-/* TEST */								echo '  				<td WIDTH=250px><b>Services</b></td>'," \n ";										
-										
-										echo '				</tr>'," \n ";
-										
-										/* ELEMENTS - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="'. $disk_desc[0] .'|'.$index.'"/>'," \n ";
-									}
+									
+									echo '				</tr>'," \n ";
+									
+									/* ELEMENTS - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="'. $disk_desc[0] .'|'.$index.'"/>'," \n ";
 								}
 							}
 							if ( $intablepartition == 1 ) {
 								/* ELEMENTS - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="NULL|'.$index.'"/>'," \n ";
+							}
+						}
+						else if ( $oid_desc == "Memoire" ) {
+							$intablememory = 1;
+							$elt_path_disk_desc = substr($oid_path,0,strlen($oid_path)-1)."3.".$index;
+							$disk_desc = HostConnectPartitions($host_snmp_community,$host_address,$elt_path_disk_desc);				
+							if ( ($disk_desc[0] == "Swap") || ($disk_desc[0] == "Memory") || ($disk_desc[0] == "Real") || ($disk_desc[0] == "Virtual") || ($disk_desc[0] == "Physical") ) {
+							
+								if ( $disk_desc[0] == "Swap" ) { $disk_desc[0] = "Swap Space"; }
+								else if ( $disk_desc[0] == "Memory" ) { $disk_desc[0] = "Memory Buffers"; }
+								else if ( $disk_desc[0] == "Real" ) { $disk_desc[0] = "Real Memory"; }
+								else if ( $disk_desc[0] == "Virtual" ) { $disk_desc[0] = "Virtual Memory"; }
+								else if ( $disk_desc[0] == "Physical" ) { $disk_desc[0] = "Physical Memory"; }	
+							
+								if ( !in_array($disk_desc[0],$memoire) ) {
+									$intablememory = 0;
+									echo '	<tr class="list_one">'," \n ";
+									echo '  	<td class="ListColCenter"></td>'," \n ";
+									echo ' 		<td class="ListCol">'," \n ";
+									echo '			<table WIDTH=100% BORDER="0" ALIGN="LEFT" VALIGN="MIDDLE" CELLPADDING="0" CELLSPACING="0">'," \n ";
+									echo '				<tr>'," \n ";
+									echo '  				<td WIDTH=30px ALIGN="CENTER">'," \n ";
+									echo '						<img style="border: 0px solid; width: 15px;" alt="-" src="./modules/CentreonDiscovery/pictures/double_puce.png">'," \n ";									
+									echo ' 					</td>'," \n ";
+									echo '  				<td><b>'. $disk_desc[0] .' :</b></td>'," \n ";
+									
+/* TEST */							echo '  				<td WIDTH=250px><b>Services</b></td>'," \n ";										
+									
+									echo '				</tr>'," \n ";
+									
+									/* ELEMENTS - Memory */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="'. $disk_desc[0] .'|'.$index.'"/>'," \n ";
+								}
+							}
+							if ( $intablememory == 1 ) {
+								/* ELEMENTS - Memory */ echo '<INPUT TYPE=HIDDEN NAME="elt_name['.$group_number.']['.($i-1).']" VALUE="NULL|'.$index.'"/>'," \n ";
 							}
 						}
 						else if ( $oid_desc == "Processus" ) {
@@ -268,61 +262,43 @@
 							$oid_service_id =  $dataoidservice['service_id'];
 							$oid_service_description =  $dataoidservice['service_description'];
 							
-							if ( $oid_desc == "Partitions" ) {			
-								if ( $eltname[0] == "hrStorageFixedDisk" || $eltname[0] == "hrStorageVirtualMemory" || $eltname[0] == "hrStorageRam" ) {
-									if ( $eltname[0] == "hrStorageVirtualMemory" ) {
-										if ( !in_array('Swap',$partition) ) {
-										
-/* TEST */									$service_display = substr($oid_service_description,18,strlen($oid_service_description)).'_Swap';
-										
-											$partition[] = 'Swap';
-											echo '				<tr>'," \n ";
-											echo '					<td WIDTH=30px ALIGN="CENTER"><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="Swap|'. $oid_service_id .'|'. $oid_service_alias .'" onChange="checkone(document.getElementsByName(\'cb'.$cbgroup.'[]\'));"  CHECKED /></td>'," \n ";
-											echo '					<td>'.$oid_service_alias.'</td>'," \n ";
-											
-/* TEST */									echo '  				<td><INPUT type=text name="service_display['.$group_number.']['.($i-1).']['.$n_service.']" value='.$service_display.' size=40></td>'," \n ";
-											
-											echo '				</tr>'," \n ";
-																				
-											/* SERVICES  - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="services['.$group_number.']['.($i-1).']['.$n_service.']" VALUE="'. $oid_service_id .'"/>'," \n ";								
-											$end_table = 0;
-										}
-									}
-									else if ( $eltname[0] == "hrStorageRam" ) {
-										if ( !in_array('RAM',$partition) ) {
-										
-/* TEST */									$service_display = substr($oid_service_description,18,strlen($oid_service_description)).'_RAM';										
-										
-											$partition[] = 'RAM';
-											echo '				<tr>'," \n ";
-											echo '					<td WIDTH=30px ALIGN="CENTER"><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="RAM|'. $oid_service_id .'|'. $oid_service_alias .'" onChange="checkone(document.getElementsByName(\'cb'.$cbgroup.'[]\'));"  CHECKED /></td>'," \n ";
-											echo '					<td>'.$oid_service_alias.'</td>'," \n ";
-											
-/* TEST */									echo '  				<td><INPUT type=text name="service_display['.$group_number.']['.($i-1).']['.$n_service.']" value='.$service_display.' size=40></td>'," \n ";
-											
-											echo '				</tr>'," \n ";
-																				
-											/* SERVICES  - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="services['.$group_number.']['.($i-1).']['.$n_service.']" VALUE="'. $oid_service_id .'"/>'," \n ";								
-											$end_table = 0;
-										}
-									}
-									else {
-										if ( !in_array($disk_desc[0],$partition) ) {
-										
+							if ( $oid_desc == "Partitions" ) {		
+								if ( !($disk_desc[0] == "Swap") && !($disk_desc[0] == "Memory") && !($disk_desc[0] == "Real") && !($disk_desc[0] == "Virtual") && !($disk_desc[0] == "Physical") ) {
+									if ( !in_array($disk_desc[0],$partition) ) {
+									
 /* TEST */									$service_display = substr($oid_service_description,18,strlen($oid_service_description)).'_'.$disk_desc[0];										
+									
+										$partition[] = $disk_desc[0];
+										echo '				<tr>'," \n ";
+										echo '					<td WIDTH=30px ALIGN="CENTER"><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="'. $disk_desc[0] .'|'. $oid_service_id .'|'. $oid_service_alias .'" onChange="checkone(document.getElementsByName(\'cb'.$cbgroup.'[]\'));"  CHECKED /></td>'," \n ";
+										echo '					<td>'.$oid_service_alias.'</td>'," \n ";
 										
-											$partition[] = $disk_desc[0];
-											echo '				<tr>'," \n ";
-											echo '					<td WIDTH=30px ALIGN="CENTER"><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="'. $disk_desc[0] .'|'. $oid_service_id .'|'. $oid_service_alias .'" onChange="checkone(document.getElementsByName(\'cb'.$cbgroup.'[]\'));"  CHECKED /></td>'," \n ";
-											echo '					<td>'.$oid_service_alias.'</td>'," \n ";
-											
 /* TEST */									echo '  				<td><INPUT type=text name="service_display['.$group_number.']['.($i-1).']['.$n_service.']" value='.$service_display.' size=40></td>'," \n ";
-											
-											echo '				</tr>'," \n ";
-																				
-											/* SERVICES  - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="services['.$group_number.']['.($i-1).']['.$n_service.']" VALUE="'. $oid_service_id .'"/>'," \n ";								
-											$end_table = 0;
-										}
+										
+										echo '				</tr>'," \n ";
+																			
+										/* SERVICES  - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="services['.$group_number.']['.($i-1).']['.$n_service.']" VALUE="'. $oid_service_id .'"/>'," \n ";								
+										$end_table = 0;
+									}
+								}
+							}
+							else if ( $oid_desc == "Memoire" ) {
+								if ( ($disk_desc[0] == "Swap Space") || ($disk_desc[0] == "Memory Buffers") || ($disk_desc[0] == "Real Memory") || ($disk_desc[0] == "Virtual Memory") || ($disk_desc[0] == "Physical Memory") ) {
+									if ( !in_array($disk_desc[0],$memoire) ) {
+									
+/* TEST */									$service_display = substr($oid_service_description,18,strlen($oid_service_description)).'_'.$disk_desc[0];										
+									
+										$memoire[] = $disk_desc[0];
+										echo '				<tr>'," \n ";
+										echo '					<td WIDTH=30px ALIGN="CENTER"><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="'. $disk_desc[0] .'|'. $oid_service_id .'|'. $oid_service_alias .'" onChange="checkone(document.getElementsByName(\'cb'.$cbgroup.'[]\'));"  CHECKED /></td>'," \n ";
+										echo '					<td>'.$oid_service_alias.'</td>'," \n ";
+										
+/* TEST */									echo '  				<td><INPUT type=text name="service_display['.$group_number.']['.($i-1).']['.$n_service.']" value='.$service_display.' size=40></td>'," \n ";
+										
+										echo '				</tr>'," \n ";
+																			
+										/* SERVICES  - Partitions */ echo '<INPUT TYPE=HIDDEN NAME="services['.$group_number.']['.($i-1).']['.$n_service.']" VALUE="'. $oid_service_id .'"/>'," \n ";								
+										$end_table = 0;
 									}
 								}
 							}

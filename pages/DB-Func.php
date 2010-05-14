@@ -56,7 +56,7 @@
 	 * @parm : $host_snmp_community - Communauté snmp
 	 * @parm : $host_address - Adresse IP de l'host
 	 * @parm : $oid_path - OID
-	*/
+	 */
 	function HostConnectPartitions($host_snmp_community,$host_address,$oid_path) {
 	 	$cmd = "snmpwalk -v 2c -c $host_snmp_community $host_address $oid_path";
 		exec($cmd,$res);		
@@ -64,8 +64,13 @@
 		$i = 0;
 		foreach($res as $row) {                                  
 			$pos = strpos($row,'STRING:');
-			$chaine = substr($row,$pos+8);
-			$result[$i] = substr($chaine,0,1);
+			$chaine1 = substr($row,$pos+8);
+			if ( ereg("^[A-Z]:[\][:blank:]?(.*)?",$chaine1) ) { $result[$i] = substr($chaine1,0,1); }
+			else if ( ereg("^/(.*)?",$chaine1) ) { $result[$i] = $chaine1; }
+			else {
+				$spacepos = strpos($chaine1," ");
+				$result[$i] = substr($chaine1,0,$spacepos);
+			}
 			$i++;
 		}       
 		return $result;
@@ -116,7 +121,7 @@
 					$arguments = '"!'.$index.'!80!90!1"';
 				}
 			}
-			else if ( $group_description == "Partitions" ) {
+			else if ( ($group_description == "Partitions") || ($group_description == "Memoire") ) {
 				$arguments = '"!'.$elt_name.'!80!90!$USER2$!1"';
 			}
 			else if ( $group_description == "Processus" ) {

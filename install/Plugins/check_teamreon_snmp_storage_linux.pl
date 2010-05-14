@@ -254,7 +254,7 @@ $Used  =  $result->{$OID_hrStorageUsed.".".$partition };
 # Plugins var treatment
 
 if (!$Size){
-    print "Disk CRITICAL - no output (-p number expected... it doesn't exist, try another disk - number\n";
+    print "CRITICAL - no output (-p number expected... it doesn't exist, try another disk - number\n";
     exit $ERRORS{'CRITICAL'};
 }
 
@@ -286,13 +286,13 @@ if (($Size =~  /([0-9]+)/) && ($AllocationUnits =~ /([0-9]+)/)){
     # Plugin return code
     
     if ($pourcent >= $critical){
-        print "Disk CRITICAL - ";
+        print "CRITICAL - ";
         $return_code = 2;
     } elsif ($pourcent >= $warning){
-        print "Disk WARNING - ";
+        print "WARNING - ";
         $return_code = 1;
     } else {
-        print "Disk OK - ";
+        print "OK - ";
         $return_code = 0;
     }
 
@@ -318,7 +318,7 @@ if (($Size =~  /([0-9]+)/) && ($AllocationUnits =~ /([0-9]+)/)){
         exit $return_code;
     }
 } else {
-    print "Disk CRITICAL - no output (-d number expected... it doesn't exist, try another disk - number\n";
+    print "CRITICAL - no output (-d number expected... it doesn't exist, try another disk - number\n";
     exit $ERRORS{'CRITICAL'};
 }
 

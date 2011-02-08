@@ -1,0 +1,510 @@
+#! /usr/bin/perl -w
+###################################################################
+# Oreon is developped with GPL Licence 2.0 
+#
+# GPL License: http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
+#
+# Developped by : Julien Mathis - Romain Le Merlus 
+#                 Christophe Coraboeuf - Sugumaran Mathavarajan
+#
+###################################################################
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+#    For information : contact@merethis.com
+####################################################################
+#
+# Script init
+#
+
+use strict;
+use Net::SNMP qw(:snmp oid_lex_sort);
+use FindBin;
+use lib "$FindBin::Bin";
+use lib "/usr/lib/nagios/plugins";
+use utils qw($TIMEOUT %ERRORS &print_revision &support);
+if (eval "require centreon" ) {
+    use centreon qw(get_parameters);
+    use vars qw(%centreon);
+    %centreon=get_parameters();
+} else {
+	print "Unable to load centreon perl module\n";
+    exit $ERRORS{'UNKNOWN'};
+}
+use vars qw($PROGNAME);
+use Getopt::Long;
+use vars qw($opt_V $opt_h $opt_P $opt_64bits $opt_v $opt_C $opt_b $opt_k $opt_u $opt_p $opt_H $opt_D $opt_i $opt_n $opt_w $opt_c $opt_s $opt_T $opt_r);
+
+# Plugin var init
+
+my($proc, $proc_run, @test, $row, @laste_values, $last_check_time, $last_in_bits, $last_out_bits, @last_values, $update_time, $db_file, $in_traffic, $out_traffic, $in_usage, $out_usage);
+
+$PROGNAME = "$0";
+sub print_help ();
+sub print_usage ();
+
+Getopt::Long::Configure('bundling');
+GetOptions
+    ("h"   => \$opt_h, "help"         => \$opt_h,
+     "u=s"   => \$opt_u, "username=s" => \$opt_u,
+     "p=s"   => \$opt_p, "password=s" => \$opt_p,
+     "P=s"   => \$opt_P, "--snmp-port=s" => \$opt_P,
+     "k=s"   => \$opt_k, "key=s"      => \$opt_k,
+     "s"   => \$opt_s, "show"         => \$opt_s,
+     "V"   => \$opt_V, "version"      => \$opt_V,
+     "i=s" => \$opt_i, "interface=s"  => \$opt_i,
+     "64-bits" => \$opt_64bits,
+     "n"   => \$opt_n, "name"         => \$opt_n,
+     "v=s" => \$opt_v, "snmp=s"       => \$opt_v,
+     "C=s" => \$opt_C, "community=s"  => \$opt_C,
+     "b=s" => \$opt_b, "bps=s"        => \$opt_b,
+     "w=s" => \$opt_w, "warning=s"    => \$opt_w,
+     "c=s" => \$opt_c, "critical=s"   => \$opt_c,
+     "T=s" => \$opt_T, "r"			  => \$opt_r,
+     "H=s" => \$opt_H, "hostname=s"   => \$opt_H);
+
+if ($opt_V) {
+    print_revision($PROGNAME,'$Revision: 1.2 $');
+  	exit $ERRORS{'OK'};
+}
+
+if ($opt_h) {
+    print_help();
+    exit $ERRORS{'OK'};
+	Getopt::Long::Configure('bundling');
+}
+
+##################################################
+#####      Verify Options
+##
+
+if (!$opt_H) {
+	print_usage();
+	exit $ERRORS{'OK'};
+}
+my $snmp = "1";
+if ($opt_v && $opt_v =~ /^[0-9]$/) {
+	$snmp = $opt_v;
+}
+
+if ($snmp eq "3") {
+if (!$opt_u) {
+print "Option -u (--username) is required for snmpV3\n";
+exit $ERRORS{'OK'};
+}
+if (!$opt_p && !$opt_k) {
+print "Option -k (--key) or -p (--password) is required for snmpV3\n";
+exit $ERRORS{'OK'};
+}elsif ($opt_p && $opt_k) {
+print "Only option -k (--key) or -p (--password) is needed for snmpV3\n";
+exit $ERRORS{'OK'};
+}
+}
+
+if ($opt_n && !$opt_i) {
+    print "Option -n (--name) need option -i (--interface)\n";
+    exit $ERRORS{'UNKNOWN'};
+}
+
+if (!$opt_C) {
+$opt_C = "public";
+}
+
+if (!$opt_i) {
+$opt_i = 2;
+}
+
+if (!$opt_b) {
+$opt_b = 95;
+}
+if (!defined($opt_P)) {
+	$opt_P = 161;
+}
+if ($opt_b =~ /([0-9]+)/) {
+my $bps = $1;
+}
+my $critical = 95;
+if ($opt_c && $opt_c =~ /[0-9]+/) {
+$critical = $opt_c;
+}
+my $warning = 80;
+if ($opt_w && $opt_w =~ /[0-9]+/) {
+$warning = $opt_w;
+}
+my $interface = 0;
+if ($opt_i =~ /([0-9]+)/ && !$opt_n){
+    $interface = $1;
+} elsif (!$opt_n) {
+    print "Unknown -i number expected... or it doesn't exist, try another interface - number\n";
+    exit $ERRORS{'UNKNOWN'};
+}
+
+if ($critical <= $warning){
+    print "(--crit) must be superior to (--warn)";
+    print_usage();
+    exit $ERRORS{'OK'};
+}
+if ($opt_64bits && $snmp !~ /2/) {
+        print "Error : Usage : SNMP v2 is required with option --64-bits\n";
+        exit $ERRORS{'UNKNOWN'};
+}
+if (defined ($opt_64bits)) {
+      if (eval "require bigint") {
+        use bigint;
+      } else  { print "ERROR : Need bigint module for 64 bit counters\n"; exit $ERRORS{"UNKNOWN"}}
+}
+
+#################################################
+#####            Plugin snmp requests
+##
+
+my $OID_DESC =$centreon{MIB2}{IF_DESC};
+my $OID_OPERSTATUS =$centreon{MIB2}{IF_OPERSTATUS};
+my @operstatus = ("up","down","testing", "unknown", "dormant", "notPresent", "lowerLayerDown");
+
+# create a SNMP session
+my ($session, $error);
+if ($snmp eq "1" || $snmp =~ /2/) {
+	($session, $error) = Net::SNMP->session(-hostname => $opt_H, -community => $opt_C, -version => $snmp, -port => $opt_P);
+	if (!defined($session)) {
+	    print("UNKNOWN: SNMP Session : $error\n");
+	    exit $ERRORS{'UNKNOWN'};
+	}
+}elsif ($opt_k) {
+    ($session, $error) = Net::SNMP->session(-hostname => $opt_H, -version => $snmp, -username => $opt_u, -authkey => $opt_k, -port => $opt_P);
+	if (!defined($session)) {
+	    print("UNKNOWN: SNMP Session : $error\n");
+	    exit $ERRORS{'UNKNOWN'};
+	}
+}elsif ($opt_p) {
+    ($session, $error) = Net::SNMP->session(-hostname => $opt_H, -version => $snmp,  -username => $opt_u, -authpassword => $opt_p, -port => $opt_P);
+	if (!defined($session)) {
+	    print("UNKNOWN: SNMP Session : $error\n");
+	    exit $ERRORS{'UNKNOWN'};
+	}
+}
+$session->translate(Net::SNMP->TRANSLATE_NONE) if (defined($session));
+
+#getting interface using its name instead of its oid index
+
+if ($opt_n) {
+	if ($opt_r){
+	    my $result = $session->get_table(Baseoid => $OID_DESC);
+	    if (!$result) {
+	        printf("ERROR: Description Table : %s.\n", $session->error);
+	        $session->close;
+	        exit $ERRORS{'UNKNOWN'};
+	    }
+	    foreach my $key ( oid_lex_sort(keys %$result)) {
+	    	# Added line to strip the illegal character off.
+		    $result->{$key} =~ s/\x00//g;
+	        if ($result->{$key} =~ m/$opt_i/) {
+			    my @oid_list = split (/\./,$key);
+			    $interface = pop (@oid_list) ;
+			}
+	    }
+	} else {
+		my $result = $session->get_table(Baseoid => $OID_DESC);
+	    if (!$result) {
+	        printf("ERROR: Description Table : %s.\n", $session->error);
+	        $session->close;
+	        exit $ERRORS{'UNKNOWN'};
+	    }
+	    foreach my $key ( oid_lex_sort(keys %$result)) {
+	    	$result->{$key} =~ s/\x00//g;
+	        if ($result->{$key} eq $opt_i) {
+			    my @oid_list = split (/\./,$key);
+			    $interface = pop (@oid_list) ;
+			}
+	    }
+	}
+}
+
+my ($OID_IN, $OID_OUT, $OID_SPEED);
+if ($opt_64bits) {
+    $OID_IN =$centreon{MIB2}{IF_IN_OCTET_64_BITS}.".".$interface;
+	$OID_OUT = $centreon{MIB2}{IF_OUT_OCTET_64_BITS}.".".$interface;
+	$OID_SPEED = $centreon{MIB2}{IF_SPEED_64_BITS}.".".$interface;
+}else {
+    $OID_IN =$centreon{MIB2}{IF_IN_OCTET}.".".$interface;
+	$OID_OUT = $centreon{MIB2}{IF_OUT_OCTET}.".".$interface;
+	$OID_SPEED = $centreon{MIB2}{IF_SPEED}.".".$interface;
+}
+
+# Get desctiption table
+
+if ($opt_s) {
+    my $result = $session->get_table(Baseoid => $OID_DESC);
+	if (!$result) {
+	    printf("ERROR: Description Table : %s.\n", $session->error);
+	    $session->close;
+	    exit $ERRORS{'UNKNOWN'};
+	}
+	foreach my $key ( oid_lex_sort(keys %$result)) {
+	    my @oid_list = split (/\./,$key);
+	    my $index = pop (@oid_list) ;
+	    my $interface_status = $session->get_request(-varbindlist => [$OID_OPERSTATUS.".".$index]);
+	    if (!defined($result)) {
+			printf("ERROR: Interface Status Request : %s", $session->error);
+			exit $ERRORS{'UNKNOWN'};
+		}
+	    print "Interface $index :: $$result{$key} :: ".$operstatus[$interface_status->{$OID_OPERSTATUS.".".$index} - 1]."\n";
+	}
+	exit $ERRORS{'OK'};
+}
+
+my $interface_status = $session->get_request(-varbindlist => [$OID_OPERSTATUS.".".$interface]);
+if (!$interface_status) {
+    printf("ERROR: Interface Status Request : %s", $session->error);
+	exit $ERRORS{'UNKNOWN'};
+}
+if ($operstatus[$interface_status->{$OID_OPERSTATUS.".".$interface} - 1] ne "up") {
+    print "Error : interface is not ready - status : ".$operstatus[$interface_status->{$OID_OPERSTATUS.".".$interface} - 1]."\n";
+	exit $ERRORS{'CRITICAL'};
+}
+
+
+#######  Get IN bytes
+
+my $in_bits;
+my $result = $session->get_request(-varbindlist => [$OID_IN]);
+if (!defined($result)) {
+    printf("ERROR: IN Bits :  %s", $session->error);
+    if ($opt_n) { print " - You must specify interface name when option -n is used";}
+    print ".\n";
+    $session->close;
+    exit $ERRORS{'UNKNOWN'};
+}
+$in_bits =  $result->{$OID_IN} * 8;
+
+
+#######  Get OUT bytes
+
+my $out_bits;
+$result = $session->get_request(-varbindlist => [$OID_OUT]);
+if (!$result) {
+    printf("ERROR: Out Bits : %s", $session->error);
+    if ($opt_n) { print " - You must specify interface name when option -n is used";}
+    print ".\n";
+    $session->close;
+    exit $ERRORS{'UNKNOWN'};
+}
+$out_bits = $result->{$OID_OUT} * 8;
+
+
+#######  Get SPEED of interface
+
+my $speed_card;
+$result = $session->get_request(-varbindlist => [$OID_SPEED]);
+if (!$result) {
+    printf("ERROR: Interface Speed : %s", $session->error);
+    if ($opt_n) { print " - You must specify interface name when option -n is used";}
+    print ".\n";
+    $session->close;
+    exit $ERRORS{'UNKNOWN'};
+}
+
+if (defined($opt_T)){
+	$speed_card = $opt_T * 1000000;
+} else {
+	$speed_card = $result->{$OID_SPEED};
+	if (!$speed_card && !defined($opt_T)) {
+	    print "Error : Card speed is null, check command options\n";
+	    exit $ERRORS{'UNKNOWN'};
+	}
+}
+
+#############################################
+#####          Plugin return code
+##
+
+$last_in_bits = 0;
+$last_out_bits  = 0;
+
+my $flg_created = 0;
+
+if (-e "/tmp/traffic_if".$interface."_".$opt_H) {
+    open(FILE,"<"."/tmp/traffic_if".$interface."_".$opt_H);
+    while($row = <FILE>){
+		@last_values = split(":",$row);
+		$last_check_time = $last_values[0];
+		$last_in_bits = $last_values[1];
+		$last_out_bits = $last_values[2];
+		$flg_created = 1;
+    }
+    close(FILE);
+} else {
+    $flg_created = 0;
+}
+
+$update_time = time();
+
+unless (open(FILE,">"."/tmp/traffic_if".$interface."_".$opt_H)){
+    print "Check mod for temporary file : /tmp/traffic_if".$interface."_".$opt_H. " !\n";
+    exit $ERRORS{"UNKNOWN"};
+}
+print FILE "$update_time:$in_bits:$out_bits";
+close(FILE);
+
+if ($flg_created == 0){
+    print "First execution : Buffer in creation.... \n";
+    exit($ERRORS{"UNKNOWN"});
+}
+
+
+## Bandwith = IN + OUT / Delta(T) = 6 Mb/s
+## (100 * Bandwith) / (2(si full duplex) * Ispeed)
+## Count must round at 4294967296 
+##
+
+if (($in_bits - $last_in_bits != 0) && defined($last_in_bits)) {
+	my $total = 0;
+	if ($in_bits - $last_in_bits < 0){
+		$total = 4294967296 * 8 - $last_in_bits + $in_bits;
+	} else {
+		$total = $in_bits - $last_in_bits;
+	}
+	my $diff = time() - $last_check_time;
+	if ($diff == 0){$diff = 1;}
+    my $pct_in_traffic = $in_traffic = abs($total / $diff);
+} else {
+    $in_traffic = 0;
+} 
+
+if ($out_bits - $last_out_bits != 0 && defined($last_out_bits)) {
+    my $total = 0;
+    if ($out_bits - $last_out_bits < 0){
+		$total = 4294967296 * 8 - $last_out_bits + $out_bits;
+    } else {
+		$total = $out_bits - $last_out_bits;
+    }
+    my $diff =  time() - $last_check_time;
+    if ($diff == 0){$diff = 1;}
+    my $pct_out_traffic = $out_traffic = abs($total / $diff);
+} else {
+    $out_traffic = 0;
+}
+
+if ( $speed_card != 0 ) {
+    $in_usage = sprintf("%.1f",($in_traffic * 100) / $speed_card);
+    $out_usage = sprintf("%.1f",($out_traffic * 100) / $speed_card);
+}
+
+my $in_prefix = "";
+my $out_prefix = "";
+
+my $in_perfparse_traffic = $in_traffic;
+my $out_perfparse_traffic = $out_traffic;
+
+if ($in_traffic > 1000) {
+    $in_traffic = $in_traffic / 1000;
+    $in_prefix = "k";
+    if($in_traffic > 1000){
+		$in_traffic = $in_traffic / 1000;
+		$in_prefix = "M";
+    }
+    if($in_traffic > 1000){
+		$in_traffic = $in_traffic / 1000;
+		$in_prefix = "G";
+    }
+}
+
+if ($out_traffic > 1000){
+    $out_traffic = $out_traffic / 1000;
+    $out_prefix = "k";
+    if ($out_traffic > 1000){
+		$out_traffic = $out_traffic / 1000;
+		$out_prefix = "M";
+	}
+    if ($out_traffic > 1000){
+		$out_traffic = $out_traffic / 1000;
+		$out_prefix = "G";
+    }
+}
+
+my $in_bits_unit = "";
+$in_bits = $in_bits/1048576;
+if ($in_bits > 1000){
+    $in_bits = $in_bits / 1000;
+    $in_bits_unit = "G";
+} else { 
+    $in_bits_unit = "M";
+}
+
+my $out_bits_unit = "";
+$out_bits = $out_bits/1048576;
+if ($out_bits > 1000){
+    $out_bits = $out_bits / 1000;
+    $out_bits_unit = "G";
+} else {
+    $out_bits_unit = "M";
+}
+
+
+if ( $speed_card == 0 ) {
+    print "CRITICAL: Interface speed equal 0! Interface must be down.|traffic_in=0B/s traffic_out=0B/s\n";
+    exit($ERRORS{"CRITICAL"});
+}
+
+#####################################
+#####        Display result
+##
+
+
+my $in_perfparse_traffic_str = sprintf("%.1f",abs($in_perfparse_traffic));
+my $out_perfparse_traffic_str = sprintf("%.1f",abs($out_perfparse_traffic));
+
+$in_perfparse_traffic_str =~ s/\./,/g;
+$out_perfparse_traffic_str =~ s/\./,/g;
+
+my $status = "OK";
+
+if(($in_usage > $warning) or ($out_usage > $warning)){
+	$status = "WARNING";
+}
+if (($in_usage > $critical) or ($out_usage > $critical)){
+	$status = "CRITICAL";
+}
+
+printf("Traffic In : %.2f ".$in_prefix."b/s (".$in_usage." %%), Out : %.2f ".$out_prefix."b/s (".$out_usage." %%) - ", $in_traffic, $out_traffic);
+printf("Total RX Bits In : %.2f ".$in_bits_unit."B, Out : %.2f ".$out_bits_unit."b", $in_bits, $out_bits);
+printf("|traffic_in=".$in_perfparse_traffic_str."Bits/s;0;$speed_card traffic_out=".$out_perfparse_traffic_str."Bits/s;0;$speed_card\n");
+exit($ERRORS{$status});
+
+sub print_usage () {
+    print "\nUsage:\n";
+    print "$PROGNAME\n";
+    print "   -H (--hostname)   Hostname to query - (required)\n";
+    print "   -C (--community)  SNMP read community (defaults to public,\n";
+    print "                     used with SNMP v1 and v2c\n";
+    print "   -v (--snmp_version)  1 for SNMP v1 (default)\n";
+    print "                        2 for SNMP v2c\n";
+    print "   -s (--show)       Describes all interfaces number (debug mode)\n";
+    print "   -i (--interface)  Set the interface number (2 by default)\n";
+    print "   -n (--name)       Allows to use interface name with option -d instead of interface oid index\n";
+    print "                     (ex: -i \"eth0\" -n, -i \"VMware Virtual Ethernet Adapter for VMnet8\" -n\n";
+    print "                     (choose an unique expression for each interface)\n";
+    print "   -w (--warn)       Signal strength at which a warning message will be generated\n";
+    print "                     (default 80)\n";
+    print "   -c (--crit)       Signal strength at which a critical message will be generated\n";
+    print "   -T                Max Banwidth\n";
+    print "   -V (--version)    Plugin version\n";
+    print "   -r                Regexp Match Mode\n";
+    print "   -h (--help)       usage help\n";
+}
+
+sub print_help () {
+    print "##############################################\n";
+    print "#    Copyright (c) 2004-2009 Centreon        #\n";
+    print "#    Bugs to http://trac.centreon.com        #\n";
+    print "##############################################\n";
+    print_usage();
+    print "\n";
+}

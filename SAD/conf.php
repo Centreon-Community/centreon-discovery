@@ -16,4 +16,14 @@
  *   You should have received a copy of the GNU General Public License
  *   along with CentreonDiscovery.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+$module_conf['CentreonDiscovery']["name"] = "Service Auto Discovery";
+$module_conf['CentreonDiscovery']["rname"] = "Service Auto Discovery Module";
+$module_conf['CentreonDiscovery']["mod_release"] = "1.1";
+$module_conf['CentreonDiscovery']["infos"] = "Module for auto discovery equipments.";
+$module_conf['CentreonDiscovery']["is_removeable"] = "1";
+$module_conf['CentreonDiscovery']["author"] = "Esiee 2012";
+$module_conf['CentreonDiscovery']["lang_files"] = "1";
+$module_conf['CentreonDiscovery']["sql_files"] = "1";
+$module_conf['CentreonDiscovery']["php_files"] = "1";
 ?>

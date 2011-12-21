@@ -1,0 +1,381 @@
+#!/bin/bash 
+## VARS
+yes="y"
+no="n"
+ok="OK"
+fail="FAIL"
+passed="PASSED"
+warning="WARNING"
+critical="CRITICAL"
+
+# Init binary to empty to use pathfind or manual define
+GREP=""
+CAT=""
+SED=""
+CHMOD=""
+CHOWN=""
+
+## COLOR FUNCTIONS
+RES_COL="60"
+MOVE_TO_COL="\\033[${RES_COL}G"
+SETCOLOR_INFO="\\033[1;38m"
+SETCOLOR_SUCCESS="\\033[1;32m"
+SETCOLOR_FAILURE="\\033[1;31m"
+SETCOLOR_WARNING="\\033[1;33m"
+SETCOLOR_NORMAL="\\033[0;39m"
+
+#----
+## print info message
+## add info message to log file
+## @param	message info
+## @param	type info (ex: INFO, username...)
+## @Stdout	info message
+## @Globals	LOG_FILE
+#----
+function echo_info() {
+    echo -e "${1}${MOVE_TO_COL}${SETCOLOR_INFO}${2}${SETCOLOR_NORMAL}" 
+    echo -e "$1 : $2" >> $LOG_FILE
+}
+
+#----
+## print success message
+## add success message to log file
+## @param	message
+## @param	word to specify success (ex: OK)
+## @Stdout	success message
+## @Globals	LOG_FILE
+#----
+function echo_success() {
+    echo -e "${1}${MOVE_TO_COL}${SETCOLOR_SUCCESS}${2}${SETCOLOR_NORMAL}" 
+    echo -e "$1 : $2" >> $LOG_FILE
+}
+
+#----
+## print failure message
+## add failure message to log file
+## @param	message
+## @param	word to specify failure (ex: fail)
+## @Stdout	failure message
+## @Globals	LOG_FILE
+#----
+function echo_failure() {
+    echo -e "${1}${MOVE_TO_COL}${SETCOLOR_FAILURE}${2}${SETCOLOR_NORMAL}"
+    echo -e "$1 : $2" >> $LOG_FILE
+}
+
+#----
+## print passed message
+## add passed message to log file
+## @param	message
+## @param	word to specify pass (ex: passed)
+## @Stdout	passed message
+## @Globals	LOG_FILE
+#----
+function echo_passed() {
+    echo -e "${1}${MOVE_TO_COL}${SETCOLOR_WARNING}${2}${SETCOLOR_NORMAL}"
+    echo -e "$1 : $2" >> $LOG_FILE
+}
+
+#----
+## print warning message
+## add warning message to log file
+## @param	message
+## @param	word to specify warning (ex: warn)
+## @Stdout	warning message
+## @Globals	LOG_FILE
+#----
+function echo_warning() {
+    echo -e "${1}${MOVE_TO_COL}${SETCOLOR_WARNING}${2}${SETCOLOR_NORMAL}"
+    echo -e "$1 : $2" >> $LOG_FILE
+}
+
+#----
+## add message on log file
+## @param	type of message level (debug, info, ...)
+## @param	message
+## @Globals	LOG_FILE
+#----
+function log() {
+	local program="$0"
+	local type="$1"
+	shift
+	local message="$@"
+	echo -e "[$program]:$type: $message" >> $LOG_FILE
+}
+
+#----
+## define a specific variables for grep,cat,sed,... binaries
+## This functions was been use in first line on your script
+## @return 0	All is't ok
+## @return 1	problem with one variable
+## @Globals	GREP, CAT, SED, CHMOD, CHOWN
+#----
+function define_specific_binary_vars() {
+	local vars_bin="GREP CAT SED CHMOD CHOWN"
+	local var_bin_tolower=""
+	for var_bin in $vars_bin ; 
+	do
+		if [ -z $(eval echo \$$var_bin) ] ; then
+			var_bin_tolower="$(echo $var_bin | tr [:upper:] [:lower:])"
+			pathfind_ret "$var_bin_tolower" "$(echo -n $var_bin)"
+			if [ "$?" -eq 0 ] ; then
+				eval "$var_bin='$(eval echo \$$var_bin)/$var_bin_tolower'"
+				export $(echo $var_bin)
+				log "INFO" "$var_bin=$(eval echo \$$var_bin)"
+			else
+				return 1
+			fi
+		fi
+	done
+	return 0
+}
+
+#----
+## find in $PATH if binary exist
+## @param	file to test
+## @return 0	found
+## @return 1	not found
+## @Globals	PATH
+#----
+function pathfind() {
+	OLDIFS="$IFS"
+	IFS=:
+	for p in $PATH; do
+		if [ -x "$p/$*" ]; then
+			IFS="$OLDIFS"
+			return 0
+		fi
+	done
+	IFS="$OLDIFS"
+	return 1
+}
+
+#----
+## find in $PATH if binary exist and return dirname
+## @param	file to test
+## @param	global variable to set a result
+## @return 0	found
+## @return 1	not found
+## @Globals	PATH
+#----
+function pathfind_ret() {
+	local bin=$1
+	local var_ref=$2
+	local OLDIFS="$IFS"
+	IFS=:
+	for p in $PATH; do
+		if [ -x "$p/$bin" ]; then
+			IFS="$OLDIFS"
+			eval $var_ref=$p
+			return 0
+		fi
+	done
+	IFS="$OLDIFS"
+	return 1
+}
+
+#----
+## make a question with yes/no possiblity
+## use "no" response by default
+## @param	message to print
+## @param 	default response (default to no)
+## @return 0 	yes
+## @return 1 	no
+#----
+function yes_no_default() {
+	local message=$1
+	local default=${2:-$no}
+	local res="not_define"
+	while [ "$res" != "$yes" ] && [ "$res" != "$no" ] && [ ! -z "$res" ] ; do
+		echo -e "\n$message\n[y/n], default to [$default]:"
+		echo -en "> "
+		read res
+		[ -z "$res" ] && res="$default"
+	done
+	if [ "$res" = "$yes" ] ; then 
+		return 0
+	else 
+		return 1
+	fi
+}
+
+#---
+## {check if xmlwriter, libssh2 and ssh2 for PHP is present}
+#----
+function check_phpExtensions {
+	echo ""
+	echo "$line"
+	echo -e "\tChecking php extension"
+	echo "$line"
+	
+	php_extension=$(php -i | ${GREP} "extension_dir" | awk '{print $3}')
+	ssh2_extension=$(ls $php_extension | ${GREP} "ssh2.so" | wc -l)
+	xmlwriter_extension=$(ls $php_extension | ${GREP} "xmlwriter.so" | wc -l)
+	
+	if [ $ssh2_extension -ge 1 ]; then
+		echo_success "SSH2 extension for PHP:" "$ok"
+	else
+		#echo_failure "SSH2 extension for PHP:" "$fail"
+		echo_warning "SSH2 extension for PHP:" "$warning"
+		echo -e ""
+		echo -e "This PHP extension (ssh2.so) is used to export configuration from Centreon"
+		echo -e "web interface to Syslog collector. You can install it after the end of this"
+		echo -e "intallation. If you don't install it, you must edit directly Syslog collector"
+		echo -e "configuration file on "etc" directory specified during installation of server."
+		echo -e ""
+	fi
+	
+	if [ $xmlwriter_extension -ge 1 ]; then
+		echo_success "$(gettext "XML-Writer extension for PHP:")" "$ok"
+	else
+		xmlwriter_extension=$(php -info | grep "xmlwriter" | wc -l)
+		if [ $xmlwriter_extension -ge 1 ]; then
+			echo_success "$(gettext "XML-Writer extension for PHP:")" "$ok"
+		else
+			echo_failure "$(gettext "XML-Writer extension for PHP:")" "$fail"
+			echo -e "Please install php-xml and reload install script."
+			exit 1
+		fi
+	fi
+}
+
+#---
+## {Get Centreon install dir and user/group for apache}
+#----
+function get_centreon_parameters() {
+	INSTALL_DIR_CENTREON=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "INSTALL_DIR_CENTREON" | cut -d '=' -f2`;
+	WEB_USER=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "WEB_USER" | cut -d '=' -f2`;
+	WEB_GROUP=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "WEB_GROUP" | cut -d '=' -f2`;
+	NAGIOS_PLUGIN=`${CAT} $CENTREON_CONF/$FILE_CONF_CENTPLUGIN | ${GREP} "NAGIOS_PLUGIN" | cut -d '=' -f2`;
+	NAGIOS_USER=`${CAT} $CENTREON_CONF/$FILE_CONF_CENTPLUGIN | ${GREP} "NAGIOS_USER" | cut -d '=' -f2`;
+	NAGIOS_GROUP=`${CAT} $CENTREON_CONF/$FILE_CONF_CENTPLUGIN | ${GREP} "NAGIOS_GROUP" | cut -d '=' -f2`;
+
+	if [ "$INSTALL_DIR_CENTREON" != "" ] && [ "$WEB_USER" != "" ] && [ "$WEB_GROUP" != "" ] && [ "$NAGIOS_PLUGIN" != "" ] && [ "$NAGIOS_USER" != "" ] && [ "$NAGIOS_GROUP" != "" ]; then
+		return 1;
+	else
+		return 0;
+	fi
+}
+
+#---
+## {Get location of instCentWeb.conf file}
+##
+## @Stdout Error message if user set incorrect directory
+## @Stdin Path with must contain $FILE_CONF
+#----
+function get_centreon_configuration_location() {
+	echo ""
+	echo "$line"
+	echo -e "\tLoad parameters"
+	echo "$line"
+	err=1
+	while [ $err != 0 ]
+	do
+		echo -e "Please specify the directory with contain \"$FILE_CONF\""
+		echo -en "> "
+		read temp_read
+
+		if [ -z "$temp_read" ]; then
+			echo_failure "The directory does not exist!" "$fail"
+		fi
+
+		if [ -d $temp_read ] && [ -f $temp_read/$FILE_CONF ] ; then
+			err=0
+			CENTREON_CONF=$temp_read
+		else
+			echo_failure "File \"$FILE_CONF\" does not exist in this directory!" "$fail"
+		fi
+	done
+}
+
+#---
+## {Install Syslog Module}
+##
+## @Stdout Actions realised by function
+## @Stderr Log into $LOG_FILE
+#----
+function install_module() {
+	echo ""
+	echo "$line"
+	echo -e "\tInstall Syslog Module"
+	echo "$line"
+	
+	TEMP_D="/tmp/Install_module"
+	/bin/mkdir -p $TEMP_D >> $LOG_FILE 2>> $LOG_FILE
+	/bin/cp -Rf www/* $TEMP_D/ >> $LOG_FILE 2>> $LOG_FILE
+	/bin/rm -Rf $TEMP_D/install $TEMP_D/*.log
+
+	echo_success "Setting right" "$ok"
+	${CHMOD} -R 755 $TEMP_D/* >> $LOG_FILE 2>> $LOG_FILE
+
+	echo_success "Setting owner/group" "$ok"
+	${CHOWN} -R $WEB_USER.$WEB_GROUP $TEMP_D/* >> $LOG_FILE 2>> $LOG_FILE
+	
+	echo_success "Changing macro" "$ok"
+	FILE="class/syslogDB.class.php"
+	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF/"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+	FILE="include/common/common-Func.php"
+	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF/"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+	FILE="include/export/csv/csv_export.php"
+	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF/"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+	FILE="include/export/odtPHP/odtPHP_export.php"
+	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF/"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+	FILE="include/export/ssh2/ssh2_export.php"
+	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF/"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+	FILE="include/monitoring/syslog.php"
+	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF/"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+	FILE="include/monitoring/xml/syslog_xml.php"
+	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF/"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+	FILE="include/monitoring/xml/syslog_filters_xml.php"
+	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF/"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+	FILE="include/pagination/pagination_syslog.php"
+	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF/"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+	FILE="include/search/syslog_search.php"
+	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF/"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+	FILE="include/common/header.php"
+	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF/"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+
+	INSTALL_DIR_MODULE=$INSTALL_DIR_CENTREON/$MODULE_DIR
+
+	if [ -d $INSTALL_DIR_MODULE ] ; then
+		if [ -d  $INSTALL_DIR_CENTREON/$BACKUP ] ; then
+			echo_success "Delete old Syslog backup" "$ok"
+			/bin/rm -Rf $INSTALL_DIR_CENTREON/$BACKUP/*
+		else
+			echo_success "Create a directory to backup old files" "$ok"
+			/bin/mkdir $INSTALL_DIR_CENTREON/$BACKUP
+		fi
+		
+		echo_success "Backup old installation" "$ok"
+		mv $INSTALL_DIR_MODULE/* $INSTALL_DIR_CENTREON/$BACKUP >> $LOG_FILE 2>> $LOG_FILE
+	fi
+
+	if [ ! -d $INSTALL_DIR_MODULE ] ; then
+		echo_success "Create module directory" "$ok"
+		/bin/mkdir $INSTALL_DIR_MODULE >> $LOG_FILE 2>> $LOG_FILE
+		${CHOWN} -R $WEB_USER.$WEB_GROUP $INSTALL_DIR_MODULE >> $LOG_FILE 2>> $LOG_FILE
+		${CHMOD} -R 755 $INSTALL_DIR_MODULE >> $LOG_FILE 2>> $LOG_FILE
+	fi
+
+	echo_success "Copying module" "$ok"
+	/bin/cp -Rf --preserve $TEMP_D/* $INSTALL_DIR_CENTREON/$MODULE_DIR >> $LOG_FILE 2>> $LOG_FILE
+
+	echo_success "Delete temp install directory" "$ok"
+	/bin/rm -Rf $TEMP_D $TEMP >> $LOG_FILE 2>> $LOG_FILE
+	
+	/bin/mkdir -p $TEMP_D >> $LOG_FILE 2>> $LOG_FILE
+	/bin/cp -Rf check_nagios/* $TEMP_D/ >> $LOG_FILE 2>> $LOG_FILE
+	
+	echo_success "Setting owner/group on Nagios plugin" "$ok"
+	${CHMOD} -R 755 $TEMP_D/* >> $LOG_FILE 2>> $LOG_FILE
+	${CHOWN} -R $NAGIOS_USER.$NAGIOS_GROUP $TEMP_D/* >> $LOG_FILE 2>> $LOG_FILE
+	
+	echo_success "Install Nagios plugin" "$ok"
+	/bin/cp -Rf --preserve $TEMP_D/* $NAGIOS_PLUGIN/ >> $LOG_FILE 2>> $LOG_FILE
+	
+	echo_success "Delete temp install directory" "$ok"
+	/bin/rm -Rf $TEMP_D $TEMP >> $LOG_FILE 2>> $LOG_FILE
+
+	echo_success "\nThe $LOG_VERSION is finished" "$ok"
+	echo -e  "See README and the log file for more details."
+}

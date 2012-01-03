@@ -94,3 +94,5 @@ The Python egg cache directory is currently set to:
 Perhaps your account does not have write access to this directory?  You can
 change the cache directory by setting the PYTHON_EGG_CACHE environment
 variable to point to an accessible directory.
+
+To try : SetEnv PYTHON_EGG_CACHE /tmp   in /etc/apache2/conf.d/centreon.conf

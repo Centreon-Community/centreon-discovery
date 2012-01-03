@@ -111,7 +111,7 @@ function log() {
 ## @Globals	GREP, CAT, SED, CHMOD, CHOWN
 #----
 function define_specific_binary_vars() {
-	local vars_bin="GREP CAT SED CHMOD CHOWN"
+	local vars_bin="GREP CAT SED CHMOD CHOWN PYTHON NMAP"
 	local var_bin_tolower=""
 	for var_bin in $vars_bin ; 
 	do
@@ -200,46 +200,6 @@ function yes_no_default() {
 }
 
 #---
-## {check if xmlwriter, libssh2 and ssh2 for PHP is present}
-#----
-function check_phpExtensions {
-	echo ""
-	echo "$line"
-	echo -e "\tChecking php extension"
-	echo "$line"
-	
-	php_extension=$(php -i | ${GREP} "extension_dir" | awk '{print $3}')
-	ssh2_extension=$(ls $php_extension | ${GREP} "ssh2.so" | wc -l)
-	xmlwriter_extension=$(ls $php_extension | ${GREP} "xmlwriter.so" | wc -l)
-	
-	if [ $ssh2_extension -ge 1 ]; then
-		echo_success "SSH2 extension for PHP:" "$ok"
-	else
-		#echo_failure "SSH2 extension for PHP:" "$fail"
-		echo_warning "SSH2 extension for PHP:" "$warning"
-		echo -e ""
-		echo -e "This PHP extension (ssh2.so) is used to export configuration from Centreon"
-		echo -e "web interface to Syslog collector. You can install it after the end of this"
-		echo -e "intallation. If you don't install it, you must edit directly Syslog collector"
-		echo -e "configuration file on "etc" directory specified during installation of server."
-		echo -e ""
-	fi
-	
-	if [ $xmlwriter_extension -ge 1 ]; then
-		echo_success "$(gettext "XML-Writer extension for PHP:")" "$ok"
-	else
-		xmlwriter_extension=$(php -info | grep "xmlwriter" | wc -l)
-		if [ $xmlwriter_extension -ge 1 ]; then
-			echo_success "$(gettext "XML-Writer extension for PHP:")" "$ok"
-		else
-			echo_failure "$(gettext "XML-Writer extension for PHP:")" "$fail"
-			echo -e "Please install php-xml and reload install script."
-			exit 1
-		fi
-	fi
-}
-
-#---
 ## {Get Centreon install dir and user/group for apache}
 #----
 function get_centreon_parameters() {
@@ -289,12 +249,101 @@ function get_centreon_configuration_location() {
 }
 
 #---
+##
+##
+##
+##
+#----
+function install_modPython() {
+	echo ""
+	echo "$line"
+	echo -e "\tInstall Python Modules"
+	echo "$line"
+	
+	# case Poller
+	case $typeInstall in
+	    poller )
+		echo -ne "Module NMAP ..."
+		cd $BASE_DIR/modPython/python-nmap-0.1.4
+		${PYTHON} setup.py install 2>&1 >> $LOG_FILE
+		install_ok=$?
+		if [ $install_ok = 0 ] ; then
+		    echo_success "" "$ok"
+		    echo "$line"
+		    return $install_ok
+		else    
+		    echo_failure "" "$fail"
+		    return $install_ok
+		fi
+		;;
+	    central ) 
+		echo -ne "Module SetupTools ..."
+		cd $BASE_DIR/modPython/setuptools-0.6c11
+		${PYTHON} setup.py install 2>&1 >> $LOG_FILE
+		install_ok=$?
+		if [ $install_ok = 0 ] ; then
+		    echo_success "" "$ok"
+		else    
+		    echo_failure "" "$fail"
+		    return $install_ok
+		fi
+		echo -ne "Module MySQLdb ..."
+		cd $BASE_DIR/modPython/MySQL-python-1.2.3
+		${PYTHON} setup.py install 2>&1 >> $LOG_FILE
+		install_ok=$?
+		if [ $install_ok = 0 ] ; then
+		    echo_success "" "$ok"
+		else    
+		    echo_failure "" "$fail"
+		fi
+		return $install_ok
+		;;
+	    both ) 
+		echo -ne "Module NMAP ..."
+                cd $BASE_DIR/modPython/python-nmap-0.1.4
+		${PYTHON} setup.py install 2>&1 >> $LOG_FILE
+		install_ok=$?
+		if [ $install_ok = 0 ] ; then
+		    echo_success "" "$ok"
+		else    
+		    echo_failure "" "$fail"
+		    return $install_ok
+		fi
+                echo -ne "Module SetupTools ..."
+		cd $BASE_DIR/modPython/setuptools-0.6c11
+		${PYTHON} setup.py install 2>&1 >> $LOG_FILE
+		install_ok=$?
+		if [ $install_ok = 0 ] ; then
+		    echo_success "" "$ok"
+		else    
+		    echo_failure "" "$fail"
+		    return $install_ok
+		fi
+		echo -ne "Module MySQLdb ..."
+                cd $BASE_DIR/modPython/MySQL-python-1.2.3
+		${PYTHON} setup.py install 2>&1 >> $LOG_FILE
+		install_ok=$?
+		if [ $install_ok = 0 ] ; then
+		    echo_success "" "$ok"
+		    return $install_ok
+		else    
+		    echo_failure "" "$fail"
+		    return $install_ok
+		fi
+		;;
+	    * )
+		;;
+	esac
+}
+	    
+
+#---
 ## {Install Syslog Module}
 ##
 ## @Stdout Actions realised by function
 ## @Stderr Log into $LOG_FILE
 #----
-function install_module() {
+function install_module_old() {
 	echo ""
 	echo "$line"
 	echo -e "\tInstall Syslog Module"
@@ -376,6 +425,69 @@ function install_module() {
 	echo_success "Delete temp install directory" "$ok"
 	/bin/rm -Rf $TEMP_D $TEMP >> $LOG_FILE 2>> $LOG_FILE
 
+	echo_success "\nThe $LOG_VERSION is finished" "$ok"
+	echo -e  "See README and the log file for more details."
+}
+
+#---
+## {Install Discovery Module}
+##
+## @Stdout Actions realised by function
+## @Stderr Log into $LOG_FILE
+#----
+function install_module() {
+	echo ""
+	echo "$line"
+	echo -e "\tInstall Discovery Module"
+	echo "$line"
+	
+	TEMP_D="/tmp/Install_module"
+	/bin/mkdir -p $TEMP_D >> $LOG_FILE 2>> $LOG_FILE
+	/bin/cp -Rf $BASE_DIR/www/modules/Discovery/* $TEMP_D/ >> $LOG_FILE 2>> $LOG_FILE
+	/bin/rm -Rf $TEMP_D/install $TEMP_D/*.log
+
+	echo_success "Setting rights" "$ok"
+	${CHMOD} -R 755 $TEMP_D/* >> $LOG_FILE 2>> $LOG_FILE
+
+	echo_success "Setting owner/group" "$ok"
+	${CHOWN} -R $WEB_USER.$WEB_GROUP $TEMP_D/* >> $LOG_FILE 2>> $LOG_FILE
+	
+	echo_success "Changing macro" "$ok"
+	FILE="include/agent/DiscoveryAgent_central.py"
+	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+	FILE="include/update.php"
+	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+	FILE="include/verif_discovery_status.php"
+	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+	
+	INSTALL_DIR_MODULE=$INSTALL_DIR_CENTREON/$MODULE_DIR
+	
+	if [ -d $INSTALL_DIR_MODULE ] ; then
+	    if [ -d  $INSTALL_DIR_CENTREON/$BACKUP ] ; then
+		echo_success "Delete old Discovery backup" "$ok"
+		/bin/rm -Rf $INSTALL_DIR_CENTREON/$BACKUP/*
+	    else
+		echo_success "Create a directory to backup old files" "$ok"
+		/bin/mkdir $INSTALL_DIR_CENTREON/$BACKUP
+	    fi
+	    
+	    echo_success "Backup old installation" "$ok"
+	    mv $INSTALL_DIR_MODULE/* $INSTALL_DIR_CENTREON/$BACKUP >> $LOG_FILE 2>> $LOG_FILE
+	fi
+	
+	if [ ! -d $INSTALL_DIR_MODULE ] ; then
+	    echo_success "Create module directory" "$ok"
+	    /bin/mkdir $INSTALL_DIR_MODULE >> $LOG_FILE 2>> $LOG_FILE
+	    ${CHOWN} -R $WEB_USER.$WEB_GROUP $INSTALL_DIR_MODULE >> $LOG_FILE 2>> $LOG_FILE
+	    ${CHMOD} -R 755 $INSTALL_DIR_MODULE >> $LOG_FILE 2>> $LOG_FILE
+	fi
+	
+	echo_success "Copying module" "$ok"
+	/bin/cp -Rf --preserve $TEMP_D/* $INSTALL_DIR_CENTREON/$MODULE_DIR >> $LOG_FILE 2>> $LOG_FILE
+	
+	echo_success "Delete temp install directory" "$ok"
+	/bin/rm -Rf $TEMP_D $TEMP >> $LOG_FILE 2>> $LOG_FILE
+	
 	echo_success "\nThe $LOG_VERSION is finished" "$ok"
 	echo -e  "See README and the log file for more details."
 }

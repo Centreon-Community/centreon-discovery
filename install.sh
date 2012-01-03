@@ -1,9 +1,5 @@
 #!/bin/bash
 #
-# Copyright 2005-2011 MERETHIS
-# Centreon is developped by : Julien Mathis and Romain Le Merlus under
-# GPL Licence 2.0.
-# 
 # This program is free software; you can redistribute it and/or modify it under 
 # the terms of the GNU General Public License as published by the Free Software 
 # Foundation ; either version 2 of the License.
@@ -29,38 +25,37 @@
 # exception to your version of the program, but you are not obliged to do so. If you
 # do not wish to do so, delete this exception statement from your version.
 # 
-# For more information : contact@centreon.com
-# 
-# Module name: Syslog
+# Module name: Centreon-Discovery
 # 
 # First developpement by : Jean Marc Grisard - Christophe Coraboeuf
 # 
 # Adaptation for Centreon 2.0 by : Merethis team 
 #
 # Script on Centreon install script by Watt
-# 
-# SVN : $URL: http://svn.modules.centreon.com/centreon-syslog/tags/centreon-syslog-frontend-1.4.1/install.sh $
-# SVN : $Id: install.sh 463 2011-05-18 08:36:47Z lpinsivy $
-# 
+#
+# Modified by Sub2.13
+#
+# SVN : $URL: http://svn.modules.centreon.com/centreon-discovery $
+#
 
-# Define syslog version
-NAME="Syslog"
-VERSION="1.4.1"
+# Define Discovery version
+NAME="Discovery"
+VERSION="0.1"
 MODULE=$NAME.$VERSION
 
 # Define vars
 LOG_VERSION="Centreon Module $MODULE installation"
 FILE_CONF="instCentWeb.conf"
 FILE_CONF_CENTPLUGIN="instCentPlugins.conf"
-CENTREON_CONF="/etc/centreon/"
-MODULE_DIR="www/modules/Syslog/"
+CENTREON_CONF="/etc/centreon"
+MODULE_DIR="www/modules/Discovery"
 INSTALL_DIR_CENTREON="0"
 WEB_USER="0"
 WEB_GROUP="0"
 NAGIOS_USER="0"
 NAGIOS_GROUP="0"
 NAGIOS_PLUGIN="0"
-BACKUP="www/modules/Syslog_backup"
+BACKUP="www/modules/Discovery_backup"
 PWD=`pwd`
 TEMP=/tmp/install.$$
 _tmp_install_opts="0"
@@ -73,11 +68,12 @@ user_conf=""
 ## @Stdout Usage and Help program
 #----
 function usage() {
-	local program=$PROGRAM
-	echo -e "Usage: $program"
-	echo -e "  -i\tinstall/update Syslog manually"
-	echo -e "  -u\tinstall/upgrade Syslog with specify directory with contain $FILE_CONF"
-	exit 1
+    local program=$PROGRAM
+    echo -e "Usage: $program"
+    echo -e "  -i\tinstall/update Discovery manually"
+#    echo -e "  -u\tinstall/upgrade Discovery with specify directory with contain $FILE_CONF"
+    echo -e "  -t\tdefine type install : central/poller/both"
+    exit 1
 }
 
 
@@ -89,8 +85,8 @@ BASE_DIR=$(dirname $0)
 BASE_DIR=$( cd $BASE_DIR; pwd )
 export BASE_DIR
 if [ -z "${BASE_DIR#/}" ] ; then
-	echo -e "I think it is not right to have Centreon source on slash"
-	exit 1
+    echo -e "I think it is not right to have Centreon source on slash"
+    exit 1
 fi
 
 INSTALL_DIR="$BASE_DIR/install"
@@ -115,28 +111,35 @@ if [ "$USERID" != "0" ]; then
 fi
 
 ## Getopts
-while getopts "iu:h" Options
+while getopts "iu:t:h" Options
 do
-	case ${Options} in
-		i )	_tmp_install_opts="1"
-			silent_install="0"
-			;;
-		u )	_tmp_install_opts="1"
-			silent_install="1"
-			user_conf="${OPTARG%/}"
-			;;
-		\?|h)	usage ; 
-			exit 0 
-			;;
-		* )	usage ; 
-			exit 1 
-			;;
-	esac
+    case ${Options} in
+	i )	
+	    _tmp_install_opts="1"
+	    silent_install="0"
+	    ;;
+	u )	
+	    _tmp_install_opts="1"
+	    silent_install="1"
+	    user_conf="${OPTARG%/}"
+	    ;;
+	t )
+	    typeInstall=$OPTARG
+	    ;;
+	\?|h)
+	    usage ; 
+	    exit 0 
+	    ;;
+	* )
+	    usage ; 
+	    exit 1 
+	    ;;
+    esac
 done
 
-if [ "$_tmp_install_opts" -eq 0 ] ; then
-	usage
-	exit 1
+if [ "$_tmp_install_opts" -eq 0 ] || ([ "$typeInstall" != "poller" ] && [ "$typeInstall" != "central" ] && [ "$typeInstall" != "both" ]) ; then
+    usage
+    exit 1
 fi
 
 #Export variable for all programs
@@ -146,7 +149,7 @@ export silent_install CENTREON_CONF
 # backup old log file...
 [ ! -d "$LOG_DIR" ] && mkdir -p "$LOG_DIR"
 if [ -e "$LOG_FILE" ] ; then
-	mv "$LOG_FILE" "$LOG_FILE.`date +%Y%m%d-%H%M%S`"
+    mv "$LOG_FILE" "$LOG_FILE.`date +%Y%m%d-%H%M%S`"
 fi
 # Clean (and create) my log file
 ${CAT} << __EOL__ > "$LOG_FILE"
@@ -158,16 +161,16 @@ define_specific_binary_vars;
 ${CAT} << __EOT__
 ###############################################################################
 #                                                                             #
-#           http://forge.centreon.com/projects/show/centreon-syslog           #
+#          http://community.centreon.com/projects/centreon-discovery          #
 #                          Thanks for using Centreon                          #
 #                                                                             #
-#                                    v$VERSION                                   #
+#                                    v$VERSION                                     #
 #                                                                             #
 ###############################################################################
 __EOT__
 
 ## Test all binaries
-BINARIES="rm cp mv ${CHMOD} ${CHOWN} echo more mkdir find ${GREP} ${CAT} ${SED}"
+BINARIES="rm cp mv ${CHMOD} ${CHOWN} echo more mkdir find ${GREP} ${CAT} ${SED} ${PYTHON} ${NMAP}"
 
 echo "$line"
 echo -e "\tChecking all needed binaries"
@@ -177,71 +180,85 @@ binary_fail="0"
 # For the moment, I check if all binary exists in path.
 # After, I must look a solution to use complet path by binary
 for binary in $BINARIES; do
-	if [ ! -e ${binary} ] ; then 
-		pathfind "$binary"
-		if [ "$?" -eq 0 ] ; then
-			echo_success "${binary}" "$ok"
-		else 
-			echo_failure "${binary}" "$fail"
-			log "ERR" "\$binary not found in \$PATH"
-			binary_fail=1
-		fi
-	else
-		echo_success "${binary}" "$ok"
+    if [ ! -e ${binary} ] ; then 
+	pathfind "$binary"
+	if [ "$?" -eq 0 ] ; then
+	    echo_success "${binary}" "$ok"
+	else 
+	    echo_failure "${binary}" "$fail"
+	    log "ERR" "\$binary not found in \$PATH"
+	    binary_fail=1
 	fi
+    else
+	echo_success "${binary}" "$ok"
+    fi
 done
 
 # Script stop if one binary wasn't found
 if [ "$binary_fail" -eq 1 ] ; then
-	echo_info "Please check fail binary and retry"
-	exit 1
+    echo_info "Please check fail binary and retry"
+    exit 1
 fi
 
 
 
 if [ "$silent_install" -eq 0 ] ; then
-	echo -e "\nYou will now read Centreon Syslog module Licence.\\n\\tPress enter to continue."
-	read 
-	tput clear 
-	more "$BASE_DIR/LICENSE"
-
-	yes_no_default "Do you accept GPL license ?"
-	if [ "$?" -ne 0 ] ; then 
-		echo_info "You do not agree to GPL license ? Okay... have a nice day."
-		exit 1
+    echo -e "\nYou will now read Centreon Discovery module Licence.\\n\\tPress enter to continue."
+    read 
+    tput clear 
+#    more "$BASE_DIR/LICENSE"
+    
+    yes_no_default "Do you accept GPL license ?"
+    if [ "$?" -ne 0 ] ; then 
+	echo_info "You do not agree to GPL license ? Okay... have a nice day."
+	exit 1
+    else
+	log "INFO" "You accepted GPL license"
+    fi
+    
+    get_centreon_configuration_location;
+    get_centreon_parameters;
+    load_parameters=$?
+    if [ "$load_parameters" -eq 1 ] ; then
+	echo_success "Parameters was loaded with success" "$ok"
+	install_modPython;
+	install_ok=$?
+	if [ "$install_ok" -eq 0 ] ; then
+	    install_module;
 	else
-		log "INFO" "You accepted GPL license"
+	    echo_failure "Modules Python weren't installed with success" "$fail"
 	fi
 	
-	get_centreon_configuration_location;
-	get_centreon_parameters;
-	load_parameters=$?
-	if [ "$load_parameters" -eq 1 ] ; then
-		check_phpExtensions;
-		install_module;
-	else
-		echo -e "\nUnable to load all parameters in \"$FILE_CONF\""
-		exit 1
-	fi
+    else
+	echo -e "\nUnable to load all parameters in \"$FILE_CONF\""
+	exit 1
+    fi
 fi
 
 if [ "$silent_install" -eq 1 ] ; then
-	if [ -d $user_conf ] && [ -f $user_conf/$FILE_CONF ] ; then
-		CENTREON_CONF=$user_conf/;
+    if [ -d $user_conf ] && [ -f $user_conf/$FILE_CONF ] ; then
+	CENTREON_CONF=$user_conf/;
 		get_centreon_parameters;
 		load_parameters=$?
 		if [ "$load_parameters" -eq 1 ] ; then
-			echo_success "Parameters was loaded with success" "$ok"
-			check_phpExtensions;
-			install_module;
+		    echo_success "Parameters was loaded with success" "$ok"
+		    install_modPython;
+		    install_ok=$?
+		    if [ "$install_ok" -eq 1 ] ; then
+			echo_success "Modules Python was installed with success" "$ok"
+	    		install_module;
+		    else
+			echo_failure "Modules Python wasn't installed with success" "$fail"
+		    fi
+		    install_module;
 		else
-			echo_failure "Unable to load all parameters in \"$FILE_CONF\"" "$fail"
-			exit 1
+		    echo_failure "Unable to load all parameters in \"$FILE_CONF\"" "$fail"
+		    exit 1
 		fi
-	else
-		echo_failure "File \"$FILE_CONF\" does not exist in your specified directory!" "$fail"
-		exit 1
-	fi
+    else
+	echo_failure "File \"$FILE_CONF\" does not exist in your specified directory!" "$fail"
+	exit 1
+    fi
 fi
 
 ${CAT} << __EOT__
@@ -250,8 +267,8 @@ ${CAT} << __EOT__
 #      Go to the URL : http://your-server/centreon/                           #
 #                   	to finish the setup                                   #
 #                                                                             #
-#      Report bugs at                                                         #
-#           http://forge.centreon.com/projects/centreon-syslog/issues/new     #
+#  Report bugs at                                                             #
+#    http://community.centreon.com/projects/centreon-discovery/issues/new     #
 #                                                                             #
 ###############################################################################
 __EOT__

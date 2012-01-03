@@ -14,11 +14,11 @@ Path centreon : /usr/local/centreon/
 
 Go to the page http://community.centreon.com/projects/centreon-discovery
 
-2. Extract the archive
+2. Extract files from the archive
 
 $# tar xzf centreon-discovery-x.x.tar.gz
 
-3. Launch install of modules Python 
+3. Launch installation of Python modules
 
 $# cd centreon-discovery-x.x/modPython
 $# chmod 755 install_python_modules.sh
@@ -32,16 +32,16 @@ $# cd /usr/local/centreon/www/modules/
 $# chown -R www-data:www-data Centreon-Discovery
 $# chmod 744 Centreon-Discovery/include/agent/*
 
-5. Go to interface of Centreon
+5. Go to Centreon interface
 
-Reach  menu 'Administration > Modules > Centreon-Discovery
-The Discovery module must be in modules list but not installed.
-Clic on the icon at right ""Install Module" then on the button "install module" to launch install.
+Reach menu 'Administration > Modules > Centreon-Discovery'
+The Discovery module must be listed but not installed.
+Click on the icon to the right "Install Module" then on button "install module" to launch install.
 
 
 #	FAQ
 
-Q:	An error appears when the Python MySQLdb module needs to create a file in the root folder of web server. It hasn't rights (more details below).
+Q:	An error appears when the Python MySQLdb module needs to create a file in the root folder of web server. Some rights are missing (more details below).
 
 R:	The Apache user must become owner of www folder
 	$#chown www-data:www-data /var/www
@@ -93,16 +93,16 @@ change the cache directory by setting the PYTHON_EGG_CACHE environment
 variable to point to an accessible directory.
 
 
-2. Start installation with install.sh script on root directory "centreon-discovery-x.x"
+2. Start installation with install.sh script in root directory "centreon-discovery-x.x"
 
 $# chmod +x install.sh
 $# ./install.sh -u /etc/centreon
 
-3. Go on Centreon web interface
+3. Go to Centreon web interface
 
-Go on menu 'Administration > Modules > Setup'.
-SAD module must be present on modules list but not installed.
-Click on right icon to start installation
+Go to menu 'Administration > Modules > Setup'.
+SAD module must be listed but not installed.
+Click to the right icon for starting installation
 
 
 

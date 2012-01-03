@@ -57,7 +57,6 @@ require_once './modules/Discovery/include/common.php';
 		<link href="./Themes/Centreon-2/style.css" />
 		<meta content="Service Auto Discovery - Subnet Declaration Page" name="Loic JEZEQUEL & Alexis DONADIO">
 		<!-- Fonctions JavaScript -->
-        <script type="text/javascript" src="./modules/Discovery/pages/JS-Func.js"></script>
 		<script type="text/javascript" src="./modules/Discovery/include/jquery-1.6.4.min.js"></script>
 		<script type="text/javascript" src="./modules/Discovery/include/script.js"></script>
 			
@@ -91,7 +90,6 @@ require_once './modules/Discovery/include/common.php';
 				$addValue = "Add";
 				$delValue = "del";
 				$error=0;
-				$res = array();
 				$listIp = array();
 				$listMask = array();
 				$listCidr = array();
@@ -147,7 +145,7 @@ require_once './modules/Discovery/include/common.php';
 				 */
 				
 				function doFormTab(){
-					global $res, $error;
+					global $error;
 					
 					//Appel le script python avec le paramètre STATUS_POLLER, cela permet de vérifier si les pollers sont actifs.
 					if (file_exists("./modules/Discovery/include/agent/DiscoveryAgent_central.py")) {
@@ -185,10 +183,9 @@ require_once './modules/Discovery/include/common.php';
 						echo ' <td class="ListColCenter" onClick="afficher_cacher(\'td_toggle'.$i.'\',\'td_toggle\');">'.$data["plage"].'</td>'."\n ";
 						echo ' <td class="ListColCenter" onClick="afficher_cacher(\'td_toggle'.$i.'\',\'td_toggle\');">'.$data["masque"].'</td>'."\n ";
 						echo ' <td class="ListColCenter" onClick="afficher_cacher(\'td_toggle'.$i.'\',\'td_toggle\');">/'.$data["cidr"].'</td>'."\n ";
-						//echo ' <td class="ListColCenter">'.$data["name"].' ('.$data["ns_ip_address"].')</td>'."\n ";
 						echo ' <td class="ListColCenter">'.doDropDownList($data["id"]).'</td>'."\n ";
 						echo ' <td class="ListColCenter" onClick="afficher_cacher(\'td_toggle'.$i.'\',\'td_toggle\');"><div id="status'.$i.'" class="status"><p id="'.$data["id"].'" style="display:none"></p><img style="border:none" type="image" src="./modules/Discovery/include/images/loading.gif" title="Loading..."></div></td>'."\n ";
-                        echo ' <td class="ListColCenter"><input style="border:none" type="image" src="./modules/Discovery/include/images/delete16x16.png" title="Delete one from list" name="clear'.$data["id"].'" value="'.$data["id"].'" onClick="self.location=\'./main.php?p=61201\'"></td>',"\n ";
+                     	echo ' <td class="ListColCenter"><a href="#"><img style="border:none" type="image" src="./modules/Discovery/include/images/delete16x16.png" title="Delete one from list" name="ClearRow" onClick="self.location=\'./main.php?p=61201&id='.$data["id"].'\'"></a></td>',"\n ";
 						echo ' <td class="ListColCenter" onClick="afficher_cacher(\'td_toggle'.$i.'\',\'td_toggle\');"><img style="border:none" type="image" src="./modules/Discovery/include/images/options.jpg" title="Options"></td></tr>'."\n ";
 						echo ' <tr class="list_one" id="tr'.$i.'">'," \n ";
 						echo ' 		<td></td>
@@ -243,10 +240,11 @@ require_once './modules/Discovery/include/common.php';
 				 * {convert an IPv4 address to it's binary format}
 				 *
 				 * @param	string	$ip_addr ip or mask
-				 * @return	string $res 
+				 * @return	string $result
 				 */
 				 
 				function ip2bin ($ip_addr){
+					$result = 0;
 					$ip = explode(".",$ip_addr);
 					for ($i=0;$i<4;$i++){
 						$ip[$i] = decbin($ip[$i]);
@@ -255,9 +253,9 @@ require_once './modules/Discovery/include/common.php';
 							$ip[$i] = substr_replace(($ip[$i]),"0",0,0);
 							$strlength++;
 						}
-						$res.=$ip[$i];
+						$result.=$ip[$i];
 					}
-					return $res;
+					return $result;
 				}	
 				
 				/*
@@ -497,14 +495,8 @@ require_once './modules/Discovery/include/common.php';
 				 */
 				
 				function doPost() {
-					global $res, $error, $conf_centreon;
+					global $error, $conf_centreon;
 					$db = dbConnect($conf_centreon['hostCentreon'], $conf_centreon['user'], $conf_centreon['password'],$conf_centreon['db'], true);
-					/*if (isset($_GET["p"]) && $_GET["p"]==613){
-						//clean_sql();
-						echo '<script type="text/javascript">';
-						echo '    window.location = "main.php?p=61201"';
-						echo '</script>';
-					}*/
 
 					if(isset($_POST["net"])) {
 						$nbPlage=mysql_query("SELECT count(*) FROM mod_discovery_rangeip WHERE id!=0;");
@@ -562,16 +554,8 @@ require_once './modules/Discovery/include/common.php';
 						}
 					}
 
-					if (!empty($_POST)){
-						$subnetIDList=mysql_query("SELECT id FROM mod_discovery_rangeip WHERE id!=0;");
-						while ($subnetIDListData=mysql_fetch_array($subnetIDList,MYSQL_ASSOC)) {
-							$id=$subnetIDListData["id"];
-							$postVar=$id."_x";
-							if (isset($_POST[$postVar]) || isset($_POST[$id])){
-								clearRow($id);
-							}
-						}
-						unset($_POST);
+					if (isset($_GET["id"])){
+						clearRow($_GET["id"]);
 					}
 
 					doInput($error);
@@ -579,10 +563,6 @@ require_once './modules/Discovery/include/common.php';
 					dbClose($db);
 					}
 				doPost();
-				/*
-				MODIFICATIONS A APPORTER:
-				- Corriger le probleme de determination du poller
-				*/
 			?>
         </span>
     </body>

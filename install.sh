@@ -211,6 +211,7 @@ if [ "$silent_install" -eq 0 ] ; then
     yes_no_default "Do you accept GPL license ?"
     if [ "$?" -ne 0 ] ; then 
 	echo_info "You do not agree to GPL license ? Okay... have a nice day."
+	echo -e "\tINSTALL ABORT"
 	exit 1
     else
 	log "INFO" "You accepted GPL license"
@@ -227,10 +228,13 @@ if [ "$silent_install" -eq 0 ] ; then
 	    install_module;
 	else
 	    echo_failure "Modules Python weren't installed with success" "$fail"
+	    echo -e "\tINSTALL ABORT"
+	    exit 1
 	fi
 	
     else
 	echo -e "\nUnable to load all parameters in \"$FILE_CONF\""
+	echo -e "\tINSTALL ABORT"
 	exit 1
     fi
 fi
@@ -246,17 +250,21 @@ if [ "$silent_install" -eq 1 ] ; then
 		    install_ok=$?
 		    if [ "$install_ok" -eq 1 ] ; then
 			echo_success "Modules Python was installed with success" "$ok"
-	    		install_module;
+	    		if [ $typeInstall = "central" || $typeInstall = "both" ] ; then
+			    install_module;
+			fi
 		    else
 			echo_failure "Modules Python wasn't installed with success" "$fail"
 		    fi
 		    install_module;
 		else
 		    echo_failure "Unable to load all parameters in \"$FILE_CONF\"" "$fail"
+		    echo -e "\tINSTALL ABORT"
 		    exit 1
 		fi
     else
 	echo_failure "File \"$FILE_CONF\" does not exist in your specified directory!" "$fail"
+	echo -e "\tINSTALL ABORT"
 	exit 1
     fi
 fi

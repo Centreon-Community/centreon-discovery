@@ -46,7 +46,7 @@ function echo_info() {
 ## @Globals	LOG_FILE
 #----
 function echo_success() {
-    echo -e "${1}${MOVE_TO_COL}${SETCOLOR_SUCCESS}${2}${SETCOLOR_NORMAL}" 
+    echo -e "${1}${MOVE_TO_COL}${SETCOLOR_SUCCESS}${2}${SETCOLOR_NORMAL}"
     echo -e "$1 : $2" >> $LOG_FILE
 }
 
@@ -248,11 +248,12 @@ function get_centreon_configuration_location() {
 	done
 }
 
-#---
+#----
+## install modules Python in function $typeInstall (poller, central, both)
 ##
-##
-##
-##
+## @return 0 if install is ok
+## @return 1 if install is ko
+## @Stderr Log into $LOG_FILE
 #----
 function install_modPython() {
 	echo ""
@@ -260,76 +261,48 @@ function install_modPython() {
 	echo -e "\tInstall Python Modules"
 	echo "$line"
 	
-	# case Poller
 	case $typeInstall in
 	    poller )
 		echo -ne "Module NMAP ..."
 		cd $BASE_DIR/modPython/python-nmap-0.1.4
-		${PYTHON} setup.py install 2>&1 >> $LOG_FILE
+		${PYTHON} setup.py install >> $LOG_FILE 2>> $LOG_FILE
 		install_ok=$?
-		if [ $install_ok = 0 ] ; then
-		    echo_success "" "$ok"
-		    echo "$line"
-		    return $install_ok
-		else    
-		    echo_failure "" "$fail"
-		    return $install_ok
-		fi
+		display_return "$install_ok" "Module NMAP"
+		echo "$line"
+		return $install_ok
 		;;
 	    central ) 
-		echo -ne "Module SetupTools ..."
+		echo -n "Module SetupTools ..."
 		cd $BASE_DIR/modPython/setuptools-0.6c11
-		${PYTHON} setup.py install 2>&1 >> $LOG_FILE
-		install_ok=$?
-		if [ $install_ok = 0 ] ; then
-		    echo_success "" "$ok"
-		else    
-		    echo_failure "" "$fail"
-		    return $install_ok
-		fi
-		echo -ne "Module MySQLdb ..."
+		${PYTHON} setup.py install >> $LOG_FILE 2>> $LOG_FILE
+		install_ok_1=$?
+                display_return "$install_ok_1" "Module SetupTools"
+		echo -n "Module MySQLdb ..."
 		cd $BASE_DIR/modPython/MySQL-python-1.2.3
-		${PYTHON} setup.py install 2>&1 >> $LOG_FILE
-		install_ok=$?
-		if [ $install_ok = 0 ] ; then
-		    echo_success "" "$ok"
-		else    
-		    echo_failure "" "$fail"
-		fi
-		return $install_ok
+		${PYTHON} setup.py install >> $LOG_FILE 2>> $LOG_FILE
+		install_ok_2=$?
+		display_return "$install_ok_2" "Module MySQLdb"
+		echo "$line"
+		return $(($install_ok_1+$install_ok_2))
 		;;
 	    both ) 
 		echo -ne "Module NMAP ..."
                 cd $BASE_DIR/modPython/python-nmap-0.1.4
-		${PYTHON} setup.py install 2>&1 >> $LOG_FILE
-		install_ok=$?
-		if [ $install_ok = 0 ] ; then
-		    echo_success "" "$ok"
-		else    
-		    echo_failure "" "$fail"
-		    return $install_ok
-		fi
+		${PYTHON} setup.py install >> $LOG_FILE 2>> $LOG_FILE
+		install_ok_1=$?
+		display_return "$install_ok_1" "Module NMAP"
                 echo -ne "Module SetupTools ..."
 		cd $BASE_DIR/modPython/setuptools-0.6c11
-		${PYTHON} setup.py install 2>&1 >> $LOG_FILE
-		install_ok=$?
-		if [ $install_ok = 0 ] ; then
-		    echo_success "" "$ok"
-		else    
-		    echo_failure "" "$fail"
-		    return $install_ok
-		fi
+		${PYTHON} setup.py install >> $LOG_FILE 2>> $LOG_FILE
+		install_ok_2=$?
+		display_return "$install_ok_2" "Module SetupTools"
 		echo -ne "Module MySQLdb ..."
                 cd $BASE_DIR/modPython/MySQL-python-1.2.3
-		${PYTHON} setup.py install 2>&1 >> $LOG_FILE
-		install_ok=$?
-		if [ $install_ok = 0 ] ; then
-		    echo_success "" "$ok"
-		    return $install_ok
-		else    
-		    echo_failure "" "$fail"
-		    return $install_ok
-		fi
+		${PYTHON} setup.py install >> $LOG_FILE 2>> $LOG_FILE
+		install_ok_3=$?
+		display_return "$install_ok_3" "Module MySQLdb"
+		echo "$line"		
+		return $(($install_ok_1+$install_ok_2+$install_ok_3))
 		;;
 	    * )
 		;;
@@ -337,7 +310,7 @@ function install_modPython() {
 }
 	    
 
-#---
+#----
 ## {Install Syslog Module}
 ##
 ## @Stdout Actions realised by function
@@ -417,7 +390,7 @@ function install_module_old() {
 	
 	echo_success "Setting owner/group on Nagios plugin" "$ok"
 	${CHMOD} -R 755 $TEMP_D/* >> $LOG_FILE 2>> $LOG_FILE
-	${CHOWN} -R $NAGIOS_USER.$NAGIOS_GROUP $TEMP_D/* >> $LOG_FILE 2>> $LOG_FILE
+	${CHOWN} -R $NAGIOS_USER.$NAGIOS_GROUP $TEMP_D/* v
 	
 	echo_success "Install Nagios plugin" "$ok"
 	/bin/cp -Rf --preserve $TEMP_D/* $NAGIOS_PLUGIN/ >> $LOG_FILE 2>> $LOG_FILE
@@ -446,48 +419,83 @@ function install_module() {
 	/bin/cp -Rf $BASE_DIR/www/modules/Discovery/* $TEMP_D/ >> $LOG_FILE 2>> $LOG_FILE
 	/bin/rm -Rf $TEMP_D/install $TEMP_D/*.log
 
-	echo_success "Setting rights" "$ok"
+	echo -n "Setting rights"
 	${CHMOD} -R 755 $TEMP_D/* >> $LOG_FILE 2>> $LOG_FILE
-
-	echo_success "Setting owner/group" "$ok"
-	${CHOWN} -R $WEB_USER.$WEB_GROUP $TEMP_D/* >> $LOG_FILE 2>> $LOG_FILE
+	display_return "$?" "Setting rights"
 	
-	echo_success "Changing macro" "$ok"
+	echo -n "Setting owner/group"
+	${CHOWN} -R $WEB_USER.$WEB_GROUP $TEMP_D/* >> $LOG_FILE 2>> $LOG_FILE
+	display_return "$?" "Setting owner/group"
+
+	echo "Changing macro"
 	FILE="include/agent/DiscoveryAgent_central.py"
 	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+	echo -ne "\tfor DiscoveryAgent_central.py"
+	display_return "$?" "Changing macro for DiscoveryAgent_central.py"
 	FILE="include/update.php"
 	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+	echo -ne "\tfor update.php"
+	display_return "$?" "Changing macro for update.php"
 	FILE="include/verif_discovery_status.php"
 	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
-	
+	echo -ne "\tfor verif_discovery_status.php"
+	display_return "$?" "Changing macro for verif_discovery_status.php"
+
 	INSTALL_DIR_MODULE=$INSTALL_DIR_CENTREON/$MODULE_DIR
 	
 	if [ -d $INSTALL_DIR_MODULE ] ; then
 	    if [ -d  $INSTALL_DIR_CENTREON/$BACKUP ] ; then
-		echo_success "Delete old Discovery backup" "$ok"
-		/bin/rm -Rf $INSTALL_DIR_CENTREON/$BACKUP/*
+		echo -n "Delete old Discovery backup"
+		/bin/rm -Rf $INSTALL_DIR_CENTREON/$BACKUP/* >> $LOG_FILE 2>> $LOG_FILE
+		display_return "$?" "Delete old Discovery backup"
 	    else
-		echo_success "Create a directory to backup old files" "$ok"
-		/bin/mkdir $INSTALL_DIR_CENTREON/$BACKUP
+		echo -n "Create a directory to backup old files"
+		/bin/mkdir $INSTALL_DIR_CENTREON/$BACKUP >> $LOG_FILE 2>> $LOG_FILE
+		display_return "$?" "Create a directory to backup old files"
 	    fi
-	    
-	    echo_success "Backup old installation" "$ok"
+	    echo -n "Backup old installation"
 	    mv $INSTALL_DIR_MODULE/* $INSTALL_DIR_CENTREON/$BACKUP >> $LOG_FILE 2>> $LOG_FILE
+	    display_return "$?" "Backup old installation"
 	fi
 	
 	if [ ! -d $INSTALL_DIR_MODULE ] ; then
-	    echo_success "Create module directory" "$ok"
+	    echo -n "Create module directory"
 	    /bin/mkdir $INSTALL_DIR_MODULE >> $LOG_FILE 2>> $LOG_FILE
+	    display_return "$?" "Create module directory"
+	    echo -n "Change owner module directory"
 	    ${CHOWN} -R $WEB_USER.$WEB_GROUP $INSTALL_DIR_MODULE >> $LOG_FILE 2>> $LOG_FILE
+	    display_return "$?" "Change owner module directory"
+	    echo -n "Change rights module directory"
 	    ${CHMOD} -R 755 $INSTALL_DIR_MODULE >> $LOG_FILE 2>> $LOG_FILE
+	    display_return "$?" "Change rights module directory"
 	fi
 	
-	echo_success "Copying module" "$ok"
+	echo -n "Copying module"
 	/bin/cp -Rf --preserve $TEMP_D/* $INSTALL_DIR_CENTREON/$MODULE_DIR >> $LOG_FILE 2>> $LOG_FILE
-	
-	echo_success "Delete temp install directory" "$ok"
+	display_return "$?" "Copying module"
+
+	echo -n "Delete temp install directory"
 	/bin/rm -Rf $TEMP_D $TEMP >> $LOG_FILE 2>> $LOG_FILE
+	display_return "$?" "Delete temp install directory"
 	
 	echo_success "\nThe $LOG_VERSION is finished" "$ok"
 	echo -e  "See README and the log file for more details."
+}
+
+#----
+## print ok for $1=0 or fail for $1=1
+## add failure message to log file
+## @param	integer : 0 OK // 1 KO
+## @param	message
+## @Stdout	message + OK/FAIL
+## @Globals     LOG_FILE
+#----
+function display_return(){
+    if [ "$1" -eq 0 ] ; then
+	echo -e "${MOVE_TO_COL}${SETCOLOR_SUCCESS}${ok}${SETCOLOR_NORMAL}"
+	echo -e "$2 : $ok" >> $LOG_FILE
+    else
+	echo -e "${MOVE_TO_COL}${SETCOLOR_FAILURE}${fail}${SETCOLOR_NORMAL}"
+	echo -e "$2 : $fail" >> $LOG_FILE
+    fi
 }

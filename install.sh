@@ -48,10 +48,13 @@ LOG_VERSION="Centreon Module $MODULE installation"
 FILE_CONF="instCentWeb.conf"
 FILE_CONF_CENTPLUGIN="instCentPlugins.conf"
 CENTREON_CONF="/etc/centreon"
+AGENT_DIR="/etc/centreon-discovery"
 MODULE_DIR="www/modules/Discovery"
 INSTALL_DIR_CENTREON="0"
 WEB_USER="0"
 WEB_GROUP="0"
+WEB_ENVVARS="envvars"
+DIR_ENVVARS="/etc/apache2"
 NAGIOS_USER="0"
 NAGIOS_GROUP="0"
 NAGIOS_PLUGIN="0"
@@ -170,7 +173,11 @@ ${CAT} << __EOT__
 __EOT__
 
 ## Test all binaries
-BINARIES="rm cp mv ${CHMOD} ${CHOWN} echo more mkdir find ${GREP} ${CAT} ${SED} ${PYTHON} ${NMAP}"
+if [ "$typeInstall" == "central" ] ; then
+    BINARIES="rm cp mv ${CHMOD} ${CHOWN} echo more mkdir find ${GREP} ${CAT} ${SED} ${PYTHON}"
+else
+    BINARIES="rm cp mv ${CHMOD} ${CHOWN} echo more mkdir find ${GREP} ${CAT} ${SED} ${PYTHON} ${NMAP}"
+fi    
 
 echo "$line"
 echo -e "\tChecking all needed binaries"
@@ -219,12 +226,12 @@ if [ "$silent_install" -eq 0 ] ; then
     
     get_centreon_configuration_location;
     get_centreon_parameters;
-    load_parameters=$?
-    if [ "$load_parameters" -eq 1 ] ; then
+    if [ "$?" -eq 0 ] ; then
 	echo_success "Parameters was loaded with success" "$ok"
+	install_agent;
 	install_modPython;
-	install_ok=$?
-	if [ "$install_ok" -eq 0 ] ; then
+	config_envvars;
+	if [ "$?" -eq 0 ] ; then
 	    install_module;
 	else
 	    echo_failure "Modules Python weren't installed with success" "$fail"
@@ -242,26 +249,25 @@ fi
 if [ "$silent_install" -eq 1 ] ; then
     if [ -d $user_conf ] && [ -f $user_conf/$FILE_CONF ] ; then
 	CENTREON_CONF=$user_conf/;
-		get_centreon_parameters;
-		load_parameters=$?
-		if [ "$load_parameters" -eq 1 ] ; then
-		    echo_success "Parameters was loaded with success" "$ok"
-		    install_modPython;
-		    install_ok=$?
-		    if [ "$install_ok" -eq 1 ] ; then
-			echo_success "Modules Python was installed with success" "$ok"
-	    		if [ $typeInstall = "central" || $typeInstall = "both" ] ; then
-			    install_module;
-			fi
-		    else
-			echo_failure "Modules Python wasn't installed with success" "$fail"
-		    fi
+	get_centreon_parameters;
+	if [ "$?" -eq 0 ] ; then
+	    echo_success "Parameters was loaded with success" "$ok"
+	    install_agent;
+	    exit 0
+	    install_modPython;
+	    if [ "$?" -eq 0 ] ; then
+		echo_success "Modules Python was installed with success" "$ok"
+	    	if [ $typeInstall = "central" || $typeInstall = "both" ] ; then
 		    install_module;
-		else
-		    echo_failure "Unable to load all parameters in \"$FILE_CONF\"" "$fail"
-		    echo -e "\tINSTALL ABORT"
-		    exit 1
 		fi
+	    else
+		echo_failure "Modules Python wasn't installed with success" "$fail"
+	    fi
+	else
+	    echo_failure "Unable to load all parameters in \"$FILE_CONF\"" "$fail"
+	    echo -e "\tINSTALL ABORT"
+	    exit 1
+	fi
     else
 	echo_failure "File \"$FILE_CONF\" does not exist in your specified directory!" "$fail"
 	echo -e "\tINSTALL ABORT"

@@ -108,26 +108,28 @@ function log() {
 ## This functions was been use in first line on your script
 ## @return 0	All is't ok
 ## @return 1	problem with one variable
-## @Globals	GREP, CAT, SED, CHMOD, CHOWN
+## @Globals	GREP, CAT, SED, CHMOD, CHOWN, PYTHON, NMAP
 #----
 function define_specific_binary_vars() {
-	local vars_bin="GREP CAT SED CHMOD CHOWN PYTHON NMAP"
-	local var_bin_tolower=""
-	for var_bin in $vars_bin ; 
-	do
-		if [ -z $(eval echo \$$var_bin) ] ; then
-			var_bin_tolower="$(echo $var_bin | tr [:upper:] [:lower:])"
-			pathfind_ret "$var_bin_tolower" "$(echo -n $var_bin)"
-			if [ "$?" -eq 0 ] ; then
-				eval "$var_bin='$(eval echo \$$var_bin)/$var_bin_tolower'"
-				export $(echo $var_bin)
-				log "INFO" "$var_bin=$(eval echo \$$var_bin)"
-			else
-				return 1
-			fi
+    local vars_bin="GREP CAT SED CHMOD CHOWN PYTHON NMAP"
+    local var_bin_tolower=""
+    for var_bin in $vars_bin ; 
+    do
+	if [ -z $(eval echo \$$var_bin) ] ; then
+		var_bin_tolower="$(echo $var_bin | tr [:upper:] [:lower:])"
+		pathfind_ret "$var_bin_tolower" "$(echo -n $var_bin)"
+		if [ "$?" -eq 0 ] ; then
+		    eval "$var_bin='$(eval echo \$$var_bin)/$var_bin_tolower'"
+		    export $(echo $var_bin)
+		    log "INFO" "$var_bin=$(eval echo \$$var_bin)"
+		else
+		    eval "$var_bin=$var_bin_tolower"
+		    export $(echo $var_bin)
+#				return 1
 		fi
-	done
-	return 0
+	fi
+    done
+    return 0
 }
 
 #----
@@ -211,9 +213,9 @@ function get_centreon_parameters() {
 	NAGIOS_GROUP=`${CAT} $CENTREON_CONF/$FILE_CONF_CENTPLUGIN | ${GREP} "NAGIOS_GROUP" | cut -d '=' -f2`;
 
 	if [ "$INSTALL_DIR_CENTREON" != "" ] && [ "$WEB_USER" != "" ] && [ "$WEB_GROUP" != "" ] && [ "$NAGIOS_PLUGIN" != "" ] && [ "$NAGIOS_USER" != "" ] && [ "$NAGIOS_GROUP" != "" ]; then
-		return 1;
-	else
 		return 0;
+	else
+		return 1;
 	fi
 }
 
@@ -251,8 +253,8 @@ function get_centreon_configuration_location() {
 #----
 ## install modules Python in function $typeInstall (poller, central, both)
 ##
-## @return 0 if install is ok
-## @return 1 if install is ko
+## @return 0 if all install is ok
+## @return 1 if any install is ko
 ## @Stderr Log into $LOG_FILE
 #----
 function install_modPython() {
@@ -462,12 +464,12 @@ function install_module() {
 	    echo -n "Create module directory"
 	    /bin/mkdir $INSTALL_DIR_MODULE >> $LOG_FILE 2>> $LOG_FILE
 	    display_return "$?" "Create module directory"
-	    echo -n "Change owner module directory"
+	    echo -n "Change owner on module directory"
 	    ${CHOWN} -R $WEB_USER.$WEB_GROUP $INSTALL_DIR_MODULE >> $LOG_FILE 2>> $LOG_FILE
-	    display_return "$?" "Change owner module directory"
-	    echo -n "Change rights module directory"
+	    display_return "$?" "Change owner on module directory"
+	    echo -n "Change rights on module directory"
 	    ${CHMOD} -R 755 $INSTALL_DIR_MODULE >> $LOG_FILE 2>> $LOG_FILE
-	    display_return "$?" "Change rights module directory"
+	    display_return "$?" "Change rights on module directory"
 	fi
 	
 	echo -n "Copying module"
@@ -485,8 +487,9 @@ function install_module() {
 #----
 ## print ok for $1=0 or fail for $1=1
 ## add failure message to log file
-## @param	integer : 0 OK // 1 KO
-## @param	message
+## @param1	integer : 0 OK // .. KO
+## @param2	message
+## @return      @param1
 ## @Stdout	message + OK/FAIL
 ## @Globals     LOG_FILE
 #----
@@ -494,8 +497,154 @@ function display_return(){
     if [ "$1" -eq 0 ] ; then
 	echo -e "${MOVE_TO_COL}${SETCOLOR_SUCCESS}${ok}${SETCOLOR_NORMAL}"
 	echo -e "$2 : $ok" >> $LOG_FILE
+	return $1
     else
 	echo -e "${MOVE_TO_COL}${SETCOLOR_FAILURE}${fail}${SETCOLOR_NORMAL}"
 	echo -e "$2 : $fail" >> $LOG_FILE
+	return $1
     fi
+}
+
+
+#---
+## {Get location of instCentWeb.conf file}
+##
+## @Stdout Error message if user set incorrect directory
+## @Stdin Path with must contain $FILE_CONF
+#----
+function get_agent_install_directory_location() {
+    err=1
+    while [ $err != 0 ]
+    do
+	echo -e "Where you want to install Discovery Agent ? [$AGENT_DIR]"
+	echo -en "> "
+	read temp_read
+	
+	if [ -z "$temp_read" ]; then
+	    temp_read=$AGENT_DIR
+	    err=0
+	fi
+	
+	if [ -d $temp_read ] ; then
+	    yes_no_default "The directory exist. Do you want overwrite it?"
+	    if [ "$?" -eq 0 ] ; then
+		err=0
+		AGENT_DIR=$temp_read
+	    else
+		err=1
+	    fi
+	fi
+    done
+    if [ "$AGENT_DIR" != "" ] ; then
+	return 0;
+    else
+	return 1;
+    fi
+}
+
+#----
+##
+#----
+function install_agent(){
+    echo ""
+    echo "$line"
+    echo -e "\tInstall Discovery Agent"
+    echo "$line"
+    get_agent_install_directory_location;
+    if [ "$?" -eq 0 ] ; then
+	if [ ! -d $AGENT_DIR ] ; then
+	    echo -n "Create the directory $AGENT_DIR"
+	    /bin/mkdir -p $AGENT_DIR >> $LOG_FILE 2>> $LOG_FILE
+	    display_return "$?" ""
+	fi
+	echo -n "Copy Discovery Agent(s)"
+	case $typeInstall in
+	    poller )
+		/bin/cp -Rf --preserve $BASE_DIR/www/modules/Discovery/include/agent/DiscoveryAgent_poller.py $AGENT_DIR >> $LOG_FILE 2>> $LOG_FILE
+		display_return "$?" ""
+		;;
+	    central )
+		/bin/cp -Rf --preserve $BASE_DIR/www/modules/Discovery/include/agent/DiscoveryAgent_central.py $AGENT_DIR >> $LOG_FILE 2>> $LOG_FILE
+		display_return "$?" ""
+		;;
+	    both )
+		/bin/cp -Rf --preserve $BASE_DIR/www/modules/Discovery/include/agent/* $AGENT_DIR >> $LOG_FILE 2>> $LOG_FILE
+		display_return "$?" ""
+		;;
+	    * )
+		;;
+	esac
+	return 0
+    else
+	return 1
+    fi
+}
+
+function config_envvars(){
+    echo ""
+    echo "$line"
+    echo -e "\tModify config Apache ($WEB_ENVVARS)"
+    echo "$line"
+    err=1
+    while [ $err != 0 ]
+    do
+	echo -e "Please specify the envvars file location [$DIR_ENVVARS]"
+	echo -en "> "
+	read temp_read
+
+	if [ -z "$temp_read" ]; then
+	    temp_read=$DIR_ENVVARS
+	fi
+	
+	if [ -f "$temp_read/$WEB_ENVVARS" ] ; then
+	    err=0
+	else
+	    echo_failure "File \"$WEB_ENVVARS\" does not exist in this directory!" "$fail"
+	fi
+    done
+    
+    echo -ne "Check rights on $temp_read/$WEB_ENVVARS"
+    if [ -r "$temp_read/$WEB_ENVVARS" ] && [ -w "$temp_read/$WEB_ENVVARS" ] ; then
+	display_return "0" "Check $temp_read/$WEB_ENVVARS"
+	${GREP} "export PYTHON_EGG_CACHE" "$temp_read/$WEB_ENVVARS" >> $LOG_FILE 2>> $LOG_FILE
+	if [ $? -eq "0" ] ; then
+	    echo_success "File \"$WEB_ENVVARS\" is already configured" "$ok"
+	else
+	    modify_envvars "$temp_read/$WEB_ENVVARS"
+	    if [ $? -eq "0" ] ; then
+		echo_success "File \"$WEB_ENVVARS\" is correctly configured" "$ok"
+	    else
+		echo_failure "File \"$WEB_ENVVARS\" isn't correctly configured" "$fail"
+	    fi
+	fi
+    else
+	echo_failure "File \"$WEB_ENVVARS\" isn't readable and/or writable!" "$fail"
+    fi
+}
+
+
+function modify_envvars(){
+    err=1
+    while [ $err != 0 ]
+    do
+	yes_no_default "Configure $1 ?" 
+	if [ "$?" -eq 0 ] ; then
+	    err=0
+	    echo $1
+	    echo -e "\n\n#Modify by install centreon-Discovery module at `date -R`" >> $1
+	    echo -e "export PYTHON_EGG_CACHE=\"/tmp\"\n" >> $1
+	    if [ "$?" -eq 0 ] ; then
+		yes_no_default "Restart Apache2 ?"
+		if [ "$?" -eq 0 ] ; then
+#		    apachectl -k graceful
+		    /etc/init.d/apache2 restart >> $LOG_FILE 2>> $LOG_FILE
+		else
+		    echo -e "Don't forget restart your web server ;-)"
+		fi
+	    fi
+	    return 0
+	else
+	    return 1
+	fi
+    done
 }

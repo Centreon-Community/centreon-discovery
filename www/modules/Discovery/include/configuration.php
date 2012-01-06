@@ -52,12 +52,9 @@
 	<head>
 		<meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
 		<title>Discovery</title>
-                <link rel="stylesheet" media="screen" type="text/css" title="Discovery" href="./modules/Discovery/css/discovery.css"/>
+        <link rel="stylesheet" media="screen" type="text/css" title="Discovery" href="./modules/Discovery/css/discovery.css"/>
 		<link href="./Themes/Centreon-2/style.css" rel="stylesheet" type="text/css"/>
-		<meta content="Service Auto Discovery - Configuration Page" name="Loic JEZEQUEL">
-		<!-- Fonctions JavaScript -->
-		<script type="text/javascript" src="./modules/Discovery/pages/JS-Func.js"></script>	
-		<!-- End Fonctions JavaScript -->
+		<meta content="Discovery - Configuration Page" name="Nicolas DIETRICH">
 	</head>
 	<body style="background-color: rgb(255, 255, 255); color: rgb(0, 0, 0); height: 158px;" alink="#ff6600" link="#ff6600" vlink="#ff6600">  
 		<span class="" style="font-family: Candara;  font-weight: bold;"><br>
@@ -69,7 +66,6 @@
 			}
 
 			require_once './modules/Discovery/include/DB-Func.php';
-           // require_once './modules/DB-Func.php';
 			
 			?>
 
@@ -88,10 +84,10 @@
 			
 			function doFormTab($id) {
 				echo '<div>'."\n";
-				echo '  <ul id="mainnav">'."\n";
-				if ($id==1) { echo '		<li class="active">'; } else { echo '		<li class="a">'; }
+				echo '  <ul id="onglets">'."\n";
+				if ($id==1) { echo '<li class="active">'; } else { echo '<li class="a" style="">'; }
 				echo '<a href="./main.php?p=61203&id=1">  Default Values  </a></li>'."\n";
-				if ($id==2) { echo' <li class="active">'; } else { echo '<li class="a">'; }
+				if ($id==2) { echo '<li class="active">'; } else { echo '<li class="a" style="">'; }
 				echo '<a href="./main.php?p=61203&id=2">  Template / OS Relation  </a></li>'."\n";
 				echo '  </ul>'."\n";
 				echo '</div>'."\n";
@@ -198,8 +194,13 @@
 						echo '         </tr>'."\n";
 						echo '         <tr><td colspan=3>&nbsp;</td></tr>',"\n";
 						echo '         <tr>'."\n";
-						echo '             <td>SNMP OS Name : <input type="text" name="os" value="">&nbsp;</td>'."\n";
-						echo '             <td>&nbsp;Template Name : <input type="text" name="template" value=""></td>'."\n";
+                        echo '		       <td>&nbsp;Template Name : <select name="template"><option>None</option>'."\n ";
+                        $listTemplate=mysql_query("SELECT * FROM host WHERE host_register='0'");
+                        while ($listTemplateData=mysql_fetch_array($listTemplate,MYSQL_ASSOC)){
+                            echo "<option value='".$listTemplateData["host_name"]."'>".$listTemplateData["host_name"]."</option>"."\n ";
+                        }
+                        echo '  		   </select></td>'."\n ";
+						echo '             <td>SNMP OS Name : <input type="text" name="os" value="">&nbsp;</td>'."\n";						
 						echo '             <td>&nbsp;<input type="submit" title="Add to List" name="submit" value="Add"></td>'."\n";
 						echo '         </tr>'."\n";
 						echo '     </table>'."\n";
@@ -207,7 +208,6 @@
 							echo '<b><font color="blue">INFO</b></font> : Error in your entry'."\n";
 						}
 						echo '     </center>'."\n";
-						#echo ' </form>'."\n";
 						echo ' <br><br><br>'."\n";
 						echo '    <table class="ListTable">'."\n ";
 						echo '         <tr class="ListHeader">'."\n ";
@@ -219,7 +219,7 @@
 							echo ' <tr class="list_one">'." \n ";
 							echo '  <td class="ListColHeaderCenter">'.$relationsData["template"].'</td>'."\n";
 							echo '  <td class="ListColHeaderCenter">'.$relationsData["os"].'</td>'."\n";
-							echo '  <td class="ListColHeaderCenter"><input type="image" src="./modules/Discovery/include/images/delete16x16.png" title="Delete One from List" name="'.$relationsData["id"].'" value="'.$relationsData["id"].'" onClick="self.location=\'./main.php?p=61204&id=2\'"></td>',"\n";
+							echo '  <td class="ListColHeaderCenter"><input style="border:none" type="image" src="./modules/Discovery/include/images/delete16x16.png" title="Delete One from List" name="'.$relationsData["id"].'" value="'.$relationsData["id"].'" onClick="self.location=\'./main.php?p=61204&id=2\'"></td>',"\n";
 							echo ' </tr>'." \n ";
 						}
 						echo '    </table>'."\n";

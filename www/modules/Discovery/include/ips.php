@@ -85,14 +85,14 @@ require_once './modules/Discovery/include/common.php';
 
 			<?php
 
-        		$submitValue = "Save configuration";
-				$resetValue = "Reset to defaults";
-				$addValue = "Add";
-				$delValue = "del";
+        		//$submitValue = "Save configuration";
+				//$resetValue = "Reset to defaults";
+				//$addValue = "Add";
+				//$delValue = "del";
 				$error=0;
-				$listIp = array();
-				$listMask = array();
-				$listCidr = array();
+				//$listIp = array();
+				//$listMask = array();
+				//$listCidr = array();
 				
 				/*
 				 * {Display input form}
@@ -150,7 +150,6 @@ require_once './modules/Discovery/include/common.php';
 					//Appel le script python avec le paramètre STATUS_POLLER, cela permet de vérifier si les pollers sont actifs.
 					if (file_exists("./modules/Discovery/include/agent/DiscoveryAgent_central.py")) {
 						shell_exec('python ./modules/Discovery/include/agent/DiscoveryAgent_central.py STATUS_POLLER > /dev/null 2>&1 &');
-						//exec('python ./modules/Discovery/include/agent/DiscoveryAgent_central.py STATUS_POLLER > /dev/null 2>&1 &');
 					}
 					else { echo 'Script Python not found...<br><br>'; }
 					
@@ -189,7 +188,7 @@ require_once './modules/Discovery/include/common.php';
 						echo ' <td class="ListColCenter" onClick="afficher_cacher(\'td_toggle'.$i.'\',\'td_toggle\');"><img style="border:none" type="image" src="./modules/Discovery/include/images/options.jpg" title="Options"></td></tr>'."\n ";
 						echo ' <tr class="list_one" id="tr'.$i.'">'," \n ";
 						echo ' 		<td></td>
-									<td colspan="6">
+									<td colspan="7">
 										<div style="display:none" id="td_toggle'.$i.'" class="td_toggle">
 										<input type="hidden" name="id'.$i.'" value="'.$data["id"].'">
 										<table>
@@ -336,7 +335,7 @@ require_once './modules/Discovery/include/common.php';
 					return preg_match("/^(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[1-9])(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])){3}$/",$ip_addr);
 				}
 
-                                /*
+                /*
 				 * {Validate IPv4 mask}
 				 *
 				 * {verify if the mask is an valid IPv4 mask}
@@ -556,6 +555,7 @@ require_once './modules/Discovery/include/common.php';
 
 					if (isset($_GET["id"])){
 						clearRow($_GET["id"]);
+						unset($_GET);
 					}
 
 					doInput($error);

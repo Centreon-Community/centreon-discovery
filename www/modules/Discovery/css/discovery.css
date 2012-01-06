@@ -77,15 +77,15 @@ form {
 #onglets li{
     float: left;
     height: 21px;
-    background-color: #F4F9FD;
+    background-color: #F4F4F4;
     margin: 2px 0 0 0 !important;
     margin: 1px 2px 0 2px;
     border: 1px solid #9EA0A1;
 }
 
 #onglets li.active{
-    border-bottom: 0px solid #fff;
-    background-color: #fff;
+    background-color: #99DFF0;
+	border-bottom: 1px solid #99DFF0;
 }
 
 #onglets a{

@@ -82,166 +82,6 @@ require_once'./modules/Discovery/include/DB-Func.php';
 
             <?php
 				
-                /*
-                 * {Initialise progress bar's shape}
-                 *
-                 * @param	int	$gauche padding left
-                 * @param	int	$haut padding top
-                 * @param	int	$largeur wheight
-                 * @param	int	$hauteur heigh
-                 * @param	int	$bord_col border color
-                 * @param	int	$txt_col text color
-                 * @param	int	$bg_col background color
-                 * @throws Exception Description
-                 * @return	void
-                 */
-
-                function Initialize($gauche,$haut,$largeur,$hauteur,$bord_col,$txt_col,$bg_col){
-                    $tailletxt=$hauteur-10;
-                    echo '<div id="pourcentage" style="position:absolute;top:'.$haut;
-                    echo ';left:'.$gauche;
-                    echo ';width:'.$largeur.'px';
-                    echo ';height:'.$hauteur.'px;border:1px solid '.$bord_col.';font-family:Tahoma;font-weight:bold';
-                    echo ';font-size:'.$tailletxt.'px;color:'.$txt_col.';z-index:1;text-align:center;">0%</div>';
-
-                    echo '<div id="progrbar" style="position:absolute;top:'.($haut+1); //+1
-                    echo ';left:'.($gauche+1); //+1
-                    echo ';width:0px';
-                    echo ';height:'.$hauteur.'px';
-                    echo ';background-color:'.$bg_col.';z-index:0;"></div>';
-
-                }
-				
-                /*
-                 * {Modify percentage in progress bar}
-                 *
-                 * @param	int	$indice number between 0 and 100
-                 * @throws Exception Description
-                 * @return	void
-                 */
-
-                function ProgressBar($indice){
-                    echo "\n<script>";
-                    echo "document.getElementById(\"pourcentage\").innerHTML='".$indice."%';";
-                    echo "document.getElementById('progrbar').style.width=".($indice*2).";\n";
-                    echo "</script>";
-                    flush();
-                }
-
-                /*
-                 * {intitialise progress bat int a table}
-                 *
-                 * @throws Exception Description
-                 * @return	void
-                 */
-
-                function displayInitProgressBar(){
-                    echo '            <table>'," \n ";
-                    echo '              <tr>'," \n ";
-                    echo '                  <td>'.Initialize(40,200,200,30,'#000000','#000000','#5F6AFF').'</td>'," \n ";
-                    echo '              </tr>'," \n ";
-                    echo '            </table>'," \n ";
-                }
-
-                /*
-                 * {calculate progress bar status and update it}
-                 *
-                 * @throws Exception Description
-                 * @return	void
-                 */
-
-                function displayProgressBar(){
-                    $nbSubnetsUncompleted = mysql_query("SELECT COUNT(*) FROM mod_discovery_rangeip WHERE id!=0;");
-                    $nbSubnetData = mysql_fetch_array($nbSubnetsUncompleted,MYSQL_ASSOC);
-                    $nbSubnet = $nbSubnetData["COUNT(*)"];
-                    $nbSubnetsCompleted = mysql_query("SELECT COUNT(*) FROM mod_discovery_rangeip WHERE (done=1 OR done=3) AND id!=0;");
-                    $nbDoneData = mysql_fetch_array($nbSubnetsCompleted,MYSQL_ASSOC);
-                    $nbDone = $nbDoneData["COUNT(*)"];
-                    if($nbDone==$nbSubnet){
-                        mysql_query("UPDATE mod_discovery_rangeip SET done=1 WHERE plage='fin';");
-                    }
-                    $curentPourcent=0;
-                    $listPourcent=Array();
-                    $subnets=mysql_query("SELECT * FROM mod_discovery_rangeip WHERE id!=0;");
-                    $nbRefresh=mysql_query("SELECT CIDR FROM mod_discovery_rangeip WHERE plage='fin';");
-                    $nbSamePoller=mysql_query("SELECT nagios_server_id, COUNT(*) FROM mod_discovery_rangeip WHERE nagios_server_id IS NOT NULL GROUP BY nagios_server_id ORDER BY count(*);");
-                    $nbRefreshData = mysql_fetch_array($nbRefresh,MYSQL_ASSOC);
-                    $nbSamePollerData=mysql_fetch_array($nbSamePoller,MYSQL_ASSOC);
-                    
-                    // simulation théorique de la progression de la barre de progression
-                    if ($nbRefreshData["CIDR"]>0){
-                        while ($subnetsData = mysql_fetch_array($subnets,MYSQL_ASSOC)){
-                            if ($subnetsData["DONE"]==1 || $subnetsData["DONE"]==3){
-
-                                $listPourcent[]=100;
-                            }
-                            elseif($subnetsData["PING"]==1 && $subnetsData["TCP"]==0) {
-                                $refreshPercent = (($nbRefreshData["CIDR"]*5000)/($subnetsData["PING_COUNT"]*100/1000))/(2^(32-$subnetsData["CIDR"])*$nbSamePollerData["COUNT(*)"]*1000);
-                                if ($refreshPercent >= 99) {
-                                    $listPourcent[]=99;
-                                }
-                                else $listPourcent[]=$refreshPercent;
-                            }
-                        }
-                        foreach ($listPourcent as $pourcent){
-                            $curentPourcent=$curentPourcent+$pourcent;
-                        }
-                    }
-
-                    echo '           <br><br><br>';
-                    echo '            <table>'," \n ";
-                    echo '                <tr>'," \n ";
-                    echo '                    <td>Discovery Operating ...</td>'," \n ";
-                    echo '                </tr>'," \n ";
-                    echo '                <tr>'," \n ";
-                    if ($curentPourcent==0){
-                        echo '                    <td>'.ProgressBar(0).'</td>'," \n ";
-                    }
-                    else {
-                        echo '                    <td>'.ProgressBar(round($curentPourcent/$nbSubnet)).'</td>'," \n ";
-                    }
-                    //echo '                    <td>'.ProgressBar(round($nbDone*100/$nbSubnet)).'</td>'," \n ";
-                    echo '                </tr>'," \n ";
-                    echo '             </table>'," \n ";
-                }
-
-                /*
-                 * {execute an XML-RPC client for each subnet to scan}
-                 *
-                 * @throws Exception Description
-                 * @return	boulean
-                 */
-
-                function callAgent($plages){
-                    //lancement des clients : 1 par subnet
-                    while ($plagesData = mysql_fetch_array($plages,MYSQL_ASSOC)){
-                        $plageBytes = explode(".",$plagesData["plage"]);
-                        $masqueBytes = explode(".",$plagesData["masque"]);
-                        $poller = mysql_query("SELECT ns_ip_address, id FROM nagios_server WHERE ns_activate='1' AND ".$plageBytes[0]."= SUBSTRING_INDEX(ns_ip_address, '.', 1)&".$masqueBytes[0]." AND ".$plageBytes[1]." = SUBSTRING_INDEX(SUBSTRING_INDEX(ns_ip_address, '.',-3),'.',1)&".$masqueBytes[1]." AND ".$plageBytes[2]." = SUBSTRING_INDEX(SUBSTRING_INDEX(ns_ip_address, '.',-2),'.',1)&".$masqueBytes[2]." AND ".$plageBytes[3]." = SUBSTRING_INDEX(ns_ip_address, '.', -1)&".$masqueBytes[3].";");
-                        if (mysql_num_rows($poller)>0){
-                            $pollerData = mysql_fetch_array($poller,MYSQL_ASSOC);
-                            mysql_query("UPDATE mod_discovery_rangeip SET nagios_server_id='".$pollerData["id"]."' WHERE plage='".$plagesData["plage"]."';");
-                            exec("perl /usr/share/centreon/www/modules/SAD-Agent/xml_rpc_client.pl ".$pollerData["ns_ip_address"]." ".$plagesData["plage"]." ".$plagesData["masque"]." > /dev/null 2>&1 &");
-                        }
-                        else {
-                            mysql_query("UPDATE mod_discovery_rangeip SET nagios_server_id='1' WHERE plage='".$plagesData["plage"]."';");
-                            exec("perl /usr/share/centreon/www/modules/SAD-Agent/xml_rpc_client.pl 127.0.0.1 ".$plagesData["plage"]." ".$plagesData["masque"]." > /dev/null 2>&1 &");
-
-                        }
-                        //mise a jour du champ donne=2 : decouverte en cours
-                        mysql_query("UPDATE mod_discovery_rangeip SET done='2' WHERE plage ='".$plagesData["plage"]."';");
-                    }
-                    return true;
-                }
-
-                /*
-                 * {Insert an host list in centreon as host objects}
-                 *
-                 * @param	int	$listHost list of host's id
-                 * @throws Exception Description
-                 * @return	Array
-                 */
-
                 function createHost($listHost){
                     $result = Array();
                     $result["success"] = Array();
@@ -365,7 +205,7 @@ require_once'./modules/Discovery/include/DB-Func.php';
                                 echo '                  <td width="22%" class="ListColHeaderCenter">Host</td>'," \n ";
                                 echo '                  <td width="22%" class="ListColHeaderCenter">Hostname</td>'," \n ";
                                 echo '                  <td width="22%" class="ListColHeaderCenter">Operating System</td>'," \n ";
-                                echo '                  <td width="22%" class="ListColHeaderCenter">Host template</td>'," \n ";
+                                echo '                  <td width="22%" class="ListColHeaderCenter"></td>'," \n ";
                                 echo '              </tr>'," \n ";
                                 while ($subnetHostData = mysql_fetch_array($subnetHostsList,MYSQL_ASSOC)){
                                     $elt_number++;
@@ -451,8 +291,8 @@ require_once'./modules/Discovery/include/DB-Func.php';
 					$req=mysql_query("SELECT count(*) FROM mod_discovery_rangeip WHERE id!=0;");
                     $nbPlage=mysql_fetch_array($req);
 					for ($i=0;$i<$nbPlage[0];$i++){
-						if (($_POST["ping_count".$i] != '') && ($_POST["ping_wait".$i] != '') && ($_POST["snmp_method".$i] != '') && ($_POST["snmp_version".$i] != '') && ($_POST["snmp_community".$i] != '') && ($_POST["oid_os".$i] != '') && ($_POST["oid_hostname".$i] != '')){
-							if ($_POST["RangeToScan".$i] == 'true'){
+						if ((isset($_POST["RangeToScan".$i])) && ($_POST["RangeToScan".$i] == 'true')){
+							if (($_POST["ping_count".$i] != '') && ($_POST["ping_wait".$i] != '') && ($_POST["snmp_method".$i] != '') && ($_POST["snmp_version".$i] != '') && ($_POST["snmp_community".$i] != '') && ($_POST["oid_os".$i] != '') && ($_POST["oid_hostname".$i] != '')){
 								mysql_query("UPDATE mod_discovery_rangeip SET ping_count='".$_POST["ping_count".$i]."', ping_wait='".$_POST["ping_wait".$i]."', snmp_method='".$_POST["snmp_method".$i]."', snmp_version='".$_POST["snmp_version".$i]."', snmp_community='".$_POST["snmp_community".$i]."', oid_os='".$_POST["oid_os".$i]."', oid_hostname='".$_POST["oid_hostname".$i]."', done=1 WHERE id='".$_POST["id".$i]."'");
 								//Vider la table mod_discovery_results
 								mysql_query("DELETE FROM mod_discovery_results;");
@@ -465,8 +305,6 @@ require_once'./modules/Discovery/include/DB-Func.php';
 					//Executer le shell
 					if (file_exists("./modules/Discovery/include/agent/DiscoveryAgent_central.py")) {
 						shell_exec('python ./modules/Discovery/include/agent/DiscoveryAgent_central.py SCAN_RANGEIP > /dev/null 2>&1 &');
-					//	exec('python ./modules/Discovery/include/agent/DiscoveryAgent_central.py SCAN_RANGEIP > /dev/null 2>&1 &');
-
 					}
 					else { echo 'Script Python not found...<br><br>'; }
 				}

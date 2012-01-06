@@ -22,7 +22,6 @@ $.post('./modules/Discovery/include/verif_discovery_status.php', { id: plage_id 
 			}
 			if (value.indexOf("UP",0) != -1){
 				document.getElementById('RangeToScan'+div_id).disabled = 0;
-				document.getElementById('RangeToScan'+div_id).checked = true;
 			}
 	}
 );
@@ -44,7 +43,7 @@ function afficher_cacher(id, classe){
 function select_all(classe){
 	var object = document.getElementsByClassName(classe).length;
 	for (i=0;i<object;i++){
-		if (document.getElementById('SelectAll').checked == true){
+		if ((document.getElementById('SelectAll').checked == true) && (document.getElementById(classe+i).disabled == 0)){
 			document.getElementById(classe+i).checked=true;
 		}else{
 			document.getElementById(classe+i).checked=false;

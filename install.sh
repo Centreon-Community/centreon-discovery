@@ -227,11 +227,11 @@ if [ "$silent_install" -eq 0 ] ; then
     get_centreon_configuration_location;
     get_centreon_parameters;
     if [ "$?" -eq 0 ] ; then
-	echo_success "Parameters was loaded with success" "$ok"
-	install_agent;
+	echo_success "Parameters were loaded with success" "$ok"
 	install_modPython;
 	config_envvars;
 	if [ "$?" -eq 0 ] ; then
+	    install_agent;
 	    install_module;
 	else
 	    echo_failure "Modules Python weren't installed with success" "$fail"
@@ -251,17 +251,17 @@ if [ "$silent_install" -eq 1 ] ; then
 	CENTREON_CONF=$user_conf/;
 	get_centreon_parameters;
 	if [ "$?" -eq 0 ] ; then
-	    echo_success "Parameters was loaded with success" "$ok"
+	    echo_success "Parameters were loaded with success" "$ok"
 	    install_agent;
 	    exit 0
 	    install_modPython;
 	    if [ "$?" -eq 0 ] ; then
-		echo_success "Modules Python was installed with success" "$ok"
+		echo_success "Modules Python were installed with success" "$ok"
 	    	if [ $typeInstall = "central" || $typeInstall = "both" ] ; then
 		    install_module;
 		fi
 	    else
-		echo_failure "Modules Python wasn't installed with success" "$fail"
+		echo_failure "Modules Python weren't installed with success" "$fail"
 	    fi
 	else
 	    echo_failure "Unable to load all parameters in \"$FILE_CONF\"" "$fail"

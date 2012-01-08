@@ -18,21 +18,15 @@ Go to the page http://community.centreon.com/projects/centreon-discovery
 
 $# tar xzf centreon-discovery-x.x.tar.gz
 
-3. Launch installation of Python modules
+3. Launch installation script
 
-$# cd centreon-discovery-x.x/modPython
-$# chmod 755 install_python_modules.sh
-$# ./install_python_modules.sh
+$# cd centreon-discovery-x.x/
+$# chmod 755 install.sh
+$# ./install.sh
 
-4. Copy files
 
-$# cd .../Centreon-Discovery
-$# cp -R www/modules/Centreon-Discovery /usr/local/centreon/www/modules
-$# cd /usr/local/centreon/www/modules/
-$# chown -R www-data:www-data Centreon-Discovery
-$# chmod 744 Centreon-Discovery/include/agent/*
 
-5. Go to Centreon interface
+4. Go to Centreon interface
 
 Reach menu 'Administration > Modules > Centreon-Discovery'
 The Discovery module must be listed but not installed.

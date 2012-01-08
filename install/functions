@@ -233,12 +233,13 @@ function get_centreon_configuration_location() {
 	err=1
 	while [ $err != 0 ]
 	do
-		echo -e "Please specify the directory with contain \"$FILE_CONF\""
+		echo -e "Please specify the directory with contain \"$FILE_CONF\" [$CENTREON_CONF]"
 		echo -en "> "
 		read temp_read
 
-		if [ -z "$temp_read" ]; then
-			echo_failure "The directory does not exist!" "$fail"
+		if [ -z $temp_read ]; then
+		    temp_read=$CENTREON_CONF
+                    #echo_failure "The directory does not exist!" "$fail"
 		fi
 
 		if [ -d $temp_read ] && [ -f $temp_read/$FILE_CONF ] ; then
@@ -430,18 +431,23 @@ function install_module() {
 	display_return "$?" "Setting owner/group"
 
 	echo "Changing macro"
-	FILE="include/agent/DiscoveryAgent_central.py"
-	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
-	echo -ne "\tfor DiscoveryAgent_central.py"
-	display_return "$?" "Changing macro for DiscoveryAgent_central.py"
 	FILE="include/update.php"
-	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
 	echo -ne "\tfor update.php"
+	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+	$SED -i -e 's|@AGENT_DIR@|'"$AGENT_DIR"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
 	display_return "$?" "Changing macro for update.php"
 	FILE="include/verif_discovery_status.php"
-	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
 	echo -ne "\tfor verif_discovery_status.php"
+	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
 	display_return "$?" "Changing macro for verif_discovery_status.php"
+	FILE="include/ips.php"
+	echo -ne "\tfor ips.php"
+	$SED -i -e 's|@AGENT_DIR@|'"$AGENT_DIR"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+	display_return "$?" "Changing macro for ips.php"
+	FILE="include/results.php"
+	echo -ne "\tfor results.php"
+	$SED -i -e 's|@AGENT_DIR@|'"$AGENT_DIR"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+	display_return "$?" "Changing macro for results.php"
 
 	INSTALL_DIR_MODULE=$INSTALL_DIR_CENTREON/$MODULE_DIR
 	
@@ -520,7 +526,7 @@ function get_agent_install_directory_location() {
 	echo -en "> "
 	read temp_read
 	
-	if [ -z "$temp_read" ]; then
+	if [ -z $temp_read ]; then
 	    temp_read=$AGENT_DIR
 	    err=0
 	fi
@@ -550,25 +556,44 @@ function install_agent(){
     echo "$line"
     echo -e "\tInstall Discovery Agent"
     echo "$line"
+
+    TEMP_D="/tmp/Install_agent"
+    /bin/mkdir -p $TEMP_D >> $LOG_FILE 2>> $LOG_FILE
+    /bin/cp -Rf $BASE_DIR/agents/* $TEMP_D/ >> $LOG_FILE 2>> $LOG_FILE
+  
     get_agent_install_directory_location;
+    
+    echo -n "Setting rights"
+    ${CHMOD} -R 755 $TEMP_D/* >> $LOG_FILE 2>> $LOG_FILE
+    display_return "$?" "Setting rights"
+    
+    echo -n "Setting owner/group"
+    ${CHOWN} -R root:root $TEMP_D/* >> $LOG_FILE 2>> $LOG_FILE
+    display_return "$?" "Setting owner/group"
+	
     if [ "$?" -eq 0 ] ; then
 	if [ ! -d $AGENT_DIR ] ; then
 	    echo -n "Create the directory $AGENT_DIR"
 	    /bin/mkdir -p $AGENT_DIR >> $LOG_FILE 2>> $LOG_FILE
 	    display_return "$?" ""
 	fi
+        echo -ne "Changing macro for DiscoveryAgent_central.py"
+        FILE="DiscoveryAgent_central.py"
+        $SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+        display_return "$?" "Changing macro for DiscoveryAgent_central.py"
+
 	echo -n "Copy Discovery Agent(s)"
 	case $typeInstall in
 	    poller )
-		/bin/cp -Rf --preserve $BASE_DIR/www/modules/Discovery/include/agent/DiscoveryAgent_poller.py $AGENT_DIR >> $LOG_FILE 2>> $LOG_FILE
+	     	/bin/cp -Rf --preserve $TEMP_D/DiscoveryAgent_poller.py $AGENT_DIR >> $LOG_FILE 2>> $LOG_FILE
 		display_return "$?" ""
 		;;
 	    central )
-		/bin/cp -Rf --preserve $BASE_DIR/www/modules/Discovery/include/agent/DiscoveryAgent_central.py $AGENT_DIR >> $LOG_FILE 2>> $LOG_FILE
+		/bin/cp -Rf --preserve $TEMP_D/DiscoveryAgent_central.py $AGENT_DIR >> $LOG_FILE 2>> $LOG_FILE
 		display_return "$?" ""
 		;;
 	    both )
-		/bin/cp -Rf --preserve $BASE_DIR/www/modules/Discovery/include/agent/* $AGENT_DIR >> $LOG_FILE 2>> $LOG_FILE
+		/bin/cp -Rf --preserve $TEMP_D/* $AGENT_DIR >> $LOG_FILE 2>> $LOG_FILE
 		display_return "$?" ""
 		;;
 	    * )
@@ -592,25 +617,26 @@ function config_envvars(){
 	echo -en "> "
 	read temp_read
 
-	if [ -z "$temp_read" ]; then
+	if [ -z $temp_read ]; then
 	    temp_read=$DIR_ENVVARS
 	fi
 	
-	if [ -f "$temp_read/$WEB_ENVVARS" ] ; then
+	if [ -d $temp_read ] && [ -f $temp_read/$WEB_ENVVARS ] ; then
 	    err=0
+	    DIR_ENVVARS=$temp_read
 	else
 	    echo_failure "File \"$WEB_ENVVARS\" does not exist in this directory!" "$fail"
 	fi
     done
-    
+
     echo -ne "Check rights on $temp_read/$WEB_ENVVARS"
-    if [ -r "$temp_read/$WEB_ENVVARS" ] && [ -w "$temp_read/$WEB_ENVVARS" ] ; then
-	display_return "0" "Check $temp_read/$WEB_ENVVARS"
-	${GREP} "export PYTHON_EGG_CACHE" "$temp_read/$WEB_ENVVARS" >> $LOG_FILE 2>> $LOG_FILE
+    if [ -r $DIR_ENVVARS/$WEB_ENVVARS ] && [ -w $DIR_ENVVARS/$WEB_ENVVARS ] ; then
+	display_return "0" "Check $DIR_ENVVARS/$WEB_ENVVARS"
+	${GREP} "export PYTHON_EGG_CACHE" "$DIR_ENVVARS/$WEB_ENVVARS" >> $LOG_FILE 2>> $LOG_FILE
 	if [ $? -eq "0" ] ; then
 	    echo_success "File \"$WEB_ENVVARS\" is already configured" "$ok"
 	else
-	    modify_envvars "$temp_read/$WEB_ENVVARS"
+	    modify_envvars;
 	    if [ $? -eq "0" ] ; then
 		echo_success "File \"$WEB_ENVVARS\" is correctly configured" "$ok"
 	    else
@@ -627,12 +653,11 @@ function modify_envvars(){
     err=1
     while [ $err != 0 ]
     do
-	yes_no_default "Configure $1 ?" 
+	yes_no_default "Configure $DIR_ENVVARS/$WEB_ENVVARS ?" 
 	if [ "$?" -eq 0 ] ; then
 	    err=0
-	    echo $1
-	    echo -e "\n\n#Modify by install centreon-Discovery module at `date -R`" >> $1
-	    echo -e "export PYTHON_EGG_CACHE=\"/tmp\"\n" >> $1
+	    echo -e "\n\n#Modify by install centreon-Discovery module at `date -R`" >> $DIR_ENVVARS/$WEB_ENVVARS
+	    echo -e "export PYTHON_EGG_CACHE=/tmp\n" >> $DIR_ENVVARS/$WEB_ENVVARS
 	    if [ "$?" -eq 0 ] ; then
 		yes_no_default "Restart Apache2 ?"
 		if [ "$?" -eq 0 ] ; then

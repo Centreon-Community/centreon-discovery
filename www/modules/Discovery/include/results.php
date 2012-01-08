@@ -46,7 +46,12 @@
  * @copyright (c) 2007-2009 Centreon
  * @license http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
  */
+ 
 require_once'./modules/Discovery/include/DB-Func.php';
+
+/* Variable indiquant la position de l'agent Python, elle est modifiée par le fichier install.sh lors de l'installation du module. */
+$agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
+//$agentDir = "./modules/Discovery/include/agent/DiscoveryAgent_central.py";
 
  ?>
 
@@ -81,7 +86,7 @@ require_once'./modules/Discovery/include/DB-Func.php';
             <br><br>
 
             <?php
-				
+			
                 function createHost($listHost){
                     $result = Array();
                     $result["success"] = Array();
@@ -240,6 +245,24 @@ require_once'./modules/Discovery/include/DB-Func.php';
                                 echo '          </table>'," \n ";
                                 echo '          <br><br><br>'," \n ";
                             }
+							
+							//Si le scanne est terminé, mais que aucune IP n'est découverte
+							if (mysql_num_rows($subnetHostsList)==0){
+								echo '          <br><br><font size="3px">'.$subnetDoneData["plage"]." polled by ".$subnetPollerData["name"]." (".$subnetPollerData["ns_ip_address"].") | <font color=\"red\"> 0 address discovered.</font><br><br> \n ";
+								echo '          <table class="ListTable">'," \n ";
+								echo '             <tr class="ListHeader">'," \n ";
+								echo '                  <td width="22%" class="ListColHeaderCenter">Host</td>'," \n ";
+								echo '                  <td width="22%" class="ListColHeaderCenter">Hostname</td>'," \n ";
+								echo '                  <td width="22%" class="ListColHeaderCenter">Operating System</td>'," \n ";
+								echo '                  <td width="22%" class="ListColHeaderCenter">Host template</td>'," \n ";
+								echo '                  <td width="12%" class="ListColHeaderCenter">&nbsp;</td>'," \n ";
+								echo '              </tr>'," \n ";
+								echo '             <tr class="list_one">'," \n";
+								echo '                  <td width="22%" colspan="5" class="ListColCenter"> No result </td>'."\n ";
+								echo '              </tr>'," \n ";
+								echo '          </table>'," \n ";
+								echo '          <br><br><br>'," \n ";
+							}     
 						}
 						
 						//Si le scanne n'est pas fini on affiche "No result"
@@ -287,7 +310,9 @@ require_once'./modules/Discovery/include/DB-Func.php';
 				/* 	Cette fonction doit récuperer les informations du formulaire lors de la saisie des plages à scanner.
 					Elle doit les saisir dans la bdd.
 				*/
-				function setScanValues(){
+				function setScanValues(){				
+					global $agentDir;
+					
 					$req=mysql_query("SELECT count(*) FROM mod_discovery_rangeip WHERE id!=0;");
                     $nbPlage=mysql_fetch_array($req);
 					for ($i=0;$i<$nbPlage[0];$i++){
@@ -298,13 +323,13 @@ require_once'./modules/Discovery/include/DB-Func.php';
 								mysql_query("DELETE FROM mod_discovery_results;");
 							}
 						}else{
-							//echo "You must fill in all fields<br>";
-							null;
+							mysql_query("UPDATE mod_discovery_rangeip SET done=0 WHERE id='".$_POST["id".$i]."'");
 						}
 					}
 					//Executer le shell
-					if (file_exists("./modules/Discovery/include/agent/DiscoveryAgent_central.py")) {
-						shell_exec('python ./modules/Discovery/include/agent/DiscoveryAgent_central.py SCAN_RANGEIP > /dev/null 2>&1 &');
+					if (file_exists($agentDir)) {
+//						shell_exec('python '.$agentDir.' SCAN_RANGEIP > /dev/null 2>&1 &');
+						shell_exec('python '.$agentDir.' SCAN_RANGEIP >> /tmp/agent_central.log 2>&1 &');
 					}
 					else { echo 'Script Python not found...<br><br>'; }
 				}

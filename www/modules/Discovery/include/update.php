@@ -1,6 +1,10 @@
 <?php
-  //$filepath = '/etc/centreon/centreon.conf.php';
+
 $filepath = '@CENTREON_ETC@/centreon.conf.php';
+//$filepath = '/etc/centreon/centreon.conf.php';
+
+$agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
+//$agentDir = "./modules/Discovery/include/agent/DiscoveryAgent_central.py";
 
 if (file_exists($filepath)) {
 	include($filepath);
@@ -14,6 +18,10 @@ if (file_exists($filepath)) {
 	$currentpath = mysql_fetch_row($sql);
 		
 	//On relance le script python afin de vérifier le status du nouveau Discovery-Agent poller
-	shell_exec('python '.$currentpath[0].'/www/modules/Discovery/include/agent/DiscoveryAgent_central.py STATUS_POLLER > /dev/null 2>&1 &');
+	if (file_exists($agentDir)) {
+//		shell_exec('python '.$agentDir.' STATUS_POLLER > /dev/null 2>&1 &');
+		shell_exec('python '.$agentDir.' STATUS_POLLER >> /tmp/agent_central.log 2>&1 &');
+	}
+	else {shell_exec('python '.$currentpath[0].'/www/modules/Discovery/include/agent/DiscoveryAgent_central.py STATUS_POLLER > /dev/null 2>&1 &');}
 }
 ?>

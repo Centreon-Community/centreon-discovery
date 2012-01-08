@@ -4,8 +4,8 @@
 	 Il sera exécuté toutes les 2 secondes, grace à une fonction ajax dans le fichier script.js
 	*/
 	
-  //$filepath = '/etc/centreon/centreon.conf.php';
-	$filepath = '@CENTREON_ETC@/centreon.conf.php';
+$filepath = '@CENTREON_ETC@/centreon.conf.php';
+//$filepath = '/etc/centreon/centreon.conf.php';
 
 	if (file_exists($filepath)) {
 		include($filepath);

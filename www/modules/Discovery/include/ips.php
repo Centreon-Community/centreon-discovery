@@ -46,8 +46,14 @@
  * @copyright (c) 2007-2009 Centreon
  * @license http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
  */
+ 
 require_once './modules/Discovery/include/DB-Func.php';
 require_once './modules/Discovery/include/common.php';
+
+/* Variable indiquant la position de l'agent Python, elle est modifiée par le fichier install.sh lors de l'installation du module. */
+$agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
+//$agentDir = "./modules/Discovery/include/agent/DiscoveryAgent_central.py";
+
  ?>
 
 <html lang="fr">
@@ -85,14 +91,7 @@ require_once './modules/Discovery/include/common.php';
 
 			<?php
 
-        		//$submitValue = "Save configuration";
-				//$resetValue = "Reset to defaults";
-				//$addValue = "Add";
-				//$delValue = "del";
 				$error=0;
-				//$listIp = array();
-				//$listMask = array();
-				//$listCidr = array();
 				
 				/*
 				 * {Display input form}
@@ -145,15 +144,16 @@ require_once './modules/Discovery/include/common.php';
 				 */
 				
 				function doFormTab(){
-					global $error;
+				
+					global $agentDir;
 					
 					//Appel le script python avec le paramètre STATUS_POLLER, cela permet de vérifier si les pollers sont actifs.
-					if (file_exists("./modules/Discovery/include/agent/DiscoveryAgent_central.py")) {
-						shell_exec('python ./modules/Discovery/include/agent/DiscoveryAgent_central.py STATUS_POLLER > /dev/null 2>&1 &');
-					}
+					if (file_exists($agentDir)) {
+//						shell_exec('python '.$agentDir.' STATUS_POLLER > /dev/null 2>&1 &');
+						shell_exec('python '.$agentDir.' STATUS_POLLER >> /tmp/agent_central.log 2>&1 &');
+						}
 					else { echo 'Script Python not found...<br><br>'; }
 					
-							
 					$i=0;
                     echo ' <form method="post">'."\n";
 					echo '    <table class="ListTable">'," \n ";

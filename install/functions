@@ -313,98 +313,6 @@ function install_modPython() {
 }
 	    
 
-#----
-## {Install Syslog Module}
-##
-## @Stdout Actions realised by function
-## @Stderr Log into $LOG_FILE
-#----
-function install_module_old() {
-	echo ""
-	echo "$line"
-	echo -e "\tInstall Syslog Module"
-	echo "$line"
-	
-	TEMP_D="/tmp/Install_module"
-	/bin/mkdir -p $TEMP_D >> $LOG_FILE 2>> $LOG_FILE
-	/bin/cp -Rf www/* $TEMP_D/ >> $LOG_FILE 2>> $LOG_FILE
-	/bin/rm -Rf $TEMP_D/install $TEMP_D/*.log
-
-	echo_success "Setting right" "$ok"
-	${CHMOD} -R 755 $TEMP_D/* >> $LOG_FILE 2>> $LOG_FILE
-
-	echo_success "Setting owner/group" "$ok"
-	${CHOWN} -R $WEB_USER.$WEB_GROUP $TEMP_D/* >> $LOG_FILE 2>> $LOG_FILE
-	
-	echo_success "Changing macro" "$ok"
-	FILE="class/syslogDB.class.php"
-	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF/"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
-	FILE="include/common/common-Func.php"
-	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF/"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
-	FILE="include/export/csv/csv_export.php"
-	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF/"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
-	FILE="include/export/odtPHP/odtPHP_export.php"
-	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF/"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
-	FILE="include/export/ssh2/ssh2_export.php"
-	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF/"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
-	FILE="include/monitoring/syslog.php"
-	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF/"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
-	FILE="include/monitoring/xml/syslog_xml.php"
-	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF/"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
-	FILE="include/monitoring/xml/syslog_filters_xml.php"
-	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF/"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
-	FILE="include/pagination/pagination_syslog.php"
-	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF/"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
-	FILE="include/search/syslog_search.php"
-	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF/"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
-	FILE="include/common/header.php"
-	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF/"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
-
-	INSTALL_DIR_MODULE=$INSTALL_DIR_CENTREON/$MODULE_DIR
-
-	if [ -d $INSTALL_DIR_MODULE ] ; then
-		if [ -d  $INSTALL_DIR_CENTREON/$BACKUP ] ; then
-			echo_success "Delete old Syslog backup" "$ok"
-			/bin/rm -Rf $INSTALL_DIR_CENTREON/$BACKUP/*
-		else
-			echo_success "Create a directory to backup old files" "$ok"
-			/bin/mkdir $INSTALL_DIR_CENTREON/$BACKUP
-		fi
-		
-		echo_success "Backup old installation" "$ok"
-		mv $INSTALL_DIR_MODULE/* $INSTALL_DIR_CENTREON/$BACKUP >> $LOG_FILE 2>> $LOG_FILE
-	fi
-
-	if [ ! -d $INSTALL_DIR_MODULE ] ; then
-		echo_success "Create module directory" "$ok"
-		/bin/mkdir $INSTALL_DIR_MODULE >> $LOG_FILE 2>> $LOG_FILE
-		${CHOWN} -R $WEB_USER.$WEB_GROUP $INSTALL_DIR_MODULE >> $LOG_FILE 2>> $LOG_FILE
-		${CHMOD} -R 755 $INSTALL_DIR_MODULE >> $LOG_FILE 2>> $LOG_FILE
-	fi
-
-	echo_success "Copying module" "$ok"
-	/bin/cp -Rf --preserve $TEMP_D/* $INSTALL_DIR_CENTREON/$MODULE_DIR >> $LOG_FILE 2>> $LOG_FILE
-
-	echo_success "Delete temp install directory" "$ok"
-	/bin/rm -Rf $TEMP_D $TEMP >> $LOG_FILE 2>> $LOG_FILE
-	
-	/bin/mkdir -p $TEMP_D >> $LOG_FILE 2>> $LOG_FILE
-	/bin/cp -Rf check_nagios/* $TEMP_D/ >> $LOG_FILE 2>> $LOG_FILE
-	
-	echo_success "Setting owner/group on Nagios plugin" "$ok"
-	${CHMOD} -R 755 $TEMP_D/* >> $LOG_FILE 2>> $LOG_FILE
-	${CHOWN} -R $NAGIOS_USER.$NAGIOS_GROUP $TEMP_D/* v
-	
-	echo_success "Install Nagios plugin" "$ok"
-	/bin/cp -Rf --preserve $TEMP_D/* $NAGIOS_PLUGIN/ >> $LOG_FILE 2>> $LOG_FILE
-	
-	echo_success "Delete temp install directory" "$ok"
-	/bin/rm -Rf $TEMP_D $TEMP >> $LOG_FILE 2>> $LOG_FILE
-
-	echo_success "\nThe $LOG_VERSION is finished" "$ok"
-	echo -e  "See README and the log file for more details."
-}
-
 #---
 ## {Install Discovery Module}
 ##
@@ -417,8 +325,10 @@ function install_module() {
 	echo -e "\tInstall Discovery Module"
 	echo "$line"
 	
+	echo -n "Creating temp install directory"
 	TEMP_D="/tmp/Install_module"
 	/bin/mkdir -p $TEMP_D >> $LOG_FILE 2>> $LOG_FILE
+	display_return "$?" "Creating temp install directory"
 	/bin/cp -Rf $BASE_DIR/www/modules/Discovery/* $TEMP_D/ >> $LOG_FILE 2>> $LOG_FILE
 	/bin/rm -Rf $TEMP_D/install $TEMP_D/*.log
 
@@ -549,7 +459,10 @@ function get_agent_install_directory_location() {
 }
 
 #----
+## {Install Discovery Agent}
 ##
+## @Stdout Actions realised by function
+## @Stderr Log into $LOG_FILE
 #----
 function install_agent(){
     echo ""
@@ -557,8 +470,10 @@ function install_agent(){
     echo -e "\tInstall Discovery Agent"
     echo "$line"
 
+    echo -n "Creating temp install directory"
     TEMP_D="/tmp/Install_agent"
     /bin/mkdir -p $TEMP_D >> $LOG_FILE 2>> $LOG_FILE
+    display_return "$?" "Creating temp install directory"
     /bin/cp -Rf $BASE_DIR/agents/* $TEMP_D/ >> $LOG_FILE 2>> $LOG_FILE
   
     get_agent_install_directory_location;
@@ -599,12 +514,24 @@ function install_agent(){
 	    * )
 		;;
 	esac
+	echo -n "Delete temp install directory"
+	/bin/rm -Rf $TEMP_D $TEMP >> $LOG_FILE 2>> $LOG_FILE
+	display_return "$?" "Delete temp install directory"
 	return 0
     else
+	echo -n "Delete temp install directory"
+	/bin/rm -Rf $TEMP_D $TEMP >> $LOG_FILE 2>> $LOG_FILE
+	display_return "$?" "Delete temp install directory"
 	return 1
     fi
 }
 
+#----
+## {Check envvars file}
+##
+## @Stdout Actions realised by function
+## @Stderr Log into $LOG_FILE
+#----
 function config_envvars(){
     echo ""
     echo "$line"
@@ -648,7 +575,12 @@ function config_envvars(){
     fi
 }
 
-
+#----
+## {Add a variable definition in envvars file if necessary}
+##
+## @Stdout Actions realised by function
+## @Stderr Log into $LOG_FILE
+#----
 function modify_envvars(){
     err=1
     while [ $err != 0 ]
@@ -659,11 +591,14 @@ function modify_envvars(){
 	    echo -e "\n\n#Modify by install centreon-Discovery module at `date -R`" >> $DIR_ENVVARS/$WEB_ENVVARS
 	    echo -e "export PYTHON_EGG_CACHE=/tmp\n" >> $DIR_ENVVARS/$WEB_ENVVARS
 	    if [ "$?" -eq 0 ] ; then
+		display_return "0" "Configure $DIR_ENVVARS/$WEB_ENVVARS"
 		yes_no_default "Restart Apache2 ?"
 		if [ "$?" -eq 0 ] ; then
 #		    apachectl -k graceful
+		    echo "apache2 restarted" >> $LOG_FILE 2>> $LOG_FILE
 		    /etc/init.d/apache2 restart >> $LOG_FILE 2>> $LOG_FILE
 		else
+		    echo "apache2 no restarted" >> $LOG_FILE 2>> $LOG_FILE
 		    echo -e "Don't forget restart your web server ;-)"
 		fi
 	    fi

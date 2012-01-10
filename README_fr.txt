@@ -26,7 +26,13 @@ $# tar xzf centreon-discovery-x.x.tar.gz
 
 $# cd centreon-discovery-x.x
 $# chmod 755 install.sh
-$# ./install.sh
+
+Choississez votre type d'installation :
+ - en tant que poller : "-t poller"
+ - en tant que central : "-t central"
+ - en tant que les deux : "-t both"
+ 
+ Exemple pour poller : $# ./install.sh -i -t poller
 
 4. Se rendre sur l'interface de Centreon
 

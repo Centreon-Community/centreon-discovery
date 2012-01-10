@@ -73,9 +73,10 @@ user_conf=""
 function usage() {
     local program=$PROGRAM
     echo -e "Usage: $program"
-    echo -e "  -i\tinstall/update Discovery manually"
+    echo -e "  -i\tinstall Discovery module"
 #    echo -e "  -u\tinstall/upgrade Discovery with specify directory with contain $FILE_CONF"
     echo -e "  -t\tdefine type install : central/poller/both"
+    echo -e "  -h\tdisplay this message"
     exit 1
 }
 
@@ -106,13 +107,6 @@ export line
 LOG_DIR="$BASE_DIR/log"
 LOG_FILE="$PWD/install.log"
 
-## Valid if you are root 
-USERID=`id -u`
-if [ "$USERID" != "0" ]; then
-    echo -e "You must exec with root user"
-    exit 1
-fi
-
 ## Getopts
 while getopts "iu:t:h" Options
 do
@@ -142,6 +136,13 @@ done
 
 if [ "$_tmp_install_opts" -eq 0 ] || ([ "$typeInstall" != "poller" ] && [ "$typeInstall" != "central" ] && [ "$typeInstall" != "both" ]) ; then
     usage
+    exit 1
+fi
+
+## Valid if you are root 
+USERID=`id -u`
+if [ "$USERID" != "0" ]; then
+    echo -e "You must exec with root user"
     exit 1
 fi
 

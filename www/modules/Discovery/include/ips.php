@@ -152,7 +152,7 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 //						shell_exec('python '.$agentDir.' STATUS_POLLER > /dev/null 2>&1 &');
 						shell_exec('python '.$agentDir.' STATUS_POLLER >> /tmp/agent_central.log 2>&1 &');
 						}
-					else { echo 'Script Python not found...<br><br>'; }
+					else { echo "<CENTER><b><font size=\"3px\" color=\"red\">ERROR</b> : File $agentDir not found...</font></CENTER>\n"; }
 					
 					$i=0;
                     echo ' <form method="post">'."\n";

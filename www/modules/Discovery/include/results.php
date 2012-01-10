@@ -331,7 +331,7 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 //						shell_exec('python '.$agentDir.' SCAN_RANGEIP > /dev/null 2>&1 &');
 						shell_exec('python '.$agentDir.' SCAN_RANGEIP >> /tmp/agent_central.log 2>&1 &');
 					}
-					else { echo 'Script Python not found...<br><br>'; }
+					else { echo "<CENTER><b><font size=\"3px\" color=\"red\">ERROR</b> : File $agentDir not found...</font></CENTER>\n"; }
 				}
 				
 	            /*
@@ -345,7 +345,9 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
                     $db = dbConnect($conf_centreon['hostCentreon'], $conf_centreon['user'], $conf_centreon['password'],$conf_centreon['db'], true);
 					
 					/* Partie modifiée	*/				
-					setScanValues();
+					if (!empty($_POST)){
+						setScanValues();
+					}
 					
 					echo '<table align="center">'."\n";
 					echo '  <tr>'."\n";

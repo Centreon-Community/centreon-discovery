@@ -190,7 +190,7 @@
 						echo '     <center>'."\n";
 						echo '     <table>'."\n";
 						echo '         <tr>'."\n";
-						echo '             <td align=center colspan=3><h3>New OS - Template Relation: </h3></td>'."\n";
+						echo '             <td align=center colspan=3><h3>OS - Template Relation: </h3></td>'."\n";
 						echo '         </tr>'."\n";
 						echo '         <tr><td colspan=3>&nbsp;</td></tr>',"\n";
 						echo '         <tr>'."\n";

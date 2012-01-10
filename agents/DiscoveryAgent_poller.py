@@ -18,10 +18,12 @@ def connectToCentral():
 			print 'Connected by', addr
 		    	data = conn.recv(256)
 			if data.startswith("#echo#"):
+				print 'DiscoveryAgent_poller.py : STATUS_POLLER'
 				data="#reply#"
 				conn.send(data)
 			elif data.startswith("#scanip#"):
 				plage = data.replace("#scanip#","")
+				print 'DiscoveryAgent_poller.py : SCAN_RANGEIP pour ' + plage
 				scanRangeIP(plage, conn, s)
 				data = "#scanip#done"
 				conn.send(data)	

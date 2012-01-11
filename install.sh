@@ -214,7 +214,7 @@ if [ "$silent_install" -eq 0 ] ; then
     echo -e "\nYou will now read Centreon Discovery module Licence.\\n\\tPress enter to continue."
     read 
     tput clear 
-#    more "$BASE_DIR/LICENSE"
+    more "$BASE_DIR/LICENSE"
     
     yes_no_default "Do you accept GPL license ?"
     if [ "$?" -ne 0 ] ; then 

@@ -14,4 +14,4 @@ along with this program.
 # Before installation
 ##
 
-Make sure you installed all needed python packages :
+read the README? ;-)

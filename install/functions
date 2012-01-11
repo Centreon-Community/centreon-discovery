@@ -271,7 +271,6 @@ function install_modPython() {
 		${PYTHON} setup.py install >> $LOG_FILE 2>> $LOG_FILE
 		install_ok=$?
 		display_return "$install_ok" "Module NMAP"
-		echo "$line"
 		return $install_ok
 		;;
 	    central ) 
@@ -285,7 +284,6 @@ function install_modPython() {
 		${PYTHON} setup.py install >> $LOG_FILE 2>> $LOG_FILE
 		install_ok_2=$?
 		display_return "$install_ok_2" "Module MySQLdb"
-		echo "$line"
 		return $(($install_ok_1+$install_ok_2))
 		;;
 	    both ) 
@@ -304,7 +302,6 @@ function install_modPython() {
 		${PYTHON} setup.py install >> $LOG_FILE 2>> $LOG_FILE
 		install_ok_3=$?
 		display_return "$install_ok_3" "Module MySQLdb"
-		echo "$line"		
 		return $(($install_ok_1+$install_ok_2+$install_ok_3))
 		;;
 	    * )
@@ -565,13 +562,13 @@ function config_envvars(){
 	else
 	    modify_envvars;
 	    if [ $? -eq "0" ] ; then
-		echo_success "File \"$WEB_ENVVARS\" is correctly configured" "$ok"
+		echo_success "\nFile \"$WEB_ENVVARS\" is correctly configured" "$ok"
 	    else
-		echo_failure "File \"$WEB_ENVVARS\" isn't correctly configured" "$fail"
+		echo_failure "\nFile \"$WEB_ENVVARS\" isn't correctly configured" "$fail"
 	    fi
 	fi
     else
-	echo_failure "File \"$WEB_ENVVARS\" isn't readable and/or writable!" "$fail"
+	echo_failure "\nFile \"$WEB_ENVVARS\" isn't readable and/or writable!" "$fail"
     fi
 }
 
@@ -591,8 +588,7 @@ function modify_envvars(){
 	    echo -e "\n\n#Modify by install centreon-Discovery module at `date -R`" >> $DIR_ENVVARS/$WEB_ENVVARS
 	    echo -e "export PYTHON_EGG_CACHE=/tmp\n" >> $DIR_ENVVARS/$WEB_ENVVARS
 	    if [ "$?" -eq 0 ] ; then
-		display_return "0" "Configure $DIR_ENVVARS/$WEB_ENVVARS"
-		yes_no_default "Restart Apache2 ?"
+		yes_no_default "Restart Apache2 server ?"
 		if [ "$?" -eq 0 ] ; then
 #		    apachectl -k graceful
 		    echo "apache2 restarted" >> $LOG_FILE 2>> $LOG_FILE

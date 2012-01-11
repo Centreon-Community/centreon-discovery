@@ -3,10 +3,10 @@
 Name: Centreon-Discovery
 Version: 0.1
 
-User Apache : www-data
-Group apache : www-data
-Path www : /var/www
-Path centreon : /usr/local/centreon/
+#	Requirements
+
+Nmap must be installed on each poller. In the case of a centralized architecture, nmap must be installed on the central.
+The package python-dev (or python-devel depending on linux distribution) must be installed too on the central and on every pollers.
 
 #	Installation:
 
@@ -22,9 +22,14 @@ $# tar xzf centreon-discovery-x.x.tar.gz
 
 $# cd centreon-discovery-x.x/
 $# chmod 755 install.sh
-$# ./install.sh
 
-
+Choose the installation type :
+ - as poller : "-t poller"
+ - as central : "-t central"
+ - as both : "-t both"
+ 
+Example for poller : $# ./install.sh -i -t poller
+The "-i-" option allows you to specify the installation mode
 
 4. Go to Centreon interface
 
@@ -32,6 +37,9 @@ Reach menu 'Administration > Modules > Centreon-Discovery'
 The Discovery module must be listed but not installed.
 Click on the icon to the right "Install Module" then on button "install module" to launch install.
 
+5. Execute Poller agent (installed in /etc/centreon-discovery by default)
+
+$# /etc/centreon-discovery/DiscoveryAgent_poller.py &
 
 #	FAQ
 

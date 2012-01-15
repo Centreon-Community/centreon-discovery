@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: iso-8859-15 -*-
 
+import os
+os.environ['PYTHON_EGG_CACHE'] = '/tmp'
 import MySQLdb
 import socket
 import sys

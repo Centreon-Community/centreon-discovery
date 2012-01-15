@@ -50,7 +50,7 @@
 require_once'./modules/Discovery/include/DB-Func.php';
 
 /* Variable indiquant la position de l'agent Python, elle est modifiée par le fichier install.sh lors de l'installation du module. */
-$agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
+$agentDir = "/etc/centreon-discovery/DiscoveryAgent_central.py";
 //$agentDir = "./modules/Discovery/include/agent/DiscoveryAgent_central.py";
 
  ?>
@@ -60,9 +60,11 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
             <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
             <title>Discovery</title>
             <link href="./Themes/Centreon-2/style.css" rel="stylesheet" type="text/css"/>
-            <meta content="Service Auto Discovery - mod_discovery_results Page" name="Loic JEZEQUEL">
+            <meta content="Service Auto Discovery - mod_discovery_results Page" name="Nicolas DIETRICH">
             <!-- Fonctions JavaScript -->
             <script type="text/javascript" src="./modules/Discovery/include/JS-Func.js"></script>
+			<script type="text/javascript" src="./modules/Discovery/include/jquery-1.6.4.min.js"></script>
+            <script type="text/javascript" src="./modules/Discovery/include/script.js"></script>
             <!-- End Fonctions JavaScript -->
     </head>
     <body style="background-color: rgb(255, 255, 255); color: rgb(0, 0, 0); height: 158px;" alink="#ff6600" link="#ff6600" vlink="#ff6600">
@@ -169,30 +171,14 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
                         $subnetPoller=mysql_query("SELECT name,ns_ip_address FROM nagios_server WHERE id='".$subnetDoneData["nagios_server_id"]."';");
                         $subnetPollerData=mysql_fetch_array($subnetPoller,MYSQL_ASSOC);
                         $cbgroup++;
-                        /*if ($subnetDoneData["done"]==3){
-                            echo '          <br><br><font size="5px">'.$subnetDoneData["plage"]." polled by ".$subnetPollerData["name"]." (".$subnetPollerData["ns_ip_address"].")<br><br> \n ";
-                            echo '          <table class="ListTable">'," \n ";
-                            echo '             <tr class="ListHeader">'," \n ";
-                            echo '                  <td width="22%" class="ListColHeaderCenter">Host</td>'," \n ";
-                            echo '                  <td width="22%" class="ListColHeaderCenter">Hostname</td>'," \n ";
-                            echo '                  <td width="22%" class="ListColHeaderCenter">Operating System</td>'," \n ";
-                            echo '                  <td width="22%" class="ListColHeaderCenter">Host template</td>'," \n ";
-                            echo '                  <td width="12%" class="ListColHeaderCenter">&nbsp;</td>'," \n ";
-                            echo '              </tr>'," \n ";
-                            echo '             <tr class="list_one">'," \n";
-                            echo '                  <td width="22%" colspan="5" class="ListColCenter"><b style="color:#D80000">Error</b> : '.$subnetPollerData["name"].' @ '.$subnetPollerData["ns_ip_address"].' <b>Unreachable</b></td>'."\n ";
-                            echo '              </tr>'," \n ";
-                            echo '          </table>'," \n ";
-                            echo '          <br><br><br>'," \n ";
-                        }
-                        else */
-						//Si done=2 alors le scanne de la plage en question est terminé
+
+						//Si done=2 alors le scan de la plage en question est terminé
 						if ($subnetDoneData["done"]==2){
                             $netoctets=explode(".",$subnetDoneData["plage"]);
                             $maskoctets=explode(".",$subnetDoneData["masque"]);
                             $subnetHostsList = mysql_query("SELECT * FROM mod_discovery_results WHERE SUBSTRING_INDEX(`ip`, '.', 1)&".$maskoctets[0]." = ".$netoctets[0]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-3),'.',1)&".$maskoctets[1]." = ".$netoctets[1]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-2),'.',1)&".$maskoctets[2]." = ".$netoctets[2]." AND SUBSTRING_INDEX(`ip`,'.',-1)&".$maskoctets[3]." = ".$netoctets[3]." ORDER BY new_host desc ;");
 
-
+							//Si il y a des adresses découvertes
                             if (mysql_num_rows($subnetHostsList)>0){
                                 $GlobalCbDisable="";
                                 $nbSNMPKo=mysql_query("SELECT Count(*) FROM mod_discovery_results WHERE hostname='N/A' AND SUBSTRING_INDEX(`ip`, '.', 1)&".$maskoctets[0]." = ".$netoctets[0]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-3),'.',1)&".$maskoctets[1]." = ".$netoctets[1]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-2),'.',1)&".$maskoctets[2]." = ".$netoctets[2]." AND SUBSTRING_INDEX(`ip`,'.',-1)&".$maskoctets[3]." = ".$netoctets[3]." ;");
@@ -201,29 +187,25 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 								$reqNbIpFound=mysql_query("SELECT Count(*) FROM mod_discovery_results WHERE plage_id=".$subnetDoneData["id"].";");
 								$nbIpFound=mysql_fetch_array($reqNbIpFound);
                                 if ($nbSNMPKoData['Count(*)']==mysql_num_rows($subnetHostsList)) $GlobalCbDisable="disabled";
-
-                                echo '          <br><br><font size="3px">'.$subnetDoneData["plage"]." polled by ".$subnetPollerData["name"]." (".$subnetPollerData["ns_ip_address"].") | <font color=\"red\"> ".$nbIpFound[0]." address(es) discovered.</font><br><br> \n ";
-                                echo '          <table class="ListTable">'," \n ";
+                                echo '          <br><font size="3px">'.$subnetDoneData["plage"].' polled by '.$subnetPollerData["name"].' ('.$subnetPollerData["ns_ip_address"].') | <a href="#" title="View addresses" onClick="$(\'#scan'.$subnetDoneData["id"].'\').slideToggle(\'fast\');"><font color="red" size="2px"> '.$nbIpFound[0].' address(es) discovered.</font></a><br>'," \n ";
+								echo'			<div style="display:none" id="scan'.$subnetDoneData["id"].'">'," \n ";
+								echo '          <br><br><table class="ListTable">'," \n ";
                                 echo '             <tr class="ListHeader">'," \n ";
 								echo '                  <td width="12%" class="ListColHeaderCenter"><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="'. $subnetDoneData["plage"] .'" OnClick="checkall(document.getElementsByName(\'cb'.$cbgroup.'[]\'));" '.$GlobalCbDisable.'/></td>'," \n ";
                                 echo '                  <INPUT TYPE=HIDDEN NAME="group_list[]" VALUE="'. $cbgroup .'" />'," \n ";
                                 echo '                  <td width="22%" class="ListColHeaderCenter">Host</td>'," \n ";
                                 echo '                  <td width="22%" class="ListColHeaderCenter">Hostname</td>'," \n ";
                                 echo '                  <td width="22%" class="ListColHeaderCenter">Operating System</td>'," \n ";
-                                echo '                  <td width="22%" class="ListColHeaderCenter"></td>'," \n ";
+                                echo '                  <td width="22%" class="ListColHeaderCenter">Host Template</td>'," \n ";
+								echo '					<td width="22%" class="ListColHeaderCenter"><a href="#" ><img style="border:none" type="image" src="./modules/Discovery/include/images/clearAll1.png" title="Delete all from list" onmouseover="javascript:this.src=\'./modules/Discovery/include/images/clearAll2.png\';" onmouseout="javascript:this.src=\'./modules/Discovery/include/images/clearAll1.png\';" onClick="self.location=\'./main.php?p=61202&clearall='.$subnetDoneData["id"].'\'"></td>'," \n";
                                 echo '              </tr>'," \n ";
                                 while ($subnetHostData = mysql_fetch_array($subnetHostsList,MYSQL_ASSOC)){
                                     $elt_number++;
-                                    if ($subnetHostData["plage_id"]===NULL){
-                                        if (!mysql_query("UPDATE mod_discovery_results SET plage_id=".$subnetDoneData["id"]." WHERE id = ".$subnetHostData["id"].";")){
-                                            echo "<br>update plage_id error<br>";
-                                        }
-                                    }
                                     $cbDisable="";
                                     if ($subnetHostData["hostname"]=='N/A') {
                                         $cbDisable="disabled";
                                     }
-                                    echo '             <tr class="list_one">'," \n";
+                                    echo '            	<tr class="list_one">'," \n";
                                     if ($subnetHostData["new_host"]==1){
                                         echo '                  <td class="ListColCenter"><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="'.$subnetHostData["id"].'" onChange="checkone(document.getElementsByName(\'cb'.$cbgroup.'[]\'));" '.$cbDisable.' /></td>',"\n";
 
@@ -233,54 +215,55 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
                                     echo '                  <td width="22%" class="ListColCenter">'.$subnetHostData["ip"].'</td>'."\n ";
                                     echo '                  <td width="22%" class="ListColCenter">'.$subnetHostData["hostname"].'</td>'."\n ";
                                     echo '                  <td width="22%" class="ListColCenter">'.$subnetHostData["os"].'</td>'."\n ";
-                                    echo '                  <td width="12%" class="ListColCenter"><select name=select'.$subnetHostData["id"].' width=95%><option>None</option>'."\n ";
+                                    
+									//Liste de templates
+									echo '                  <td width="12%" class="ListColCenter"><select name=select'.$subnetHostData["id"].' width=95%><option>None</option>'."\n ";
                                     $listTemplate=mysql_query("SELECT * FROM host WHERE host_register='0'");
                                     while ($listTemplateData=mysql_fetch_array($listTemplate,MYSQL_ASSOC)){
                                         echo "template ".$listTemplateData["host_name"]."<br>\n";
                                         echo "                  <option value='".$listTemplateData["host_name"]."'>".$listTemplateData["host_name"]."</option>"."\n ";
                                     }
                                     echo '                  </select></td>'."\n ";
+									echo ' 					<td width="22%" class="ListColCenter"><a href="#"><img style="border:none" type="image" src="./modules/Discovery/include/images/delete16x16.png" title="Delete one from list" name="ClearRow" onClick="self.location=\'./main.php?p=61202&id='.$subnetHostData["id"].'\'"></a></td>',"\n ";
                                     echo '              </tr>'," \n ";
                                 }
                                 echo '          </table>'," \n ";
-                                echo '          <br><br><br>'," \n ";
+								echo '			</div>'," \n ";
                             }
 							
-							//Si le scanne est terminé, mais que aucune IP n'est découverte
+							//Si le scan est terminé, mais que aucune IP n'est découverte
 							if (mysql_num_rows($subnetHostsList)==0){
-								echo '          <br><br><font size="3px">'.$subnetDoneData["plage"]." polled by ".$subnetPollerData["name"]." (".$subnetPollerData["ns_ip_address"].") | <font color=\"red\"> 0 address discovered.</font><br><br> \n ";
+								echo '          <br><font size="3px">'.$subnetDoneData["plage"]." polled by ".$subnetPollerData["name"]." (".$subnetPollerData["ns_ip_address"].") | <font color=\"red\"> 0 address discovered.</font><br><br> \n ";
 								echo '          <table class="ListTable">'," \n ";
 								echo '             <tr class="ListHeader">'," \n ";
 								echo '                  <td width="22%" class="ListColHeaderCenter">Host</td>'," \n ";
 								echo '                  <td width="22%" class="ListColHeaderCenter">Hostname</td>'," \n ";
 								echo '                  <td width="22%" class="ListColHeaderCenter">Operating System</td>'," \n ";
-								echo '                  <td width="22%" class="ListColHeaderCenter">Host template</td>'," \n ";
-								echo '                  <td width="12%" class="ListColHeaderCenter">&nbsp;</td>'," \n ";
+								echo '                  <td width="22%" class="ListColHeaderCenter">Host Template</td>'," \n ";
 								echo '              </tr>'," \n ";
 								echo '             <tr class="list_one">'," \n";
 								echo '                  <td width="22%" colspan="5" class="ListColCenter"> No result </td>'."\n ";
 								echo '              </tr>'," \n ";
 								echo '          </table>'," \n ";
-								echo '          <br><br><br>'," \n ";
+								echo '          <br>'," \n ";
 							}     
 						}
 						
-						//Si le scanne n'est pas fini on affiche "No result"
+						//Si le scanne n'est pas fini on affiche un logo "patientez"
                         else if ($subnetDoneData["done"]==1) {
-							echo '          <br><br><font size="3px">'.$subnetDoneData["plage"]." polled by ".$subnetPollerData["name"]." (".$subnetPollerData["ns_ip_address"].")<br><br> \n ";
+							echo '          <br><font size="3px">'.$subnetDoneData["plage"]." polled by ".$subnetPollerData["name"]." (".$subnetPollerData["ns_ip_address"].")<br><br> \n ";
 							echo '          <table class="ListTable">'," \n ";
 							echo '             <tr class="ListHeader">'," \n ";
 							echo '                  <td width="22%" class="ListColHeaderCenter">Host</td>'," \n ";
 							echo '                  <td width="22%" class="ListColHeaderCenter">Hostname</td>'," \n ";
 							echo '                  <td width="22%" class="ListColHeaderCenter">Operating System</td>'," \n ";
-							echo '                  <td width="22%" class="ListColHeaderCenter">Host template</td>'," \n ";
-							echo '                  <td width="12%" class="ListColHeaderCenter">&nbsp;</td>'," \n ";
+							echo '                  <td width="22%" class="ListColHeaderCenter">Host Template</td>'," \n ";
 							echo '              </tr>'," \n ";
 							echo '             <tr class="list_one">'," \n";
-							echo '                  <td width="22%" colspan="5" class="ListColCenter"> No result </td>'."\n ";
+							echo '                  <td width="22%" colspan="5" class="ListColCenter"><img style="border:none" type="image" src="./modules/Discovery/include/images/loading2.gif" title="Loading..."></td>'."\n ";
 							echo '              </tr>'," \n ";
 							echo '          </table>'," \n ";
-							echo '          <br><br><br>'," \n ";
+							echo '          <br>'," \n ";
                         }                        
                     }
                     echo '          <table align="right">',"\n";
@@ -334,6 +317,14 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 					else { echo "<CENTER><b><font size=\"3px\" color=\"red\">ERROR</b> : File $agentDir not found...</font></CENTER>\n"; }
 				}
 				
+				function clearRangeResult(){
+					$sql=mysql_query("DELETE FROM mod_discovery_results WHERE plage_id =".$_GET["clearall"].";");
+				}
+				
+				function clearResult(){
+					$sql=mysql_query("DELETE FROM mod_discovery_results WHERE id =".$_GET["id"].";");
+				}
+				
 	            /*
                  * {main function}
                  *
@@ -344,7 +335,16 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
                     //connexion à la base de données
                     $db = dbConnect($conf_centreon['hostCentreon'], $conf_centreon['user'], $conf_centreon['password'],$conf_centreon['db'], true);
 					
-					/* Partie modifiée	*/				
+					/* Partie modifiée	*/	
+
+					if (isset($_GET["clearall"])){
+						clearRangeResult($_GET["clearall"]);
+					}
+
+					if (isset($_GET["id"])){
+						clearResult($_GET["id"]);
+					}
+					
 					if (!empty($_POST)){
 						setScanValues();
 					}

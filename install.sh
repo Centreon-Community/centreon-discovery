@@ -174,10 +174,10 @@ ${CAT} << __EOT__
 __EOT__
 
 ## Test all binaries
-if [ "$typeInstall" == "central" ] ; then
-    BINARIES="rm cp mv ${CHMOD} ${CHOWN} echo more mkdir find ${GREP} ${CAT} ${SED} ${PYTHON}"
-else
+if [ "$typeInstall" == "poller" ] ; then
     BINARIES="rm cp mv ${CHMOD} ${CHOWN} echo more mkdir find ${GREP} ${CAT} ${SED} ${PYTHON} ${NMAP}"
+else
+    BINARIES="rm cp mv ${CHMOD} ${CHOWN} echo more mkdir find ${GREP} ${CAT} ${SED} ${PYTHON} ${GCC}"
 fi    
 
 echo "$line"
@@ -225,26 +225,29 @@ if [ "$silent_install" -eq 0 ] ; then
 	log "INFO" "You accepted GPL license"
     fi
     
-    get_centreon_configuration_location;
-    get_centreon_parameters;
-    if [ "$?" -eq 0 ] ; then
-	echo_success "Parameters were loaded with success" "$ok"
-	install_modPython;
-	config_envvars;
+    if [ "$typeInstall" != "poller" ] ; then
+	get_centreon_configuration_location;
+	get_centreon_parameters;
 	if [ "$?" -eq 0 ] ; then
-	    install_agent;
-	    install_module;
+	    echo_success "Parameters were loaded with success" "$ok"
 	else
-	    echo_failure "Modules Python weren't installed with success" "$fail"
+	    echo -e "\nUnable to load all parameters in \"$FILE_CONF\""
 	    echo -e "\tINSTALL ABORT"
 	    exit 1
 	fi
-	
+    fi
+    
+    install_modPython;
+#   config_envvars;
+    if [ "$?" -eq 0 ] ; then
+	install_agent;
+	install_module;
     else
-	echo -e "\nUnable to load all parameters in \"$FILE_CONF\""
+	echo_failure "Modules Python weren't installed with success" "$fail"
 	echo -e "\tINSTALL ABORT"
 	exit 1
     fi
+    
 fi
 
 if [ "$silent_install" -eq 1 ] ; then

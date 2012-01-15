@@ -108,10 +108,10 @@ function log() {
 ## This functions was been use in first line on your script
 ## @return 0	All is't ok
 ## @return 1	problem with one variable
-## @Globals	GREP, CAT, SED, CHMOD, CHOWN, PYTHON, NMAP
+## @Globals	GREP, CAT, SED, CHMOD, CHOWN, PYTHON, NMAP, GCC
 #----
 function define_specific_binary_vars() {
-    local vars_bin="GREP CAT SED CHMOD CHOWN PYTHON NMAP"
+    local vars_bin="GREP CAT SED CHMOD CHOWN PYTHON NMAP GCC"
     local var_bin_tolower=""
     for var_bin in $vars_bin ; 
     do
@@ -125,7 +125,7 @@ function define_specific_binary_vars() {
 		else
 		    eval "$var_bin=$var_bin_tolower"
 		    export $(echo $var_bin)
-#				return 1
+#		    return 1
 		fi
 	fi
     done
@@ -582,7 +582,7 @@ function modify_envvars(){
     err=1
     while [ $err != 0 ]
     do
-	yes_no_default "Configure $DIR_ENVVARS/$WEB_ENVVARS ?" 
+	yes_no_default "Cnfigure $DIR_ENVVARS/$WEB_ENVVARS ?" 
 	if [ "$?" -eq 0 ] ; then
 	    err=0
 	    echo -e "\n\n#Modify by install centreon-Discovery module at `date -R`" >> $DIR_ENVVARS/$WEB_ENVVARS

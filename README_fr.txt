@@ -7,6 +7,7 @@ Version: 0.1
 
 * Le logiciel nmap doit être installé sur chaque poller. Dans le cas d'une architecture centralisée, nmap doit être installé sur le central.
 * Le paquet python-dev (python-devel en fonction des distributions) doit être installé à la fois sur le ou les pollers ainsi que sur le central.
+* Le paquet mysql-devel (sur CentOS) doit être installé sur le central.
 
 #	Installation:
 

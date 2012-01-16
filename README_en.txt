@@ -5,8 +5,9 @@ Version: 0.1
 
 #	Requirements
 
-Nmap must be installed on each poller. In the case of a centralized architecture, nmap must be installed on the central.
-The package python-dev (or python-devel depending on linux distribution) must be installed too on the central and on every pollers.
+* Nmap must be installed on each poller. In the case of a centralized architecture, nmap must be installed on the central.
+* The package python-dev (or python-devel depending on linux distribution) must be installed too on the central and on every pollers.
+* The package mysql-devel (on CentOS) must be installed on the central.
 
 #	Installation:
 

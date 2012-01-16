@@ -173,11 +173,14 @@ ${CAT} << __EOT__
 ###############################################################################
 __EOT__
 
+BINARIES="rm cp mv ${CHMOD} ${CHOWN} echo more mkdir find ${GREP} ${CAT} ${SED} ${PYTHON}"
 ## Test all binaries
 if [ "$typeInstall" == "poller" ] ; then
-    BINARIES="rm cp mv ${CHMOD} ${CHOWN} echo more mkdir find ${GREP} ${CAT} ${SED} ${PYTHON} ${NMAP}"
+    BINARIES=$BINARIES" ${NMAP}"
+elif [ "$typeInstall" == "central" ] ; then
+    BINARIES=$BINARIES" ${GCC}"
 else
-    BINARIES="rm cp mv ${CHMOD} ${CHOWN} echo more mkdir find ${GREP} ${CAT} ${SED} ${PYTHON} ${GCC}"
+    BINARIES=$BINARIES" ${GCC} ${NMAP}"
 fi    
 
 echo "$line"

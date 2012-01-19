@@ -208,11 +208,12 @@ function get_centreon_parameters() {
 	INSTALL_DIR_CENTREON=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "INSTALL_DIR_CENTREON" | cut -d '=' -f2`;
 	WEB_USER=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "WEB_USER" | cut -d '=' -f2`;
 	WEB_GROUP=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "WEB_GROUP" | cut -d '=' -f2`;
-	NAGIOS_PLUGIN=`${CAT} $CENTREON_CONF/$FILE_CONF_CENTPLUGIN | ${GREP} "NAGIOS_PLUGIN" | cut -d '=' -f2`;
-	NAGIOS_USER=`${CAT} $CENTREON_CONF/$FILE_CONF_CENTPLUGIN | ${GREP} "NAGIOS_USER" | cut -d '=' -f2`;
-	NAGIOS_GROUP=`${CAT} $CENTREON_CONF/$FILE_CONF_CENTPLUGIN | ${GREP} "NAGIOS_GROUP" | cut -d '=' -f2`;
+	NAGIOS_PLUGIN=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "NAGIOS_PLUGIN" | cut -d '=' -f2`;
+	NAGIOS_USER=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "NAGIOS_USER" | cut -d '=' -f2`;
+	NAGIOS_GROUP=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "NAGIOS_GROUP" | cut -d '=' -f2`;
+	DB_NAME_CENTREON=`cat /etc/centreon/centreon.conf.php | grep "\$conf_centreon\['db'\]" | cut -d '=' -f2 | sed -e s/\"//g -e s/\ //g -e s/\;//g`
 
-	if [ "$INSTALL_DIR_CENTREON" != "" ] && [ "$WEB_USER" != "" ] && [ "$WEB_GROUP" != "" ] && [ "$NAGIOS_PLUGIN" != "" ] && [ "$NAGIOS_USER" != "" ] && [ "$NAGIOS_GROUP" != "" ]; then
+	if [ "$INSTALL_DIR_CENTREON" != "" ] && [ "$WEB_USER" != "" ] && [ "$WEB_GROUP" != "" ] && [ "$NAGIOS_PLUGIN" != "" ] && [ "$NAGIOS_USER" != "" ] && [ "$NAGIOS_GROUP" != "" ] && [ "DB_NAME_CENTREON" != "" ]; then
 		return 0;
 	else
 		return 1;
@@ -355,6 +356,14 @@ function install_module() {
 	echo -ne "\tfor results.php"
 	$SED -i -e 's|@AGENT_DIR@|'"$AGENT_DIR"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
 	display_return "$?" "Changing macro for results.php"
+	FILE="sql/install.sql"
+	echo -ne "\tfor install.sql"
+        $SED -i -e 's|@DB_NAME_CENTREON@|'"$DB_NAME_CENTREON"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+        display_return "$?" "Changing macro for install.sql"
+	FILE="sql/uninstall.sql"
+	echo -ne "\tfor uninstall.sql"
+        $SED -i -e 's|@DB_NAME_CENTREON@|'"$DB_NAME_CENTREON"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+        display_return "$?" "Changing macro for uninstall.sql"
 
 	INSTALL_DIR_MODULE=$INSTALL_DIR_CENTREON/$MODULE_DIR
 	
@@ -444,6 +453,14 @@ function get_agent_install_directory_location() {
 		err=0
 		AGENT_DIR=$temp_read
 	    else
+		err=1
+	    fi
+	else
+	    if [ ${temp_read:0:1} == "/" ] ; then
+		err=0
+		AGENT_DIR=$temp_read
+	    else
+		echo "Directory \"$temp_read\" is not valid!"
 		err=1
 	    fi
 	fi

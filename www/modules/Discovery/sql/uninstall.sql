@@ -2,13 +2,13 @@
  *
  *	 CentreonDiscovery is developped with GPL Licence 3.0 :
  *	 Developped by : Jonathan Teste - Cedric Dupre
- *	 Modified by : François Cousté
+ *	 Modified by : Sub2.13
  *   
  */
 
 
 /*
- * DATABASE : Centreon2
+ * DATABASE : @DB_NAME_CENTREON@
  * TABLE : topology
  *	
  *	Suppression des pages du module Centreon Discovery
@@ -21,7 +21,7 @@ DELETE FROM `topology` WHERE `topology_page` = '61203';
 DELETE FROM `topology` WHERE `topology_page` = '61204';
 DELETE FROM `topology` WHERE `topology_page` = '61205';
 /*
- * DATABASE : Centreon
+ * DATABASE : @DB_NAME_CENTREON@
  * TABLE : mod_discovery_*
  *	
  *	Suppression des tables utiles au fonctionnement du module
@@ -29,7 +29,7 @@ DELETE FROM `topology` WHERE `topology_page` = '61205';
  */
 
 /*
- * DATABASE : Centreon
+ * DATABASE : @DB_NAME_CENTREON@
  * TABLE : mod_discovery_rangeip
  *	
  * Suppression de la table mod_discovery_rangeip
@@ -39,7 +39,7 @@ DROP TABLE `mod_discovery_rangeip`;
 
 
 /*
- * DATABASE : Centreon
+ * DATABASE : @DB_NAME_CENTREON@
  * TABLE : mod_discovery_results
  *	
  * Suppression de la table mod_discovery_results
@@ -49,7 +49,7 @@ DROP TABLE `mod_discovery_results`;
 
 
 /*
- * DATABASE : Centreon
+ * DATABASE : @DB_NAME_CENTREON@
  * TABLE : mod_discovery_template_os_relation
  *	
  * Suppression de la table mod_discovery_template_os_relation

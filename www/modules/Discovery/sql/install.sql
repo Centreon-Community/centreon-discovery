@@ -2,13 +2,13 @@
  *
  *	 Centreon-Discovery is developped with GPL Licence 3.0 :
  *	 Developped by : Jonathan Teste - Cedric Dupre
- *	 Modified by : François Cousté
+ *	 Modified by : Sub2.13
  *   
  */
 
 
 /*
- * DATABASE : Centreon
+ * DATABASE : @DB_NAME_CENTREON@
  * TABLE : topology
  *	
  *	Insertion des pages du module Centreon Discovery
@@ -23,7 +23,7 @@ VALUES ('', 'Centreon Discovery', NULL, 6, 612, 100, 1, './modules/Discovery/inc
 
 
 /*
- * DATABASE : Centreon
+ * DATABASE : @DB_NAME_CENTREON@
  * TABLE : mod_discovery_*
  *	
  *	Création des tables utiles au fonctionnement du module
@@ -32,7 +32,7 @@ VALUES ('', 'Centreon Discovery', NULL, 6, 612, 100, 1, './modules/Discovery/inc
 
 
 /*
- * DATABASE : Centreon
+ * DATABASE : @DB_NAME_CENTREON@
  * TABLE : mod_discovery_rangeip
  *	
  * Création de la table mod_discovery_rangeip contenant les informations relatives aux plages IP à scanner
@@ -62,10 +62,10 @@ CREATE TABLE IF NOT EXISTS `mod_discovery_rangeip` (
 
 INSERT INTO `mod_discovery_rangeip` (`id`, `plage`, `masque`, `cidr`, `ping`, `ping_count`, `ping_wait`, `tcp`, `tcp_port`, `snmp`, `snmp_version`, `snmp_community`, `oid_hostname`, `oid_os`, `snmp_method`, `nagios_server_id`, `done`) VALUES
 (0, 'default', '0', 0, 0, 1, 500, 0, NULL, 0, 2, 'public', '.1.3.6.1.2.1.1.5.0', '.1.3.6.1.2.1.1.1.0', NULL, NULL, 0);
-UPDATE  `centreon`.`mod_discovery_rangeip` SET  `id` =  '0' WHERE  `mod_discovery_rangeip`.`id` =1 LIMIT 1 ;
+UPDATE  `@DB_NAME_CENTREON@`.`mod_discovery_rangeip` SET  `id` =  '0' WHERE  `mod_discovery_rangeip`.`id` =1 LIMIT 1 ;
 
 /*
- * DATABASE : Centreon
+ * DATABASE : @DB_NAME_CENTREON@
  * TABLE : mod_discovery_results
  *	
  * Création de la table mod_discovery_results contenant les informations résultantes du scan
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS `mod_discovery_results` (
 
 
 /*
- * DATABASE : Centreon
+ * DATABASE : @DB_NAME_CENTREON@
  * TABLE : mod_discovery_template_os_relation
  *	
  * Création de la table mod_discovery_template_os_relation contenant les associations entre le type d'équipement et son template associé

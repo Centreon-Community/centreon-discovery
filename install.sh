@@ -230,29 +230,37 @@ if [ "$silent_install" -eq 0 ] ; then
 	log "INFO" "You accepted GPL license"
     fi
     
-    if [ "$typeInstall" != "poller" ] ; then
-	get_centreon_configuration_location;
-	get_centreon_parameters;
-	if [ "$?" -eq 0 ] ; then
-	    echo_success "Parameters were loaded with success" "$ok"
-	else
-	    echo -e "\nUnable to load all parameters in \"$FILE_CONF\""
-	    echo -e "\tINSTALL ABORT"
-	    exit 1
-	fi
-    fi
-    
-    install_modPython;
-#   config_envvars;
-    if [ "$?" -eq 0 ] ; then
-	install_agent;
-	install_module;
+    if [ "$typeInstall" == "poller" ] ; then
+        install_modPython;
+        if [ "$?" -eq 0 ] ; then
+	    get_agent_install_directory_location;
+            install_agent;
+        else
+            echo_failure "Modules Python weren't installed with success" "$fail"
+            echo -e "\tINSTALL ABORT"
+            exit 1
+        fi
     else
-	echo_failure "Modules Python weren't installed with success" "$fail"
-	echo -e "\tINSTALL ABORT"
-	exit 1
+		get_centreon_configuration_location;
+		get_centreon_parameters;
+		if [ "$?" -eq 0 ] ; then
+			echo_success "Parameters were loaded with success" "$ok"
+			install_modPython;
+			if [ "$?" -eq 0 ] ; then
+				get_agent_install_directory_location;
+				install_agent;
+				install_module;
+			else
+				echo_failure "Modules Python weren't installed with success" "$fail"
+				echo -e "\tINSTALL ABORT"
+				exit 1
+			fi
+		else
+			echo -e "\nUnable to load all parameters in \"$FILE_CONF\""
+			echo -e "\tINSTALL ABORT"
+			exit 1
+		fi
     fi
-    
 fi
 
 if [ "$silent_install" -eq 1 ] ; then

@@ -366,6 +366,7 @@ function install_module() {
         display_return "$?" "Changing macro for uninstall.sql"
 
 	INSTALL_DIR_MODULE=$INSTALL_DIR_CENTREON/$MODULE_DIR
+
 	
 	if [ -d $INSTALL_DIR_MODULE ] ; then
 	    if [ -d  $INSTALL_DIR_CENTREON/$BACKUP ] ; then
@@ -490,7 +491,7 @@ function install_agent(){
     display_return "$?" "Creating temp install directory"
     /bin/cp -Rf $BASE_DIR/agents/* $TEMP_D/ >> $LOG_FILE 2>> $LOG_FILE
   
-    get_agent_install_directory_location;
+#    get_agent_install_directory_location;
     
     echo -n "Setting rights"
     ${CHMOD} -R 755 $TEMP_D/* >> $LOG_FILE 2>> $LOG_FILE

@@ -1,11 +1,13 @@
 #	Description:
 
 Nom: Centreon-Discovery
-Version: 0.1
+Version: 0.1a
+Distribution : Debian/CentOS
 
 #	Prerequis
 
-* Le logiciel nmap doit être installé sur chaque poller. Dans le cas d'une architecture centralisée, nmap doit être installé sur le central.
+* Python (version 2.6) doit être installé à la fois sur le ou les pollers ainsi que sur le central.
+* Le logiciel nmap (version 5.00 ou plus) doit être installé sur chaque poller. Dans le cas d'une architecture centralisée, nmap doit être installé sur le central.
 * Le paquet python-dev (python-devel en fonction des distributions) doit être installé à la fois sur le ou les pollers ainsi que sur le central.
 * Le paquet mysql-devel (sur CentOS) doit être installé sur le central.
 
@@ -39,9 +41,10 @@ Se rendre ensuite dans le menu 'Administration > Modules > Centreon-Discovery
 Le module Discovery doit figurer dans la liste des modules mais non installé.
 Cliquer sur l'icone à droite ""Install Module" puis sur le bouton "install module" pour lancer l'installation.
 
-5. Exécuter l'agent Poller en fond de tâche (installé par défaut dans /etc/centreon-discovery)
+5. Exécuter l'agent Poller en fond de tâche (installé par défaut dans /etc/centreon-discovery) en root
 
-$# /etc/centreon-discovery/DiscoveryAgent_poller.py &
+$# python /etc/centreon-discovery/DiscoveryAgent_poller.py &
+(ou $# python26 /etc/centreon-discovery/DiscoveryAgent_poller.py &)
 
 #	FAQ
 
@@ -94,5 +97,3 @@ The Python egg cache directory is currently set to:
 Perhaps your account does not have write access to this directory?  You can
 change the cache directory by setting the PYTHON_EGG_CACHE environment
 variable to point to an accessible directory.
-
-To try : SetEnv PYTHON_EGG_CACHE /tmp   in /etc/apache2/conf.d/centreon.conf

@@ -66,6 +66,8 @@ TEMP=/tmp/install.$$
 _tmp_install_opts="0"
 silent_install="0"
 user_conf=""
+distrib=""
+typeInstall=""
 
 #---
 ## {Print help and usage}
@@ -79,11 +81,14 @@ function usage() {
 #    echo -e "  -u\tinstall/upgrade Discovery with specify directory with contain $FILE_CONF"
     echo -e "  -t\tdefine type install : central/poller/both"
     echo -e "  -h\tdisplay this message"
+    echo -e "\nExample for poller:"
+    echo -e "  ./install.sh -i -t poller"
     exit 1
 }
 
 
 ### Main
+echo "Waiting ..."
 
 # define where is a centreon source 
 BASE_DIR=$(dirname $0)
@@ -148,6 +153,9 @@ if [ "$USERID" != "0" ]; then
     exit 1
 fi
 
+## Find OS
+find_OS 
+
 #Export variable for all programs
 export silent_install CENTREON_CONF  
 
@@ -176,7 +184,7 @@ ${CAT} << __EOT__
 __EOT__
 
 BINARIES="rm cp mv ${CHMOD} ${CHOWN} echo more mkdir find ${GREP} ${CAT} ${SED} ${PYTHON}"
-## Test all binaries
+## binaries in function typeInstall
 if [ "$typeInstall" == "poller" ] ; then
     BINARIES=$BINARIES" ${NMAP}"
 elif [ "$typeInstall" == "central" ] ; then
@@ -185,11 +193,20 @@ else
     BINARIES=$BINARIES" ${GCC} ${NMAP}"
 fi    
 
+## binaries/packages in function distrib 
+if [ "$distrib" == "DEBIAN" ] || [ "$distrib" == "UBUNTU" ] ; then
+    BINARIES=$BINARIES" ${DPKG}"
+    PACKAGES="python-dev libmysqlclient-dev"
+elif [ "$distrib" == "REDHAT" ] || [ "$distrib" == "CENTOS" ] ; then
+    BINARIES=$BINARIES" ${YUM}"
+    PACKAGES="python-devel mysql-devel"
+fi
+
 echo "$line"
 echo -e "\tChecking all needed binaries"
 echo "$line"
 
-binary_fail="0"
+binary_fail=1
 # For the moment, I check if all binary exists in path.
 # After, I must look a solution to use complet path by binary
 for binary in $BINARIES; do
@@ -197,10 +214,10 @@ for binary in $BINARIES; do
 	pathfind "$binary"
 	if [ "$?" -eq 0 ] ; then
 	    echo_success "${binary}" "$ok"
+	    binary_fail=0
 	else 
 	    echo_failure "${binary}" "$fail"
 	    log "ERR" "\$binary not found in \$PATH"
-	    binary_fail=1
 	fi
     else
 	echo_success "${binary}" "$ok"
@@ -213,8 +230,27 @@ if [ "$binary_fail" -eq 1 ] ; then
     exit 1
 fi
 
+# Check package
+echo -e "\n$line"
+echo -e "\tChecking all needed packages"
+echo "$line"
+for package in $PACKAGES; do
+    echo -n $package
+    check_package $package;
+    if [ $? -eq 0 ] ; then
+  	#package not installed !
+	display_return "1" "$package"
+	exit 1
+    else
+  	#package installed !
+	display_return "0" "$package"
+    fi
+done
 
 
+echo -e "\n$line"
+echo -e "\tAccepting licence"
+echo "$line"
 if [ "$silent_install" -eq 0 ] ; then
     echo -e "\nYou will now read Centreon Discovery module Licence.\\n\\tPress enter to continue."
     read 
@@ -230,37 +266,29 @@ if [ "$silent_install" -eq 0 ] ; then
 	log "INFO" "You accepted GPL license"
     fi
     
-    if [ "$typeInstall" == "poller" ] ; then
-        install_modPython;
-        if [ "$?" -eq 0 ] ; then
-	    get_agent_install_directory_location;
-            install_agent;
-        else
-            echo_failure "Modules Python weren't installed with success" "$fail"
-            echo -e "\tINSTALL ABORT"
-            exit 1
-        fi
-    else
-		get_centreon_configuration_location;
-		get_centreon_parameters;
-		if [ "$?" -eq 0 ] ; then
-			echo_success "Parameters were loaded with success" "$ok"
-			install_modPython;
-			if [ "$?" -eq 0 ] ; then
-				get_agent_install_directory_location;
-				install_agent;
-				install_module;
-			else
-				echo_failure "Modules Python weren't installed with success" "$fail"
-				echo -e "\tINSTALL ABORT"
-				exit 1
-			fi
-		else
-			echo -e "\nUnable to load all parameters in \"$FILE_CONF\""
-			echo -e "\tINSTALL ABORT"
-			exit 1
-		fi
+    if [ "$typeInstall" != "poller" ] ; then
+	get_centreon_configuration_location;
+	get_centreon_parameters;
+	if [ "$?" -eq 0 ] ; then
+	    echo_success "Parameters were loaded with success" "$ok"
+	else
+	    echo -e "\nUnable to load all parameters in \"$FILE_CONF\""
+	    echo -e "\tINSTALL ABORT"
+	    exit 1
+	fi
     fi
+    
+    install_modPython;
+#   config_envvars;
+    if [ "$?" -eq 0 ] ; then
+	install_agent;
+	install_module;
+    else
+	echo_failure "Modules Python weren't installed with success" "$fail"
+	echo -e "\tINSTALL ABORT"
+	exit 1
+    fi
+    
 fi
 
 if [ "$silent_install" -eq 1 ] ; then

@@ -111,7 +111,7 @@ function log() {
 ## @Globals	GREP, CAT, SED, CHMOD, CHOWN, PYTHON, NMAP, GCC
 #----
 function define_specific_binary_vars() {
-    local vars_bin="GREP CAT SED CHMOD CHOWN PYTHON NMAP GCC"
+    local vars_bin="GREP CAT SED CHMOD CHOWN PYTHON NMAP GCC DPKG YUM"
     local var_bin_tolower=""
     for var_bin in $vars_bin ; 
     do
@@ -309,7 +309,77 @@ function install_modPython() {
 		;;
 	esac
 }
+
 	    
+#----
+## Define OS
+## check on etc to find a specific file <p>
+## Debian, Suse, Redhat, FreeBSD
+## @param   variable to set a result
+## @return 0      OS found
+## @return 1      OS not found
+#----
+function find_OS() {
+      local system=""
+      local lsb_release=""
+      system="$(uname -s)"
+      if [ "$system" = "Linux" ] ; then
+            if [ "$(pathfind lsb_release; echo $?)" -eq "0" ] ; then
+                  lsb_release="$(lsb_release -i -s)"
+            else
+                  lsb_release="NOT_FOUND"
+            fi
+            if [ "$lsb_release" = "Debian" ] || \
+                  [ -e "/etc/debian_version" ] ; then 
+                  distrib="DEBIAN"
+                  log "INFO" "$(gettext "GNU/Linux Debian Distribution")"
+	    elif [ "$lsb_release" = "Ubuntu" ] ; then
+		  distrib="UBUNTU"
+                  log "INFO" "$(gettext "GNU/Linux Ubuntu Distribution")"
+	    elif [ "$lsb_release" = "CentOS" ] ; then
+                  distrib="CENTOS"
+                  log "INFO" "$(gettext "GNU/Linux CentOS Distribution")"
+            elif [ "$lsb_release" = "RedHatEnterpriseES" ] || \
+                  [ -e "/etc/redhat-release" ] ; then
+                  distrib="REDHAT"
+                  log "INFO" "$(gettext "GNU/Linux Redhat Distribution")"
+	    elif [ "$lsb_release" = "Fedora" ] ; then
+		  distrib="FEDORA"
+                  log "INFO" "$(gettext "GNU/Linux Fedora Distribution")"
+            else
+                  distrib="NOT_FOUND"
+                  log "INFO" "$(gettext "GNU/Linux distribution not found")"
+                  return 1
+            fi
+      elif [ "$system" = "FreeBSD" ] ; then
+            distrib="FREEBSD"
+            log "INFO" "$(gettext "FreeBSD System")"
+      elif [ "$system" = "AIX" ] ; then
+            distrib="AIX"
+            log "INFO" "$(gettext "AIX System")"
+      elif [ "$system" = "SunOS" ] ; then
+            distrib="SUNOS"
+            log "INFO" "$(gettext "SunOS System")"
+      else
+            distrib="NOT_FOUND"
+            log "INFO" "$(gettext "System not found")"
+      fi
+      return 0
+}
+
+#---
+## Check package
+## @param   	  variable to set a result
+## @return 0      packages found
+## @return 1      packages not found
+#---
+function check_package() {
+	if [ "$distrib" == "DEBIAN" ] || [ "$distrib" == "UBUNTU" ] ; then
+	    return `${DPKG} -l | grep $1 | wc -l`
+	elif [ "$distrib" == "REDHAT" ] || [ "$distrib" == "CENTOS" ] ; then
+	    return `${YUM} list installed | grep $1 | wc -l`
+	fi
+}
 
 #---
 ## {Install Discovery Module}
@@ -366,7 +436,6 @@ function install_module() {
         display_return "$?" "Changing macro for uninstall.sql"
 
 	INSTALL_DIR_MODULE=$INSTALL_DIR_CENTREON/$MODULE_DIR
-
 	
 	if [ -d $INSTALL_DIR_MODULE ] ; then
 	    if [ -d  $INSTALL_DIR_CENTREON/$BACKUP ] ; then
@@ -491,7 +560,7 @@ function install_agent(){
     display_return "$?" "Creating temp install directory"
     /bin/cp -Rf $BASE_DIR/agents/* $TEMP_D/ >> $LOG_FILE 2>> $LOG_FILE
   
-#    get_agent_install_directory_location;
+    get_agent_install_directory_location;
     
     echo -n "Setting rights"
     ${CHMOD} -R 755 $TEMP_D/* >> $LOG_FILE 2>> $LOG_FILE

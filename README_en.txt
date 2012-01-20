@@ -1,11 +1,13 @@
 #	Description:
 
 Name: Centreon-Discovery
-Version: 0.1
+Version: 0.1a
+Distribution : Debian/CentOS
 
 #	Requirements
 
-* Nmap must be installed on each poller. In the case of a centralized architecture, nmap must be installed on the central.
+* Nmap (version 5.00 or highter) must be installed on each poller. In the case of a centralized architecture, nmap must be installed on the central.
+* Python (version 2.6) must be installed too on the central and on every pollers.
 * The package python-dev (or python-devel depending on linux distribution) must be installed too on the central and on every pollers.
 * The package mysql-devel (on CentOS) must be installed on the central.
 
@@ -38,9 +40,10 @@ Reach menu 'Administration > Modules > Centreon-Discovery'
 The Discovery module must be listed but not installed.
 Click on the icon to the right "Install Module" then on button "install module" to launch install.
 
-5. Execute Poller agent (installed in /etc/centreon-discovery by default)
+5. Execute Poller agent (installed in /etc/centreon-discovery by default) in root
 
 $# /etc/centreon-discovery/DiscoveryAgent_poller.py &
+(or $# python26 /etc/centreon-discovery/DiscoveryAgent_poller.py &)
 
 #	FAQ
 
@@ -94,41 +97,3 @@ The Python egg cache directory is currently set to:
 Perhaps your account does not have write access to this directory?  You can
 change the cache directory by setting the PYTHON_EGG_CACHE environment
 variable to point to an accessible directory.
-
-
-2. Start installation with install.sh script in root directory "centreon-discovery-x.x"
-
-$# chmod +x install.sh
-$# ./install.sh -u /etc/centreon
-
-3. Go to Centreon web interface
-
-Go to menu 'Administration > Modules > Setup'.
-SAD module must be listed but not installed.
-Click to the right icon for starting installation
-
-
-
-#	FAQ
-
-Q:
-
-R:
-
-
-
-#	Links:
-
-	Centreon-discovery
-	
-Documentation:	*** TO DO ***
-SVN:	*** TO DO ***
-Trac:	*** TO DO ***
-Forum:	*** TO DO ***
-
-	Centreon
-	
-Wiki:	http://doc.centreon.com/
-SVN:	http://svn.centreon.com/
-Trac:	http://forge.centreon.com/projects/show/centreon
-Forum:	http://forum.centreon.com/

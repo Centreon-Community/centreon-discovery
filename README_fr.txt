@@ -48,6 +48,12 @@ $# python /etc/centreon-discovery/DiscoveryAgent_poller.py &
 
 #	FAQ
 
+Q: Dans quel type d'installation je me trouve : poller? central? ou both ?
+
+R1 : poller : si vous n'avez que Nagios d'installé sur cette machine et que ce dernier renvoit les infos collectées vers un serveur central. Voir la liste dans l'interface Centreon : "Configuration" --> "Centreon"  --> colonne localhost = NO)
+R2 : central : si vous n'avez que Centreon d'installé sur cette machine et que ce dernier collecte toutes les infos renvoyées par le(s) poller(s).
+R3 : both : si vous avez à la fois Nagios et Centreon d'installés sur la machine. Voir la liste dans l'interface Centreon : "Configuration" --> "Centreon" --> colonne localhost = YES)
+
 Q:	Une erreur apparaît lorsque le module Python MySQLdb a besoin de créer un fichier à la racine du serveur web et qu'il n'a pas les droits (plus de détails de l'erreur plus bas).
 
 R:	La solution consiste a rendre l'utilisateur Apache propriétaire de dossier www

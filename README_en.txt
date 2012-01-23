@@ -47,9 +47,15 @@ $# /etc/centreon-discovery/DiscoveryAgent_poller.py &
 
 #	FAQ
 
+Q: Which install type I am into: poller? central? ou both ?
+
+A1 : poller : if you have just Nagios installed on your server and this last sends to Central the collected informations. Look the list in Centreon interface : "Configuration" --> "Centreon"  --> column localhost = NO)
+A2 : central : if you have just Nagios installed on your server and this last recieves from poller(s) the collected informations.
+A3 : both : if you have at the same time Nagios and Centreon installed on your server. Look the list in Centreon interface : "Configuration" --> "Centreon" --> column localhost = YES)
+
 Q:	An error appears when the Python MySQLdb module needs to create a file in the root folder of web server. Some rights are missing (more details below).
 
-R:	The Apache user must become owner of www folder
+A:	The Apache user must become owner of www folder
 	$#chown www-data:www-data /var/www
 
 

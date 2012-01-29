@@ -382,6 +382,20 @@ function check_package() {
 }
 
 #---
+## Check package version
+## @param   	  variable to set a result
+## @return 0      packages found
+## @return 1      packages not found
+#---
+function check_bin_version() {
+	for line in $(cat ./install/bin_version)
+	{
+		echo $line
+	}	
+#	version= `$1 -V`
+}
+
+#---
 ## {Install Discovery Module}
 ##
 ## @Stdout Actions realised by function
@@ -508,7 +522,7 @@ function get_agent_install_directory_location() {
     err=1
     while [ $err != 0 ]
     do
-	echo -e "Where you want to install Discovery Agent ? [$AGENT_DIR]"
+	echo -e "Where do you want to install Discovery Agent ? [$AGENT_DIR]"
 	echo -en "> "
 	read temp_read
 	

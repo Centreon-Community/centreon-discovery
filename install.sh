@@ -196,10 +196,18 @@ fi
 ## binaries/packages in function distrib 
 if [ "$distrib" == "DEBIAN" ] || [ "$distrib" == "UBUNTU" ] ; then
     BINARIES=$BINARIES" ${DPKG}"
-    PACKAGES="python-dev libmysqlclient-dev"
+    if [ "$typeInstall" == "poller" ] ; then
+	PACKAGES="python-dev"
+    else
+	PACKAGES="python-dev libmysqlclient-dev"
+    fi
 elif [ "$distrib" == "REDHAT" ] || [ "$distrib" == "CENTOS" ] ; then
     BINARIES=$BINARIES" ${YUM}"
-    PACKAGES="python-devel mysql-devel"
+    if [ "$typeInstall" == "poller" ] ; then
+	PACKAGES="python-devel"
+    else
+	PACKAGES="python-devel mysql-devel"
+    fi
 fi
 
 echo "$line"
@@ -234,19 +242,24 @@ fi
 echo -e "\n$line"
 echo -e "\tChecking all needed packages"
 echo "$line"
+error=0
 for package in $PACKAGES; do
     echo -n $package
     check_package $package;
     if [ $? -eq 0 ] ; then
   	#package not installed !
 	display_return "1" "$package"
-	exit 1
+	error=1
     else
   	#package installed !
 	display_return "0" "$package"
     fi
 done
-
+#check_bin_version
+if [ $error == 1 ]; then
+    echo_info "\nPlease check fail packages and retry"
+    exit 1
+fi	
 
 echo -e "\n$line"
 echo -e "\tAccepting licence"
@@ -266,7 +279,16 @@ if [ "$silent_install" -eq 0 ] ; then
 	log "INFO" "You accepted GPL license"
     fi
     
-    if [ "$typeInstall" != "poller" ] ; then
+    if [ "$typeInstall" == "poller" ] ; then
+	install_modPython;
+	if [ "$?" -eq 0 ] ; then
+	    install_agent;
+        else
+	    echo_failure "Modules Python weren't installed with success" "$fail"
+	    echo -e "\tINSTALL ABORT"
+	    exit 1
+	fi
+    else
 	get_centreon_configuration_location;
 	get_centreon_parameters;
 	if [ "$?" -eq 0 ] ; then
@@ -276,19 +298,16 @@ if [ "$silent_install" -eq 0 ] ; then
 	    echo -e "\tINSTALL ABORT"
 	    exit 1
 	fi
+	install_modPython;
+	if [ "$?" -eq 0 ] ; then
+	    install_agent;
+	    install_module;
+        else
+	    echo_failure "Modules Python weren't installed with success" "$fail"
+	    echo -e "\tINSTALL ABORT"
+	    exit 1
+        fi
     fi
-    
-    install_modPython;
-#   config_envvars;
-    if [ "$?" -eq 0 ] ; then
-	install_agent;
-	install_module;
-    else
-	echo_failure "Modules Python weren't installed with success" "$fail"
-	echo -e "\tINSTALL ABORT"
-	exit 1
-    fi
-    
 fi
 
 if [ "$silent_install" -eq 1 ] ; then

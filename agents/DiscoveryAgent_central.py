@@ -2,11 +2,14 @@
 # -*- coding: iso-8859-15 -*-
 
 import os
-os.environ['PYTHON_EGG_CACHE'] = '/tmp'
-import MySQLdb
 import socket
 import sys
 import re
+
+# Fix the problem of PYTHON_EGG_CACHE
+os.environ['PYTHON_EGG_CACHE'] = '/tmp'
+
+import MySQLdb
 
 ID = 0
 IP = 1
@@ -33,6 +36,8 @@ def connectToDB():
 # Scan a range of IP taken in the database
 def scanRangeIP(db):
 	c=db.cursor()
+	# Set done = 1 while checking pollers
+	c.execute("""UPDATE mod_discovery_rangeip SET done = 1 WHERE id=0""")
 #	c.execute("""SELECT R.id, S.ns_ip_address, R.plage, R.cidr\
 #			 FROM nagios_server S, mod_discovery_rangeip R\
 #			 WHERE S.id=R.nagios_server_id AND R.poller_status=1 AND R.done=1\
@@ -42,29 +47,30 @@ def scanRangeIP(db):
 			 WHERE S.id=R.nagios_server_id AND R.poller_status=1 AND R.done=1;""")
 	pollers = c.fetchall()
 	for poller in pollers:
-		print "ScanRangeIP : " + str(poller[ID]) + " pour la plage : " + str(poller[PLAGE])
+		print "Scan the range IP " + str(poller[PLAGE]) + " (poller #" + str(poller[ID])  +")"
 		getHostsFromPoller(poller)
+	# Set done = 2 when scan is done
+	c.execute("""UPDATE mod_discovery_rangeip SET done = 2 WHERE id=0""")
 
 # Check the status of the pollers needed to scan range of IP
 def statusPoller(db, idpoller=""):
 	c=db.cursor()
 	if idpoller is "":
+		c.execute("""SELECT R.id, S.ns_ip_address, R.nagios_server_id\
+			FROM nagios_server S, mod_discovery_rangeip R\
+			WHERE S.id=R.nagios_server_id\
+			GROUP BY R.nagios_server_id;""")
 #		c.execute("""SELECT R.id, S.ns_ip_address\
 #			FROM nagios_server S, mod_discovery_rangeip R\
-#			WHERE S.id=R.nagios_server_id\
-#			GROUP BY R.nagios_server_id;""")
-		c.execute("""SELECT R.id, S.ns_ip_address\
-			FROM nagios_server S, mod_discovery_rangeip R\
-			WHERE S.id=R.nagios_server_id;""")
+#			WHERE S.id=R.nagios_server_id;""")
 	else:
-		c.execute("""SELECT R.id, S.ns_ip_address\
+		c.execute("""SELECT R.id, S.ns_ip_address, R.nagios_server_id\
 			FROM nagios_server S, mod_discovery_rangeip R\
 			WHERE S.id=R.nagios_server_id\
 			AND R.nagios_server_id=%s
 			GROUP BY R.nagios_server_id;""",(idpoller))
 	pollers = c.fetchall()
 	for poller in pollers:
-		print "checkStatusPoller : " + str(poller[ID])
 		checkStatusPoller(poller)
 
 # Check the status of the poller in argument
@@ -76,17 +82,16 @@ def checkStatusPoller(poller):
 		s.settimeout(3)
 		s.connect((host, 1080))
 		data = "#echo#"
-		print host + " : " + data
 		s.send(data)
 		rcv = s.recv(512)
 		if rcv.startswith("#reply#"):
-			req = "UPDATE mod_discovery_rangeip SET poller_status = %d WHERE id=%d" % (1, poller[ID])
-			print "DiscoveryAgent_central.py : STATUS_POLLER=1 pour Poller[ID]=" + str(poller[ID])
+			req = "UPDATE mod_discovery_rangeip SET poller_status = %d WHERE nagios_server_id=%d" % (1, poller[2])
+			print "Poller #%d (%s) STATUS_POLLER=1 (OK)" % (poller[2], host)
 			c.execute(req)
 		s.close()
 	except socket.error:
-		req = "UPDATE mod_discovery_rangeip SET poller_status = %d WHERE id=%d" % (2, poller[ID])
-		print "DiscoveryAgent_central.py : STATUS_POLLER=2 pour Poller[ID]=" + str(poller[ID])
+		req = "UPDATE mod_discovery_rangeip SET poller_status = %d WHERE nagios_server_id=%d" % (2, poller[2])
+		print "Poller #%d (%s) STATUS_POLLER=2 (NOK)" % (poller[2], host)
 		c.execute(req)
 	except KeyboardInterrupt:
 		print "Connection aborted"
@@ -106,10 +111,12 @@ def getHostsFromPoller(poller):
 		c.execute(req)
 		while not rcv.rstrip().endswith("#scanip#done"):
 			rcv = s.recv(25)
+			if rcv.strip() == "":
+				print "Error while receiving data.\nCheck connection of poller.\nEND"
+				sys.exit()
 			print "SCAN_RANGEIP : " +rcv.lstrip()
 			if rcv.lstrip().startswith("#state#"):
 				adr_ip = rc.findall(rcv)[0]
-				print adr_ip
 				req = "INSERT INTO mod_discovery_results(ip, plage_id) VALUES ('%s', %d)" % (adr_ip, poller[ID])
 				c.execute(req)
 		req = "UPDATE mod_discovery_rangeip SET done = %d WHERE id=%d" % (2, poller[ID])
@@ -127,14 +134,16 @@ if __name__ == '__main__':
 	SCAN_RANGEIP  : Scan different range IP registered in DB
 	STATUS_POLLER : Check poller status
 	'''
-	print "   --- Appel DiscoveryAgent_Central ---"
+	print "   --- Call DiscoveryAgent_Central ---"
 	# Bad number of args to call the script
 	if len(sys.argv) not in [2,3] :
-		print "You have to precise which action you want to do by using args"
+		print "You have to precise which action you want to do by using args\n"
+		print " - STATUS_POLLER to check the pollers"
+		print " - SCAN_RANGEIP to scan a range IP"
 		sys.exit()
 	# Check the status of the pollers
 	if sys.argv[1] == "STATUS_POLLER":
-		print "STATUS_POLLER -->"
+		print "Check the status of poller"
 		db=connectToDB()
 		if len(sys.argv) == 2:		
 			statusPoller(db)
@@ -142,11 +151,11 @@ if __name__ == '__main__':
 			statusPoller(db, sys.argv[2])
 	# Scan a range of IP
 	elif sys.argv[1] == "SCAN_RANGEIP":
-		print "SCAN_RANGEIP -->"
+		print "Scan range IP"
 		db=connectToDB()
 		scanRangeIP(db)
 	#  The argument given is not correct
 	else:
 		print "Bad argument : SCAN_RANGEIP / STATUS_POLLER"
 		sys.exit()
-	print "---------> End"
+	print "   --- End DiscoveryAgent_Central ---"

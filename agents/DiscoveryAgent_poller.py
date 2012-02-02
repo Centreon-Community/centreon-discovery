@@ -23,7 +23,7 @@ def connectToCentral():
 				conn.send(data)
 			elif data.startswith("#scanip#"):
 				plage = data.replace("#scanip#","")
-				print 'DiscoveryAgent_poller.py : SCAN_RANGEIP pour ' + plage
+				print 'DiscoveryAgent_poller.py : SCAN_RANGEIP for ' + plage
 				scanRangeIP(plage, conn, s)
 				data = "#scanip#done"
 				conn.send(data)	
@@ -45,17 +45,20 @@ def scanRangeIP(rangeIP, conn, s):
 
 	# Scan NMAP en ARP sur un réseau spécifié
 #	nm.scan(hosts=rangeIP, arguments='-n -sP -PR ') # ARP
-	nm.scan(hosts=rangeIP, arguments='-n -sU -p161 -T5 ') # Port 161
+	try:
+		nm.scan(hosts=rangeIP, arguments='-n -sU -p161 -T5 ') # Port 161
 
-	hosts_list = [(x, nm[x]['status']['state']) for x in nm.all_hosts()]
-	for host, status in hosts_list:
-		if status=='up' :
-#			print('{0}:{1}'.format(host, status))
-			state = "#state#%s#%s"%(host,status)
-			state = "%25s"%state
-			conn.send(state)
-			print "Envoi : ",state.lstrip()
-	print "#scanip#done"		
-
+		hosts_list = [(x, nm[x]['status']['state']) for x in nm.all_hosts()]
+		for host, status in hosts_list:
+			if status=='up' :
+	#			print('{0}:{1}'.format(host, status))
+				state = "#state#%s#%s"%(host,status)
+				state = "%25s"%state
+				conn.send(state)
+				print "Send : ",state.lstrip()
+		print "#scanip#done"		
+	except nmap.PortScannerError:
+		print "Error using connection. Scan stopped"
+		sys.exit()
 if __name__ == '__main__':
 	connectToCentral();

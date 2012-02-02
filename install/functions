@@ -432,6 +432,10 @@ function install_module() {
 	echo -ne "\tfor verif_discovery_status.php"
 	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
 	display_return "$?" "Changing macro for verif_discovery_status.php"
+	FILE="include/refresh_result.php"
+	echo -ne "\tfor refresh_result.php"
+        $SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+        display_return "$?" "Changing macro for refresh_result.php"
 	FILE="include/ips.php"
 	echo -ne "\tfor ips.php"
 	$SED -i -e 's|@AGENT_DIR@|'"$AGENT_DIR"'|g' $TEMP_D/$FILE 2>> $LOG_FILE

@@ -19,7 +19,7 @@ VALUES ('', 'Centreon Discovery', NULL, 6, 612, 100, 1, './modules/Discovery/inc
 ('', 'IP addresses', './img/icones/16x16/client_network.gif', 612, 61201, 1, 1, './modules/Discovery/include/ips.php', NULL, '0', '1', '1') ,
 ('', 'Results', './img/icones/16x16/column.gif', 612, 61202, 101, 1, './modules/Discovery/include/results.php', NULL, '0', '1', '1') ,
 ('', 'Configuration', './img/icones/16x16/gear.gif', 612, 61203, 101, 1, './modules/Discovery/include/configuration.php', NULL, '0', '1', '1') , 
-('', 'A propos', './img/icones/16x16/about.gif', 612, 61204, 101, 1, './modules/Discovery/include/informations.htm', NULL, '0', '1', '1');
+('', 'About', './img/icones/16x16/about.gif', 612, 61204, 101, 1, './modules/Discovery/include/informations.htm', NULL, '0', '1', '1');
 
 
 /*

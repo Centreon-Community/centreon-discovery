@@ -40,30 +40,6 @@
 		}
 	}
 	
-	/* 
-	 * function checkone()
-	 * Fonction permettant de checker/dechecker la checkbox primaire
-	 */
-	function checkone(groupcheckbox) {
-		m=0; // initialisation du nombre de checkboxes coch�es	
-		temp = groupcheckbox.length;
-
-		for (i=1; i < temp; i++) { 
-			if (groupcheckbox[i].checked) { 
-				// si la checkbox courante est coch�e, on comptabilise
-				m++;
-			}
-		}
-		if ( m > 0 ) {
-			// si au moins une des checkboxes est coch�e, on coche la checkboxe principale
-			groupcheckbox[0].checked=true;
-		}
-		else {
-			// sinon on d�coche la checkboxe principale
-			groupcheckbox[0].checked=false;
-		}
-	}	
-	
 	/*
 	 * function verifselection()
 	 * Fonction permettant de v�rifer que l'on a bien selectionn� au moins un objet ...

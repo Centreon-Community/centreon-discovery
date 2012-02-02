@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2005-20012 MERETHIS
+ * Copyright 2005-2009 MERETHIS
  * Centreon is developped by : Julien Mathis and Romain Le Merlus under
  * GPL Licence 2.0.
  * 
@@ -31,20 +31,22 @@
  * 
  * For more information : contact@centreon.com
  * 
- * SVN : http://svn.modules.centreon.com/centreon-discovery/
+ * SVN : $URL$
+ * SVN : $Id$
  * 
- *
- *
+ */
+ 
+/*
  * {DESCRIPTION}
  *
  * PHP version 5
  *
- * @package Centreon-Discovery
- * @version Centreon-Discovery: 0.1
- * @copyright (c) 2007-20012 Centreon
+ * @package {PACKAGE_NAME}
+ * @version $Id: 0.6
+ * @copyright (c) 2007-2009 Centreon
  * @license http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
  */
-?>
+ ?>
 
 <html lang="fr">
 	<head>
@@ -74,13 +76,26 @@
 					<td width="40%"><h1 ALIGN=CENTER>Discovery - Configuration page</h1></td>
 					<td width="30%"></td>
 				</tr>
-			</table>
-
-			<br><br>
-
 			<?php
 			
 			function doFormTab($id) {
+				
+				if ($id==1) {
+				echo '	<tr>
+							<td width="30%"></td>
+							<td width="40%"><h2 ALIGN=CENTER><i>Default Values</i></h2></td>
+						</tr>
+					</table>
+					<br><br>';
+				}
+				if ($id==2) {
+				echo '	<tr>
+							<td width="30%"></td>
+							<td width="40%"><h2 ALIGN=CENTER><i>Template / OS Relation</i></h2></td>
+						</tr>
+					</table>
+					<br><br>';
+				}
 				echo '<div>'."\n";
 				echo '  <ul id="onglets">'."\n";
 				if ($id==1) { echo '<li class="active">'; } else { echo '<li class="a" style="">'; }
@@ -118,11 +133,6 @@
 						echo '          <td>&nbsp;</td>'."\n";
 						echo '          <td><input style="text-align:center;"  type="text" name="pingtimeout" size="12" value="'.$valuesData["ping_wait"].'"></td>'."\n";
 						echo '      </tr>'."\n";
-						/*echo '      <tr>'."\n";
-						echo '          <td>TCP port : </td>'."\n";
-						echo '          <td>&nbsp;</td>'."\n";
-						echo '          <td><input style="text-align:center;"  type="text" name="tcpport" size="12" value="'.$valuesData["tcp_port"].'" title="Example: 21-25;80;445"></td>'."\n";
-						echo '      </tr>'."\n";*/
 						echo '      <tr>'."\n";
 						echo '          <td>Hostname OID : </td>'."\n";
 						echo '          <td>&nbsp;</td>'."\n";
@@ -211,13 +221,13 @@
 						echo '         <tr class="ListHeader">'."\n ";
 						echo '             <td class="ListColHeaderCenter">Template Name</td>'."\n ";
 						echo '             <td class="ListColHeaderCenter">SNMP OS Version</td>'."\n ";
-						echo '             <td class="ListColHeaderCenter"><input type="submit" title="Delete All from List" name="clear" value=" Clear All " onClick="self.location=\'./main.php?p=61204&id=2\'"></td>'," \n";
+						echo '             <td class="ListColHeaderCenter"><input type="submit" title="Delete All from List" name="clear" value=" Clear All " onClick="return window.confirm(\'Are you sure you want delete all ?\');self.location=\'./main.php?p=61204&id=2\'"></td>'," \n";
 						echo '         </tr>'."\n";
 						while ($relationsData=mysql_fetch_array($relations,MYSQL_ASSOC)){
 							echo ' <tr class="list_one">'." \n ";
 							echo '  <td class="ListColHeaderCenter">'.$relationsData["template"].'</td>'."\n";
 							echo '  <td class="ListColHeaderCenter">'.$relationsData["os"].'</td>'."\n";
-							echo '  <td class="ListColHeaderCenter"><input style="border:none" type="image" src="./modules/Discovery/include/images/delete16x16.png" title="Delete One from List" name="'.$relationsData["id"].'" value="'.$relationsData["id"].'" onClick="self.location=\'./main.php?p=61204&id=2\'"></td>',"\n";
+							echo '  <td class="ListColHeaderCenter"><input style="border:none" type="image" src="./modules/Discovery/include/images/delete16x16.png" title="Delete One from List" name="'.$relationsData["id"].'" value="'.$relationsData["id"].'" onClick="return window.confirm(\'Are you sure you want delete this item ?\n ('.$relationsData["template"].' | '.$relationsData["os"].')\');self.location=\'./main.php?p=61204&id=2\'"></td>',"\n";
 							echo ' </tr>'." \n ";
 						}
 						echo '    </table>'."\n";

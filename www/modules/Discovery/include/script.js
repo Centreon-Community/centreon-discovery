@@ -63,8 +63,9 @@ function valider_form(formulaire){
 		alert('Please, select at least one address range!');
 		return false;
 }
-	
-function request(url,cadre,source,id) {
+
+//Fonction ajax, permettant de mettre à jour la base de données lors du changement de poller dans la liste déroulante
+function request_update(url,cadre,source,id) {
         var XHR = null;
 
         if(window.XMLHttpRequest) // Firefox
@@ -95,4 +96,39 @@ function request(url,cadre,source,id) {
 
     return;
 }
+
+function refresh_div() {
+	var XHR = null;
+
+	if(window.XMLHttpRequest) // Firefox
+			XHR = new XMLHttpRequest();
+	else if(window.ActiveXObject) // Internet Explorer
+			XHR = new ActiveXObject("Microsoft.XMLHTTP");
+	else { // XMLHttpRequest non supporté par le navigateur
+			alert("Votre navigateur ne supporte pas les objets XMLHTTPRequest...");
+			return;
+	}
+	
+	XHR.onreadystatechange = function()
+	{
+		if(XHR.readyState == 4 && XHR.status == 200)
+		{
+			var tmp = XHR.responseText;
+			document.getElementById('mon_div').innerHTML = tmp;
+			if (tmp.indexOf("end",0) != -1){
+				window.setTimeout("window.location='./main.php?p=61202&stop=1';",100);
+				XHR.abort();
+			}else{
+				window.setTimeout("refresh_div()",1000);
+			}
+		}
+	}
+			
+	var method = 'GET';
+	var filename = './modules/Discovery/include/refresh_result.php';
+	XHR.open(method, filename, false);
+	XHR.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+	XHR.send(null);
+}
+
 	

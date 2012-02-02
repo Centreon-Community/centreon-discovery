@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2005-20012 MERETHIS
+ * Copyright 2005-2009 MERETHIS
  * Centreon is developped by : Julien Mathis and Romain Le Merlus under
  * GPL Licence 2.0.
  * 
@@ -31,17 +31,19 @@
  * 
  * For more information : contact@centreon.com
  * 
- * SVN : http://svn.modules.centreon.com/centreon-discovery/
+ * SVN : $URL$
+ * SVN : $Id$
  * 
- *
- *
+ */
+ 
+/*
  * {DESCRIPTION}
  *
  * PHP version 5
  *
- * @package Centreon-Discovery
- * @version Centreon-Discovery: 0.1
- * @copyright (c) 2007-20012 Centreon
+ * @package {PACKAGE_NAME}
+ * @version $Id: 0.6
+ * @copyright (c) 2007-2009 Centreon
  * @license http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
  */
  
@@ -50,7 +52,7 @@ require_once './modules/Discovery/include/common.php';
 
 /* Variable indiquant la position de l'agent Python, elle est modifiée par le fichier install.sh lors de l'installation du module. */
 $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
-//$agentDir = "./modules/Discovery/include/agent/DiscoveryAgent_central.py";
+//$agentDir = "/etc/centreon-discovery/DiscoveryAgent_central.py";
 
  ?>
 
@@ -308,7 +310,7 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 				function doDropDownList ($id){
 					$sql = mysql_query("SELECT * FROM nagios_server;");
 					$sql2 = mysql_query("SELECT nagios_server_id FROM mod_discovery_rangeip WHERE id='$id';");	
-					$list='<select id="poller'.$id.'" title="Choose the Discovery-Agent to use">';
+					$list='<select id="poller'.$id.'" title="Choose the Discovery-Agent to use" onChange="request_update(\'./modules/Discovery/include/update.php\',\'xmlhttp\',\'poller'.$id.'\',\''.$id.'\');">';
 					while ($result = mysql_fetch_array($sql,MYSQL_ASSOC)){
 						$list.='<option value="'.$result["id"].'"';
 						if (mysql_result($sql2,0) == $result["id"]){
@@ -316,7 +318,7 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 						}
 						$list.='>'.$result["name"].' ('.$result["ns_ip_address"].')</option>';
 					}
-					$list.='</select>  <img style="border:none" type="image" src="./modules/Discovery/include/images/check.png" onClick="request(\'./modules/Discovery/include/update.php\',\'xmlhttp\',\'poller'.$id.'\',\''.$id.'\');" title="Check poller status">';
+					$list.='</select>';
 					return $list;
 				}
 					
@@ -343,7 +345,7 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 				 */
 
 				function validateMask($mask) {
-					return preg_match("/^(((128|192|224|240|248|252|254|255)(\.0){3})|(255\.(128|192|224|240|248|252|254|255)(\.0){2})|((255\.){2}(128|192|224|240|248|252|254|255)\.0)|((255\.){3}(128|192|224|240|248|252|254)))$/",$mask);
+					return preg_match("/^(((255\.){2}(0|128|192|224|240|248|252|254|255)\.0)|((255\.){3}(128|192|224|240|248|252|254)))$/",$mask);
 				}
 				
 				/*
@@ -356,7 +358,7 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 				 */
 				
 				function validateCidr($cidr) {
-					return preg_match("/^([1-9]|[1-2][0-9]|31)$/",$cidr);
+					return (($cidr < 32) && ($cidr > 15));
 				}
 				
 				/*

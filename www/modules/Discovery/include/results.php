@@ -1,47 +1,49 @@
 <?php
 /*
- * Copyright 2005-20012 MERETHIS
+ * Copyright 2005-2009 MERETHIS
  * Centreon is developped by : Julien Mathis and Romain Le Merlus under
  * GPL Licence 2.0.
- * 
- * This program is free software; you can redistribute it and/or modify it under 
- * the terms of the GNU General Public License as published by the Free Software 
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
  * Foundation ; either version 2 of the License.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License along with 
+ *
+ * You should have received a copy of the GNU General Public License along with
  * this program; if not, see <http://www.gnu.org/licenses>.
- * 
- * Linking this program statically or dynamically with other modules is making a 
- * combined work based on this program. Thus, the terms and conditions of the GNU 
+ *
+ * Linking this program statically or dynamically with other modules is making a
+ * combined work based on this program. Thus, the terms and conditions of the GNU
  * General Public License cover the whole combination.
- * 
- * As a special exception, the copyright holders of this program give MERETHIS 
- * permission to link this program with independent modules to produce an executable, 
- * regardless of the license terms of these independent modules, and to copy and 
- * distribute the resulting executable under terms of MERETHIS choice, provided that 
- * MERETHIS also meet, for each linked independent module, the terms  and conditions 
- * of the license of that module. An independent module is a module which is not 
- * derived from this program. If you modify this program, you may extend this 
+ *
+ * As a special exception, the copyright holders of this program give MERETHIS
+ * permission to link this program with independent modules to produce an executable,
+ * regardless of the license terms of these independent modules, and to copy and
+ * distribute the resulting executable under terms of MERETHIS choice, provided that
+ * MERETHIS also meet, for each linked independent module, the terms  and conditions
+ * of the license of that module. An independent module is a module which is not
+ * derived from this program. If you modify this program, you may extend this
  * exception to your version of the program, but you are not obliged to do so. If you
  * do not wish to do so, delete this exception statement from your version.
- * 
+ *
  * For more information : contact@centreon.com
- * 
- * SVN : http://svn.modules.centreon.com/centreon-discovery/
- * 
  *
+ * SVN : $URL$
+ * SVN : $Id$
  *
+ */
+
+/*
  * {DESCRIPTION}
  *
  * PHP version 5
  *
- * @package Centreon-Discovery
- * @version Centreon-Discovery: 0.1
- * @copyright (c) 2007-20012 Centreon
+ * @package {PACKAGE_NAME}
+ * @version $Id: $
+ * @copyright (c) 2007-2009 Centreon
  * @license http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
  */
  
@@ -49,7 +51,9 @@ require_once'./modules/Discovery/include/DB-Func.php';
 
 /* Variable indiquant la position de l'agent Python, elle est modifiée par le fichier install.sh lors de l'installation du module. */
 $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
-//$agentDir = "./modules/Discovery/include/agent/DiscoveryAgent_central.py";
+//$agentDir = "/etc/centreon-discovery/DiscoveryAgent_central.py";
+
+//Couleur erreur #2AD1D4 pendant le scan.
 
  ?>
 
@@ -65,7 +69,7 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
             <script type="text/javascript" src="./modules/Discovery/include/script.js"></script>
             <!-- End Fonctions JavaScript -->
     </head>
-    <body style="background-color: rgb(255, 255, 255); color: rgb(0, 0, 0); height: 158px;" alink="#ff6600" link="#ff6600" vlink="#ff6600">
+    <body style="background-color: rgb(255, 255, 255); color: rgb(0, 0, 0); height: 158px;" alink="#ff6600" link="#ff6600" vlink="#ff6600" <?php if ((isset($_GET['stop'])) && ($_GET['stop'] == 1)){ echo '';} else {echo 'onload="refresh_div();"';} ?>>
         <span class="" style="font-family: Candara;  font-weight: bold;"><br>
             <?php
 
@@ -185,8 +189,8 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 								$reqNbIpFound=mysql_query("SELECT Count(*) FROM mod_discovery_results WHERE plage_id=".$subnetDoneData["id"].";");
 								$nbIpFound=mysql_fetch_array($reqNbIpFound);
                                 if ($nbSNMPKoData['Count(*)']==mysql_num_rows($subnetHostsList)) $GlobalCbDisable="disabled";
-                                echo '          <br><font size="3px">'.$subnetDoneData["plage"].' polled by '.$subnetPollerData["name"].' ('.$subnetPollerData["ns_ip_address"].') | <a href="#" title="View addresses" onClick="$(\'#scan'.$subnetDoneData["id"].'\').slideToggle(\'fast\');"><font color="red" size="2px"> '.$nbIpFound[0].' address(es) discovered.</font></a><br>'," \n ";
-								echo'			<div style="display:none" id="scan'.$subnetDoneData["id"].'">'," \n ";
+                                echo '          <br><font size="3px">'.$subnetDoneData["plage"].' polled by '.$subnetPollerData["name"].' ('.$subnetPollerData["ns_ip_address"].') | <a href="#" title="View addresses" onClick="$(\'#scan'.$subnetDoneData["id"].'\').slideToggle(\'fast\');"><font color="green" size="2px"> '.$nbIpFound[0].' address(es) discovered</font></a><br>'," \n ";
+								echo'			<div id="scan'.$subnetDoneData["id"].'">'," \n ";
 								echo '          <br><br><table class="ListTable">'," \n ";
                                 echo '             <tr class="ListHeader">'," \n ";
 								echo '                  <td width="12%" class="ListColHeaderCenter"><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="'. $subnetDoneData["plage"] .'" OnClick="checkall(document.getElementsByName(\'cb'.$cbgroup.'[]\'));" '.$GlobalCbDisable.'/></td>'," \n ";
@@ -205,7 +209,7 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
                                     }
                                     echo '            	<tr class="list_one">'," \n";
                                     if ($subnetHostData["new_host"]==1){
-                                        echo '                  <td class="ListColCenter"><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="'.$subnetHostData["id"].'" onChange="checkone(document.getElementsByName(\'cb'.$cbgroup.'[]\'));" '.$cbDisable.' /></td>',"\n";
+                                        echo '                  <td class="ListColCenter"><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="'.$subnetHostData["id"].'"/></td>',"\n";
 
                                     } else {
                                         echo '                  <td class="ListColCenter">already exist</td>',"\n";
@@ -214,7 +218,7 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
                                     echo '                  <td width="22%" class="ListColCenter">'.$subnetHostData["hostname"].'</td>'."\n ";
                                     echo '                  <td width="22%" class="ListColCenter">'.$subnetHostData["os"].'</td>'."\n ";
                                     
-									//Liste de templates
+									/* Liste de templates */
 									echo '                  <td width="12%" class="ListColCenter"><select name=select'.$subnetHostData["id"].' width=95%><option>None</option>'."\n ";
                                     $listTemplate=mysql_query("SELECT * FROM host WHERE host_register='0'");
                                     while ($listTemplateData=mysql_fetch_array($listTemplate,MYSQL_ASSOC)){
@@ -231,8 +235,9 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 							
 							//Si le scan est terminé, mais que aucune IP n'est découverte
 							if (mysql_num_rows($subnetHostsList)==0){
-								echo '          <br><font size="3px">'.$subnetDoneData["plage"]." polled by ".$subnetPollerData["name"]." (".$subnetPollerData["ns_ip_address"].") | <font color=\"red\"> 0 address discovered.</font><br><br> \n ";
-								echo '          <table class="ListTable">'," \n ";
+								echo '          <br><font size="3px">'.$subnetDoneData["plage"].' polled by '.$subnetPollerData["name"].' ('.$subnetPollerData["ns_ip_address"].') | <a href="#" title="View addresses" onClick="$(\'#scan'.$subnetDoneData["id"].'\').slideToggle(\'fast\');"><font color="red" size="2px"> 0 address discovered</font></a><br>'," \n ";
+								echo '			<div id="scan'.$subnetDoneData["id"].'">'," \n ";
+								echo '          <br><br><table class="ListTable">'," \n ";
 								echo '             <tr class="ListHeader">'," \n ";
 								echo '                  <td width="22%" class="ListColHeaderCenter">Host</td>'," \n ";
 								echo '                  <td width="22%" class="ListColHeaderCenter">Hostname</td>'," \n ";
@@ -244,6 +249,7 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 								echo '              </tr>'," \n ";
 								echo '          </table>'," \n ";
 								echo '          <br>'," \n ";
+								echo '			</div>'," \n ";
 							}     
 						}
 						
@@ -307,6 +313,7 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 							mysql_query("UPDATE mod_discovery_rangeip SET done=0 WHERE id='".$_POST["id".$i]."'");
 						}
 					}
+					mysql_query("UPDATE mod_discovery_rangeip SET done=0 WHERE id='0'");
 					//Executer le shell
 					if (file_exists($agentDir)) {
 //						shell_exec('python '.$agentDir.' SCAN_RANGEIP > /dev/null 2>&1 &');
@@ -347,7 +354,9 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 						setScanValues();
 					}
 					
-					echo '<table align="center">'."\n";
+					echo '	<div id="mon_div"></div>'."\n";
+					
+					/*echo '<table align="center">'."\n";
 					echo '  <tr>'."\n";
 					echo '      <td>'."\n";
 					echo "          <form>\n";
@@ -355,12 +364,12 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 					echo "          </form>\n";
 					echo '      <td>'."\n";
 					echo '  <tr>'."\n";
-					echo '</table>'."\n";
+					echo '</table>'."\n";*/
 					
 					//Rafraichissement automatique de la page toutes les 10 secondes
-					echo '<script type="text/javascript">';
+					/*echo '<script type="text/javascript">';
                     echo '    setTimeout("window.location=\'./main.php?p=61202\';",10000);';
-                    echo '</script>';
+                    echo '</script>';*/
 					
 					doFormTab();
 					

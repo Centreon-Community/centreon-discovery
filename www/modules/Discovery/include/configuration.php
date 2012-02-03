@@ -72,10 +72,10 @@
 			<br>
 			<table width="100%">
 				<tr>
-					<td width="30%"><img alt ="CentrESIEEon" src="./modules/Discovery/include/images/img_CentrESIEEon.png"/></td>
-					<td width="40%"><h1 ALIGN=CENTER>Discovery - Configuration page</h1></td>
 					<td width="30%"></td>
-				</tr>
+					<td width="40%"><h1 ALIGN=CENTER>Discovery - Configuration page</h1></td>
+					<td width="30%"><img ALIGN=right alt="CentESIEEon" src="./modules/Discovery/include/images/logo.jpg"/><td>		
+				<br><br></tr>
 			<?php
 			
 			function doFormTab($id) {

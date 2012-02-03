@@ -62,7 +62,7 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
             <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
             <title>Discovery</title>
             <link href="./Themes/Centreon-2/style.css" rel="stylesheet" type="text/css"/>
-            <meta content="Service Auto Discovery - mod_discovery_results Page" name="Nicolas DIETRICH">
+            <meta content="Discovery - Results Page" name="Nicolas DIETRICH">
             <!-- Fonctions JavaScript -->
             <script type="text/javascript" src="./modules/Discovery/include/JS-Func.js"></script>
 			<script type="text/javascript" src="./modules/Discovery/include/jquery-1.6.4.min.js"></script>
@@ -82,9 +82,9 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
             <br>
             <table width="100%">
                 <tr>
-                    <td width="30%"><img src="./modules/Discovery/include/images/img_CentrESIEEon.png" alt="CentrESIEEon" /></td>
-                    <td width="40%"><h1 ALIGN=CENTER>Discovery Results</h1></td>
-                    <td width="30%"></td>
+                 	<td width="30%"></td>
+                    	<td width="40%"><h1 ALIGN=CENTER>Discovery Results</h1></td>
+   			<td width="30%"><img ALIGN=right alt="CentESIEEon" src="./modules/Discovery/include/images/logo.jpg"/><td>					
                 </tr>
             </table>
             <br><br>
@@ -193,13 +193,14 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 								echo'			<div id="scan'.$subnetDoneData["id"].'">'," \n ";
 								echo '          <br><br><table class="ListTable">'," \n ";
                                 echo '             <tr class="ListHeader">'," \n ";
-								echo '                  <td width="12%" class="ListColHeaderCenter"><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="'. $subnetDoneData["plage"] .'" OnClick="checkall(document.getElementsByName(\'cb'.$cbgroup.'[]\'));" '.$GlobalCbDisable.'/></td>'," \n ";
+								echo '                  <td width="8%" class="ListColHeaderCenter"><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="'. $subnetDoneData["plage"] .'" OnClick="checkall(document.getElementsByName(\'cb'.$cbgroup.'[]\'));" '.$GlobalCbDisable.'/></td>'," \n ";
                                 echo '                  <INPUT TYPE=HIDDEN NAME="group_list[]" VALUE="'. $cbgroup .'" />'," \n ";
-                                echo '                  <td width="22%" class="ListColHeaderCenter">Host</td>'," \n ";
-                                echo '                  <td width="22%" class="ListColHeaderCenter">Hostname</td>'," \n ";
-                                echo '                  <td width="22%" class="ListColHeaderCenter">Operating System</td>'," \n ";
-                                echo '                  <td width="22%" class="ListColHeaderCenter">Host Template</td>'," \n ";
-								echo '					<td width="22%" class="ListColHeaderCenter"><a href="#" ><img style="border:none" type="image" src="./modules/Discovery/include/images/clearAll1.png" title="Delete all from list" onmouseover="javascript:this.src=\'./modules/Discovery/include/images/clearAll2.png\';" onmouseout="javascript:this.src=\'./modules/Discovery/include/images/clearAll1.png\';" onClick="self.location=\'./main.php?p=61202&clearall='.$subnetDoneData["id"].'\'"></td>'," \n";
+                                echo '                  <td width="15%" class="ListColHeaderCenter">Host</td>'," \n ";
+                                echo '                  <td width="20%" class="ListColHeaderCenter">Hostname</td>'," \n ";
+                                echo '                  <td width="20%" class="ListColHeaderCenter">Operating System</td>'," \n ";
+                                echo '                  <td width="20%" class="ListColHeaderCenter">Host Template</td>'," \n ";
+                                echo '                  <td width="30%" class="ListColHeaderCenter">Host Group</td>'," \n ";
+								echo '					<td width="10%" class="ListColHeaderCenter"><a href="#" ><img style="border:none" type="image" src="./modules/Discovery/include/images/clearAll1.png" title="Delete all from list" onmouseover="javascript:this.src=\'./modules/Discovery/include/images/clearAll2.png\';" onmouseout="javascript:this.src=\'./modules/Discovery/include/images/clearAll1.png\';" onClick="self.location=\'./main.php?p=61202&clearall='.$subnetDoneData["id"].'\'"></td>'," \n";
                                 echo '              </tr>'," \n ";
                                 while ($subnetHostData = mysql_fetch_array($subnetHostsList,MYSQL_ASSOC)){
                                     $elt_number++;
@@ -214,18 +215,28 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
                                     } else {
                                         echo '                  <td class="ListColCenter">already exist</td>',"\n";
                                     }
-                                    echo '                  <td width="22%" class="ListColCenter">'.$subnetHostData["ip"].'</td>'."\n ";
+                                    echo '                  <td width="10%" class="ListColCenter">'.$subnetHostData["ip"].'</td>'."\n ";
                                     echo '                  <td width="22%" class="ListColCenter">'.$subnetHostData["hostname"].'</td>'."\n ";
                                     echo '                  <td width="22%" class="ListColCenter">'.$subnetHostData["os"].'</td>'."\n ";
                                     
 									/* Liste de templates */
-									echo '                  <td width="12%" class="ListColCenter"><select name=select'.$subnetHostData["id"].' width=95%><option>None</option>'."\n ";
+									echo '                  <td width="12%" class="ListColCenter"><select name=select_template'.$subnetHostData["id"].' width=95%><option>None</option>'."\n ";
                                     $listTemplate=mysql_query("SELECT * FROM host WHERE host_register='0'");
                                     while ($listTemplateData=mysql_fetch_array($listTemplate,MYSQL_ASSOC)){
                                         echo "template ".$listTemplateData["host_name"]."<br>\n";
                                         echo "                  <option value='".$listTemplateData["host_name"]."'>".$listTemplateData["host_name"]."</option>"."\n ";
                                     }
                                     echo '                  </select></td>'."\n ";
+									
+									/* Liste des groupes */
+									echo '                  <td width="12%" class="ListColCenter"><select name=select_group'.$subnetHostData["id"].' width=95%><option>None</option>'."\n ";
+                                    $listGroup=mysql_query("SELECT * FROM hostgroup;");
+                                    while ($listGroupData=mysql_fetch_array($listGroup,MYSQL_ASSOC)){
+                                        echo "template ".$listGroupData["hg_name"]."<br>\n";
+                                        echo "                  <option value='".$listGroupData["hg_name"]."'>".$listGroupData["hg_name"]."</option>"."\n ";
+                                    }
+                                    echo '                  </select></td>'."\n ";
+									
 									echo ' 					<td width="22%" class="ListColCenter"><a href="#"><img style="border:none" type="image" src="./modules/Discovery/include/images/delete16x16.png" title="Delete one from list" name="ClearRow" onClick="self.location=\'./main.php?p=61202&id='.$subnetHostData["id"].'\'"></a></td>',"\n ";
                                     echo '              </tr>'," \n ";
                                 }
@@ -365,11 +376,6 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 					echo '      <td>'."\n";
 					echo '  <tr>'."\n";
 					echo '</table>'."\n";*/
-					
-					//Rafraichissement automatique de la page toutes les 10 secondes
-					/*echo '<script type="text/javascript">';
-                    echo '    setTimeout("window.location=\'./main.php?p=61202\';",10000);';
-                    echo '</script>';*/
 					
 					doFormTab();
 					

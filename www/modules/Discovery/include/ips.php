@@ -61,7 +61,7 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 		<meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
 		<title>Discovery</title>
 		<link href="./Themes/Centreon-2/style.css" />
-		<meta content="Service Auto Discovery - Subnet Declaration Page" name="Loic JEZEQUEL & Alexis DONADIO">
+		<meta content="Centreon-Discovery - Subnet Declaration Page" name="Nicolas DIETRICH">
 		<!-- Fonctions JavaScript -->
 		<script type="text/javascript" src="./modules/Discovery/include/jquery-1.6.4.min.js"></script>
 		<script type="text/javascript" src="./modules/Discovery/include/script.js"></script>
@@ -81,12 +81,11 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 			<br>
 			<table width="100%">
 				<tr>
-					<td width="30%"><img alt="CentESIEEon" src="./modules/Discovery/include/images/img_CentrESIEEon.png" /></td>
-					<td width="40%"><h1 ALIGN=CENTER>IP range(s) to scan</h1></td>
-					<td width="30%"></td>					
+					<td style="text-align:center;" width="30%"></td>					
+					<td style="text-align:center;" width="40%"><h1 ALIGN=center>IP range(s) to scan</h1></td>
+					<td width="30%"><img ALIGN=right alt="CentESIEEon" src="./modules/Discovery/include/images/logo.jpg"/><td>					
 				</tr>
 			</table>
-			<br><br>
 			<div id="xmlhttp"></div>
 
 			<?php

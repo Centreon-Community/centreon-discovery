@@ -214,18 +214,18 @@ echo "$line"
 echo -e "\tChecking all needed binaries"
 echo "$line"
 
-binary_fail=1
+error=0
 # For the moment, I check if all binary exists in path.
 # After, I must look a solution to use complet path by binary
 for binary in $BINARIES; do
     if [ ! -e ${binary} ] ; then 
 	pathfind "$binary"
-	if [ "$?" -eq 0 ] ; then
+	if [ $? -eq 0 ] ; then
 	    echo_success "${binary}" "$ok"
-	    binary_fail=0
 	else 
 	    echo_failure "${binary}" "$fail"
 	    log "ERR" "\$binary not found in \$PATH"
+	    error=1
 	fi
     else
 	echo_success "${binary}" "$ok"
@@ -233,8 +233,8 @@ for binary in $BINARIES; do
 done
 
 # Script stop if one binary wasn't found
-if [ "$binary_fail" -eq 1 ] ; then
-    echo_info "Please check fail binary and retry"
+if [ "$error" -eq 1 ] ; then
+    echo_info "\nPlease check fail binary and retry"
     exit 1
 fi
 
@@ -247,17 +247,17 @@ for package in $PACKAGES; do
     echo -n $package
     check_package $package;
     if [ $? -eq 0 ] ; then
-  	#package not installed !
+	#package not installed !
 	display_return "1" "$package"
 	error=1
     else
-  	#package installed !
+		#package installed !
 	display_return "0" "$package"
     fi
 done
 #check_bin_version
 if [ $error == 1 ]; then
-    echo_info "\nPlease check fail packages and retry"
+    echo_info "\nPlease check fail package and retry"
     exit 1
 fi	
 
@@ -283,7 +283,7 @@ if [ "$silent_install" -eq 0 ] ; then
 	install_modPython;
 	if [ "$?" -eq 0 ] ; then
 	    install_agent;
-        else
+	else
 	    echo_failure "Modules Python weren't installed with success" "$fail"
 	    echo -e "\tINSTALL ABORT"
 	    exit 1
@@ -302,7 +302,7 @@ if [ "$silent_install" -eq 0 ] ; then
 	if [ "$?" -eq 0 ] ; then
 	    install_agent;
 	    install_module;
-        else
+	else
 	    echo_failure "Modules Python weren't installed with success" "$fail"
 	    echo -e "\tINSTALL ABORT"
 	    exit 1
@@ -321,7 +321,7 @@ if [ "$silent_install" -eq 1 ] ; then
 	    install_modPython;
 	    if [ "$?" -eq 0 ] ; then
 		echo_success "Modules Python were installed with success" "$ok"
-	    	if [ $typeInstall = "central" || $typeInstall = "both" ] ; then
+		if [ $typeInstall = "central" || $typeInstall = "both" ] ; then
 		    install_module;
 		fi
 	    else

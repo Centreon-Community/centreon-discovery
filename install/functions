@@ -96,11 +96,11 @@ function echo_warning() {
 ## @Globals	LOG_FILE
 #----
 function log() {
-	local program="$0"
-	local type="$1"
-	shift
-	local message="$@"
-	echo -e "[$program]:$type: $message" >> $LOG_FILE
+    local program="$0"
+    local type="$1"
+    shift
+    local message="$@"
+    echo -e "[$program]:$type: $message" >> $LOG_FILE
 }
 
 #----
@@ -116,17 +116,17 @@ function define_specific_binary_vars() {
     for var_bin in $vars_bin ; 
     do
 	if [ -z $(eval echo \$$var_bin) ] ; then
-		var_bin_tolower="$(echo $var_bin | tr [:upper:] [:lower:])"
-		pathfind_ret "$var_bin_tolower" "$(echo -n $var_bin)"
-		if [ "$?" -eq 0 ] ; then
-		    eval "$var_bin='$(eval echo \$$var_bin)/$var_bin_tolower'"
-		    export $(echo $var_bin)
-		    log "INFO" "$var_bin=$(eval echo \$$var_bin)"
-		else
-		    eval "$var_bin=$var_bin_tolower"
-		    export $(echo $var_bin)
+	    var_bin_tolower="$(echo $var_bin | tr [:upper:] [:lower:])"
+	    pathfind_ret "$var_bin_tolower" "$(echo -n $var_bin)"
+	    if [ "$?" -eq 0 ] ; then
+		eval "$var_bin='$(eval echo \$$var_bin)/$var_bin_tolower'"
+		export $(echo $var_bin)
+		log "INFO" "$var_bin=$(eval echo \$$var_bin)"
+	    else
+		eval "$var_bin=$var_bin_tolower"
+		export $(echo $var_bin)
 #		    return 1
-		fi
+	    fi
 	fi
     done
     return 0
@@ -140,16 +140,16 @@ function define_specific_binary_vars() {
 ## @Globals	PATH
 #----
 function pathfind() {
-	OLDIFS="$IFS"
-	IFS=:
-	for p in $PATH; do
-		if [ -x "$p/$*" ]; then
-			IFS="$OLDIFS"
-			return 0
-		fi
-	done
-	IFS="$OLDIFS"
-	return 1
+    OLDIFS="$IFS"
+    IFS=:
+    for p in $PATH; do
+	if [ -x "$p/$*" ]; then
+	    IFS="$OLDIFS"
+	    return 0
+	fi
+    done
+    IFS="$OLDIFS"
+    return 1
 }
 
 #----
@@ -161,19 +161,19 @@ function pathfind() {
 ## @Globals	PATH
 #----
 function pathfind_ret() {
-	local bin=$1
-	local var_ref=$2
-	local OLDIFS="$IFS"
-	IFS=:
-	for p in $PATH; do
-		if [ -x "$p/$bin" ]; then
-			IFS="$OLDIFS"
-			eval $var_ref=$p
-			return 0
-		fi
-	done
-	IFS="$OLDIFS"
-	return 1
+    local bin=$1
+    local var_ref=$2
+    local OLDIFS="$IFS"
+    IFS=:
+    for p in $PATH; do
+	if [ -x "$p/$bin" ]; then
+	    IFS="$OLDIFS"
+	    eval $var_ref=$p
+	    return 0
+	fi
+    done
+    IFS="$OLDIFS"
+    return 1
 }
 
 #----
@@ -185,39 +185,39 @@ function pathfind_ret() {
 ## @return 1 	no
 #----
 function yes_no_default() {
-	local message=$1
-	local default=${2:-$no}
-	local res="not_define"
-	while [ "$res" != "$yes" ] && [ "$res" != "$no" ] && [ ! -z "$res" ] ; do
-		echo -e "\n$message\n[y/n], default to [$default]:"
-		echo -en "> "
-		read res
-		[ -z "$res" ] && res="$default"
-	done
-	if [ "$res" = "$yes" ] ; then 
-		return 0
-	else 
-		return 1
-	fi
+    local message=$1
+    local default=${2:-$no}
+    local res="not_define"
+    while [ "$res" != "$yes" ] && [ "$res" != "$no" ] && [ ! -z "$res" ] ; do
+	echo -e "\n$message\n[y/n], default to [$default]:"
+	echo -en "> "
+	read res
+	[ -z "$res" ] && res="$default"
+    done
+    if [ "$res" = "$yes" ] ; then 
+	return 0
+    else 
+	return 1
+    fi
 }
 
 #---
 ## {Get Centreon install dir and user/group for apache}
 #----
 function get_centreon_parameters() {
-	INSTALL_DIR_CENTREON=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "INSTALL_DIR_CENTREON" | cut -d '=' -f2`;
-	WEB_USER=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "WEB_USER" | cut -d '=' -f2`;
-	WEB_GROUP=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "WEB_GROUP" | cut -d '=' -f2`;
-	NAGIOS_PLUGIN=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "NAGIOS_PLUGIN" | cut -d '=' -f2`;
-	NAGIOS_USER=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "NAGIOS_USER" | cut -d '=' -f2`;
-	NAGIOS_GROUP=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "NAGIOS_GROUP" | cut -d '=' -f2`;
-	DB_NAME_CENTREON=`cat /etc/centreon/centreon.conf.php | grep "\$conf_centreon\['db'\]" | cut -d '=' -f2 | sed -e s/\"//g -e s/\ //g -e s/\;//g`
-
-	if [ "$INSTALL_DIR_CENTREON" != "" ] && [ "$WEB_USER" != "" ] && [ "$WEB_GROUP" != "" ] && [ "$NAGIOS_PLUGIN" != "" ] && [ "$NAGIOS_USER" != "" ] && [ "$NAGIOS_GROUP" != "" ] && [ "DB_NAME_CENTREON" != "" ]; then
-		return 0;
-	else
-		return 1;
-	fi
+    INSTALL_DIR_CENTREON=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "INSTALL_DIR_CENTREON" | cut -d '=' -f2`;
+    WEB_USER=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "WEB_USER" | cut -d '=' -f2`;
+    WEB_GROUP=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "WEB_GROUP" | cut -d '=' -f2`;
+    NAGIOS_PLUGIN=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "NAGIOS_PLUGIN" | cut -d '=' -f2`;
+    NAGIOS_USER=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "NAGIOS_USER" | cut -d '=' -f2`;
+    NAGIOS_GROUP=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "NAGIOS_GROUP" | cut -d '=' -f2`;
+    DB_NAME_CENTREON=`cat /etc/centreon/centreon.conf.php | grep "\$conf_centreon\['db'\]" | cut -d '=' -f2 | sed -e s/\"//g -e s/\ //g -e s/\;//g`
+    
+    if [ "$INSTALL_DIR_CENTREON" != "" ] && [ "$WEB_USER" != "" ] && [ "$WEB_GROUP" != "" ] && [ "$NAGIOS_PLUGIN" != "" ] && [ "$NAGIOS_USER" != "" ] && [ "$NAGIOS_GROUP" != "" ] && [ "DB_NAME_CENTREON" != "" ]; then
+	return 0;
+    else
+	return 1;
+    fi
 }
 
 #---
@@ -227,29 +227,29 @@ function get_centreon_parameters() {
 ## @Stdin Path with must contain $FILE_CONF
 #----
 function get_centreon_configuration_location() {
-	echo ""
-	echo "$line"
-	echo -e "\tLoad parameters"
-	echo "$line"
-	err=1
-	while [ $err != 0 ]
-	do
-		echo -e "Please specify the directory with contain \"$FILE_CONF\" [$CENTREON_CONF]"
-		echo -en "> "
-		read temp_read
-
-		if [ -z $temp_read ]; then
-		    temp_read=$CENTREON_CONF
-                    #echo_failure "The directory does not exist!" "$fail"
-		fi
-
-		if [ -d $temp_read ] && [ -f $temp_read/$FILE_CONF ] ; then
-			err=0
-			CENTREON_CONF=$temp_read
-		else
-			echo_failure "File \"$FILE_CONF\" does not exist in this directory!" "$fail"
-		fi
-	done
+    echo ""
+    echo "$line"
+    echo -e "\tLoad parameters"
+    echo "$line"
+    err=1
+    while [ $err != 0 ]
+    do
+	echo -e "Please specify the directory with contain \"$FILE_CONF\" [$CENTREON_CONF]"
+	echo -en "> "
+	read temp_read
+	
+	if [ -z $temp_read ]; then
+	    temp_read=$CENTREON_CONF
+            #echo_failure "The directory does not exist!" "$fail"
+	fi
+	
+	if [ -d $temp_read ] && [ -f $temp_read/$FILE_CONF ] ; then
+	    err=0
+	    CENTREON_CONF=$temp_read
+	else
+	    echo_failure "File \"$FILE_CONF\" does not exist in this directory!" "$fail"
+	fi
+    done
 }
 
 #----
@@ -260,57 +260,57 @@ function get_centreon_configuration_location() {
 ## @Stderr Log into $LOG_FILE
 #----
 function install_modPython() {
-	echo ""
-	echo "$line"
-	echo -e "\tInstall Python Modules"
-	echo "$line"
-	
-	case $typeInstall in
-	    poller )
-		echo -ne "Module NMAP ..."
-		cd $BASE_DIR/modPython/python-nmap-0.1.4
-		${PYTHON} setup.py install >> $LOG_FILE 2>> $LOG_FILE
-		install_ok=$?
-		display_return "$install_ok" "Module NMAP"
-		return $install_ok
-		;;
-	    central ) 
-		echo -n "Module SetupTools ..."
-		cd $BASE_DIR/modPython/setuptools-0.6c11
-		${PYTHON} setup.py install >> $LOG_FILE 2>> $LOG_FILE
-		install_ok_1=$?
-                display_return "$install_ok_1" "Module SetupTools"
-		echo -n "Module MySQLdb ..."
-		cd $BASE_DIR/modPython/MySQL-python-1.2.3
-		${PYTHON} setup.py install >> $LOG_FILE 2>> $LOG_FILE
-		install_ok_2=$?
-		display_return "$install_ok_2" "Module MySQLdb"
-		return $(($install_ok_1+$install_ok_2))
-		;;
-	    both ) 
-		echo -ne "Module NMAP ..."
-                cd $BASE_DIR/modPython/python-nmap-0.1.4
-		${PYTHON} setup.py install >> $LOG_FILE 2>> $LOG_FILE
-		install_ok_1=$?
-		display_return "$install_ok_1" "Module NMAP"
-                echo -ne "Module SetupTools ..."
-		cd $BASE_DIR/modPython/setuptools-0.6c11
-		${PYTHON} setup.py install >> $LOG_FILE 2>> $LOG_FILE
-		install_ok_2=$?
-		display_return "$install_ok_2" "Module SetupTools"
-		echo -ne "Module MySQLdb ..."
-                cd $BASE_DIR/modPython/MySQL-python-1.2.3
-		${PYTHON} setup.py install >> $LOG_FILE 2>> $LOG_FILE
-		install_ok_3=$?
-		display_return "$install_ok_3" "Module MySQLdb"
-		return $(($install_ok_1+$install_ok_2+$install_ok_3))
-		;;
-	    * )
-		;;
-	esac
+    echo ""
+    echo "$line"
+    echo -e "\tInstall Python Modules"
+    echo "$line"
+    
+    case $typeInstall in
+	poller )
+	    echo -ne "Module NMAP ..."
+	    cd $BASE_DIR/modPython/python-nmap-0.1.4
+	    ${PYTHON} setup.py install >> $LOG_FILE 2>> $LOG_FILE
+	    install_ok=$?
+	    display_return "$install_ok" "Module NMAP"
+	    return $install_ok
+	    ;;
+	central ) 
+	    echo -n "Module SetupTools ..."
+	    cd $BASE_DIR/modPython/setuptools-0.6c11
+	    ${PYTHON} setup.py install >> $LOG_FILE 2>> $LOG_FILE
+	    install_ok_1=$?
+            display_return "$install_ok_1" "Module SetupTools"
+	    echo -n "Module MySQLdb ..."
+	    cd $BASE_DIR/modPython/MySQL-python-1.2.3
+	    ${PYTHON} setup.py install >> $LOG_FILE 2>> $LOG_FILE
+	    install_ok_2=$?
+	    display_return "$install_ok_2" "Module MySQLdb"
+	    return $(($install_ok_1+$install_ok_2))
+	    ;;
+	both ) 
+	    echo -ne "Module NMAP ..."
+            cd $BASE_DIR/modPython/python-nmap-0.1.4
+	    ${PYTHON} setup.py install >> $LOG_FILE 2>> $LOG_FILE
+	    install_ok_1=$?
+	    display_return "$install_ok_1" "Module NMAP"
+            echo -ne "Module SetupTools ..."
+	    cd $BASE_DIR/modPython/setuptools-0.6c11
+	    ${PYTHON} setup.py install >> $LOG_FILE 2>> $LOG_FILE
+	    install_ok_2=$?
+	    display_return "$install_ok_2" "Module SetupTools"
+	    echo -ne "Module MySQLdb ..."
+            cd $BASE_DIR/modPython/MySQL-python-1.2.3
+	    ${PYTHON} setup.py install >> $LOG_FILE 2>> $LOG_FILE
+	    install_ok_3=$?
+	    display_return "$install_ok_3" "Module MySQLdb"
+	    return $(($install_ok_1+$install_ok_2+$install_ok_3))
+	    ;;
+	* )
+	    ;;
+    esac
 }
 
-	    
+
 #----
 ## Define OS
 ## check on etc to find a specific file <p>
@@ -320,51 +320,51 @@ function install_modPython() {
 ## @return 1      OS not found
 #----
 function find_OS() {
-      local system=""
-      local lsb_release=""
-      system="$(uname -s)"
-      if [ "$system" = "Linux" ] ; then
-            if [ "$(pathfind lsb_release; echo $?)" -eq "0" ] ; then
-                  lsb_release="$(lsb_release -i -s)"
-            else
-                  lsb_release="NOT_FOUND"
-            fi
-            if [ "$lsb_release" = "Debian" ] || \
-                  [ -e "/etc/debian_version" ] ; then 
-                  distrib="DEBIAN"
-                  log "INFO" "$(gettext "GNU/Linux Debian Distribution")"
-	    elif [ "$lsb_release" = "Ubuntu" ] ; then
-		  distrib="UBUNTU"
-                  log "INFO" "$(gettext "GNU/Linux Ubuntu Distribution")"
-	    elif [ "$lsb_release" = "CentOS" ] ; then
-                  distrib="CENTOS"
-                  log "INFO" "$(gettext "GNU/Linux CentOS Distribution")"
-            elif [ "$lsb_release" = "RedHatEnterpriseES" ] || \
-                  [ -e "/etc/redhat-release" ] ; then
-                  distrib="REDHAT"
-                  log "INFO" "$(gettext "GNU/Linux Redhat Distribution")"
-	    elif [ "$lsb_release" = "Fedora" ] ; then
-		  distrib="FEDORA"
-                  log "INFO" "$(gettext "GNU/Linux Fedora Distribution")"
-            else
-                  distrib="NOT_FOUND"
-                  log "INFO" "$(gettext "GNU/Linux distribution not found")"
-                  return 1
-            fi
-      elif [ "$system" = "FreeBSD" ] ; then
-            distrib="FREEBSD"
-            log "INFO" "$(gettext "FreeBSD System")"
-      elif [ "$system" = "AIX" ] ; then
-            distrib="AIX"
-            log "INFO" "$(gettext "AIX System")"
-      elif [ "$system" = "SunOS" ] ; then
-            distrib="SUNOS"
-            log "INFO" "$(gettext "SunOS System")"
-      else
+    local system=""
+    local lsb_release=""
+    system="$(uname -s)"
+    if [ "$system" = "Linux" ] ; then
+        if [ "$(pathfind lsb_release; echo $?)" -eq "0" ] ; then
+            lsb_release="$(lsb_release -i -s)"
+        else
+            lsb_release="NOT_FOUND"
+        fi
+        if [ "$lsb_release" = "Debian" ] || \
+            [ -e "/etc/debian_version" ] ; then 
+            distrib="DEBIAN"
+            log "INFO" "$(gettext "GNU/Linux Debian Distribution")"
+	elif [ "$lsb_release" = "Ubuntu" ] ; then
+	    distrib="UBUNTU"
+            log "INFO" "$(gettext "GNU/Linux Ubuntu Distribution")"
+	elif [ "$lsb_release" = "CentOS" ] ; then
+            distrib="CENTOS"
+            log "INFO" "$(gettext "GNU/Linux CentOS Distribution")"
+        elif [ "$lsb_release" = "RedHatEnterpriseES" ] || \
+            [ -e "/etc/redhat-release" ] ; then
+            distrib="REDHAT"
+            log "INFO" "$(gettext "GNU/Linux Redhat Distribution")"
+	elif [ "$lsb_release" = "Fedora" ] ; then
+	    distrib="FEDORA"
+            log "INFO" "$(gettext "GNU/Linux Fedora Distribution")"
+        else
             distrib="NOT_FOUND"
-            log "INFO" "$(gettext "System not found")"
-      fi
-      return 0
+            log "INFO" "$(gettext "GNU/Linux distribution not found")"
+            return 1
+        fi
+    elif [ "$system" = "FreeBSD" ] ; then
+        distrib="FREEBSD"
+        log "INFO" "$(gettext "FreeBSD System")"
+    elif [ "$system" = "AIX" ] ; then
+        distrib="AIX"
+        log "INFO" "$(gettext "AIX System")"
+    elif [ "$system" = "SunOS" ] ; then
+        distrib="SUNOS"
+        log "INFO" "$(gettext "SunOS System")"
+    else
+        distrib="NOT_FOUND"
+        log "INFO" "$(gettext "System not found")"
+    fi
+    return 0
 }
 
 #---
@@ -374,11 +374,11 @@ function find_OS() {
 ## @return 1      packages not found
 #---
 function check_package() {
-	if [ "$distrib" == "DEBIAN" ] || [ "$distrib" == "UBUNTU" ] ; then
-	    return `${DPKG} -l | grep $1 | wc -l`
-	elif [ "$distrib" == "REDHAT" ] || [ "$distrib" == "CENTOS" ] ; then
-	    return `${YUM} list installed | grep $1 | wc -l`
-	fi
+    if [ "$distrib" == "DEBIAN" ] || [ "$distrib" == "UBUNTU" ] ; then
+	return `${DPKG} -l | grep $1 | wc -l`
+    elif [ "$distrib" == "REDHAT" ] || [ "$distrib" == "CENTOS" ] ; then
+	return `${YUM} list installed | grep $1 | wc -l`
+    fi
 }
 
 #---
@@ -388,10 +388,10 @@ function check_package() {
 ## @return 1      packages not found
 #---
 function check_bin_version() {
-	for line in $(cat ./install/bin_version)
-	{
-		echo $line
-	}	
+    for line in $(cat ./install/bin_version)
+    {
+	echo $line
+    }	
 #	version= `$1 -V`
 }
 
@@ -402,96 +402,96 @@ function check_bin_version() {
 ## @Stderr Log into $LOG_FILE
 #----
 function install_module() {
-	echo ""
-	echo "$line"
-	echo -e "\tInstall Discovery Module"
-	echo "$line"
+    echo ""
+    echo "$line"
+    echo -e "\tInstall Discovery Module"
+    echo "$line"
+    
+    echo -n "Creating temp install directory"
+    TEMP_D="/tmp/Install_module"
+    /bin/mkdir -p $TEMP_D >> $LOG_FILE 2>> $LOG_FILE
+    display_return "$?" "Creating temp install directory"
+    /bin/cp -Rf $BASE_DIR/www/modules/Discovery/* $TEMP_D/ >> $LOG_FILE 2>> $LOG_FILE
+    /bin/rm -Rf $TEMP_D/install $TEMP_D/*.log
+    
+    echo -n "Setting rights"
+    ${CHMOD} -R 755 $TEMP_D/* >> $LOG_FILE 2>> $LOG_FILE
+    display_return "$?" "Setting rights"
 	
-	echo -n "Creating temp install directory"
-	TEMP_D="/tmp/Install_module"
-	/bin/mkdir -p $TEMP_D >> $LOG_FILE 2>> $LOG_FILE
-	display_return "$?" "Creating temp install directory"
-	/bin/cp -Rf $BASE_DIR/www/modules/Discovery/* $TEMP_D/ >> $LOG_FILE 2>> $LOG_FILE
-	/bin/rm -Rf $TEMP_D/install $TEMP_D/*.log
-
-	echo -n "Setting rights"
-	${CHMOD} -R 755 $TEMP_D/* >> $LOG_FILE 2>> $LOG_FILE
-	display_return "$?" "Setting rights"
-	
-	echo -n "Setting owner/group"
-	${CHOWN} -R $WEB_USER.$WEB_GROUP $TEMP_D/* >> $LOG_FILE 2>> $LOG_FILE
-	display_return "$?" "Setting owner/group"
-
-	echo "Changing macro"
-	FILE="include/update.php"
-	echo -ne "\tfor update.php"
-	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
-	$SED -i -e 's|@AGENT_DIR@|'"$AGENT_DIR"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
-	display_return "$?" "Changing macro for update.php"
-	FILE="include/verif_discovery_status.php"
-	echo -ne "\tfor verif_discovery_status.php"
-	$SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
-	display_return "$?" "Changing macro for verif_discovery_status.php"
-	FILE="include/refresh_result.php"
-	echo -ne "\tfor refresh_result.php"
-        $SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
-        display_return "$?" "Changing macro for refresh_result.php"
-	FILE="include/ips.php"
-	echo -ne "\tfor ips.php"
-	$SED -i -e 's|@AGENT_DIR@|'"$AGENT_DIR"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
-	display_return "$?" "Changing macro for ips.php"
-	FILE="include/results.php"
-	echo -ne "\tfor results.php"
-	$SED -i -e 's|@AGENT_DIR@|'"$AGENT_DIR"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
-	display_return "$?" "Changing macro for results.php"
-	FILE="sql/install.sql"
-	echo -ne "\tfor install.sql"
-        $SED -i -e 's|@DB_NAME_CENTREON@|'"$DB_NAME_CENTREON"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
-        display_return "$?" "Changing macro for install.sql"
-	FILE="sql/uninstall.sql"
-	echo -ne "\tfor uninstall.sql"
-        $SED -i -e 's|@DB_NAME_CENTREON@|'"$DB_NAME_CENTREON"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
-        display_return "$?" "Changing macro for uninstall.sql"
-
-	INSTALL_DIR_MODULE=$INSTALL_DIR_CENTREON/$MODULE_DIR
-	
-	if [ -d $INSTALL_DIR_MODULE ] ; then
-	    if [ -d  $INSTALL_DIR_CENTREON/$BACKUP ] ; then
-		echo -n "Delete old Discovery backup"
-		/bin/rm -Rf $INSTALL_DIR_CENTREON/$BACKUP/* >> $LOG_FILE 2>> $LOG_FILE
-		display_return "$?" "Delete old Discovery backup"
-	    else
-		echo -n "Create a directory to backup old files"
-		/bin/mkdir $INSTALL_DIR_CENTREON/$BACKUP >> $LOG_FILE 2>> $LOG_FILE
-		display_return "$?" "Create a directory to backup old files"
-	    fi
-	    echo -n "Backup old installation"
-	    mv $INSTALL_DIR_MODULE/* $INSTALL_DIR_CENTREON/$BACKUP >> $LOG_FILE 2>> $LOG_FILE
-	    display_return "$?" "Backup old installation"
+    echo -n "Setting owner/group"
+    ${CHOWN} -R $WEB_USER.$WEB_GROUP $TEMP_D/* >> $LOG_FILE 2>> $LOG_FILE
+    display_return "$?" "Setting owner/group"
+    
+    echo "Changing macro"
+    FILE="include/update.php"
+    echo -ne "\tfor update.php"
+    $SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+    $SED -i -e 's|@AGENT_DIR@|'"$AGENT_DIR"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+    display_return "$?" "Changing macro for update.php"
+    FILE="include/verif_discovery_status.php"
+    echo -ne "\tfor verif_discovery_status.php"
+    $SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+    display_return "$?" "Changing macro for verif_discovery_status.php"
+    FILE="include/refresh_result.php"
+    echo -ne "\tfor refresh_result.php"
+    $SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+    display_return "$?" "Changing macro for refresh_result.php"
+    FILE="include/ips.php"
+    echo -ne "\tfor ips.php"
+    $SED -i -e 's|@AGENT_DIR@|'"$AGENT_DIR"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+    display_return "$?" "Changing macro for ips.php"
+    FILE="include/results.php"
+    echo -ne "\tfor results.php"
+    $SED -i -e 's|@AGENT_DIR@|'"$AGENT_DIR"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+    display_return "$?" "Changing macro for results.php"
+    FILE="sql/install.sql"
+    echo -ne "\tfor install.sql"
+    $SED -i -e 's|@DB_NAME_CENTREON@|'"$DB_NAME_CENTREON"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+    display_return "$?" "Changing macro for install.sql"
+    FILE="sql/uninstall.sql"
+    echo -ne "\tfor uninstall.sql"
+    $SED -i -e 's|@DB_NAME_CENTREON@|'"$DB_NAME_CENTREON"'|g' $TEMP_D/$FILE 2>> $LOG_FILE
+    display_return "$?" "Changing macro for uninstall.sql"
+    
+    INSTALL_DIR_MODULE=$INSTALL_DIR_CENTREON/$MODULE_DIR
+    
+    if [ -d $INSTALL_DIR_MODULE ] ; then
+	if [ -d  $INSTALL_DIR_CENTREON/$BACKUP ] ; then
+	    echo -n "Delete old Discovery backup"
+	    /bin/rm -Rf $INSTALL_DIR_CENTREON/$BACKUP/* >> $LOG_FILE 2>> $LOG_FILE
+	    display_return "$?" "Delete old Discovery backup"
+	else
+	    echo -n "Create a directory to backup old files"
+	    /bin/mkdir $INSTALL_DIR_CENTREON/$BACKUP >> $LOG_FILE 2>> $LOG_FILE
+	    display_return "$?" "Create a directory to backup old files"
 	fi
-	
-	if [ ! -d $INSTALL_DIR_MODULE ] ; then
-	    echo -n "Create module directory"
-	    /bin/mkdir $INSTALL_DIR_MODULE >> $LOG_FILE 2>> $LOG_FILE
-	    display_return "$?" "Create module directory"
-	    echo -n "Change owner on module directory"
-	    ${CHOWN} -R $WEB_USER.$WEB_GROUP $INSTALL_DIR_MODULE >> $LOG_FILE 2>> $LOG_FILE
-	    display_return "$?" "Change owner on module directory"
-	    echo -n "Change rights on module directory"
-	    ${CHMOD} -R 755 $INSTALL_DIR_MODULE >> $LOG_FILE 2>> $LOG_FILE
-	    display_return "$?" "Change rights on module directory"
-	fi
-	
-	echo -n "Copying module"
-	/bin/cp -Rf --preserve $TEMP_D/* $INSTALL_DIR_CENTREON/$MODULE_DIR >> $LOG_FILE 2>> $LOG_FILE
-	display_return "$?" "Copying module"
-
-	echo -n "Delete temp install directory"
-	/bin/rm -Rf $TEMP_D $TEMP >> $LOG_FILE 2>> $LOG_FILE
-	display_return "$?" "Delete temp install directory"
-	
-	echo_success "\nThe $LOG_VERSION is finished" "$ok"
-	echo -e  "See README and the log file for more details."
+	echo -n "Backup old installation"
+	mv $INSTALL_DIR_MODULE/* $INSTALL_DIR_CENTREON/$BACKUP >> $LOG_FILE 2>> $LOG_FILE
+	display_return "$?" "Backup old installation"
+    fi
+    
+    if [ ! -d $INSTALL_DIR_MODULE ] ; then
+	echo -n "Create module directory"
+	/bin/mkdir $INSTALL_DIR_MODULE >> $LOG_FILE 2>> $LOG_FILE
+	display_return "$?" "Create module directory"
+	echo -n "Change owner on module directory"
+	${CHOWN} -R $WEB_USER.$WEB_GROUP $INSTALL_DIR_MODULE >> $LOG_FILE 2>> $LOG_FILE
+	display_return "$?" "Change owner on module directory"
+	echo -n "Change rights on module directory"
+	${CHMOD} -R 755 $INSTALL_DIR_MODULE >> $LOG_FILE 2>> $LOG_FILE
+	display_return "$?" "Change rights on module directory"
+    fi
+    
+    echo -n "Copying module"
+    /bin/cp -Rf --preserve $TEMP_D/* $INSTALL_DIR_CENTREON/$MODULE_DIR >> $LOG_FILE 2>> $LOG_FILE
+    display_return "$?" "Copying module"
+    
+    echo -n "Delete temp install directory"
+    /bin/rm -Rf $TEMP_D $TEMP >> $LOG_FILE 2>> $LOG_FILE
+    display_return "$?" "Delete temp install directory"
+    
+    echo_success "\nThe $LOG_VERSION is finished" "$ok"
+    echo -e  "See README and the log file for more details."
 }
 
 #----
@@ -628,84 +628,3 @@ function install_agent(){
     fi
 }
 
-#----
-## {Check envvars file}
-##
-## @Stdout Actions realised by function
-## @Stderr Log into $LOG_FILE
-#----
-function config_envvars(){
-    echo ""
-    echo "$line"
-    echo -e "\tModify config Apache ($WEB_ENVVARS)"
-    echo "$line"
-    err=1
-    while [ $err != 0 ]
-    do
-	echo -e "Please specify the envvars file location [$DIR_ENVVARS]"
-	echo -en "> "
-	read temp_read
-
-	if [ -z $temp_read ]; then
-	    temp_read=$DIR_ENVVARS
-	fi
-	
-	if [ -d $temp_read ] && [ -f $temp_read/$WEB_ENVVARS ] ; then
-	    err=0
-	    DIR_ENVVARS=$temp_read
-	else
-	    echo_failure "File \"$WEB_ENVVARS\" does not exist in this directory!" "$fail"
-	fi
-    done
-
-    echo -ne "Check rights on $temp_read/$WEB_ENVVARS"
-    if [ -r $DIR_ENVVARS/$WEB_ENVVARS ] && [ -w $DIR_ENVVARS/$WEB_ENVVARS ] ; then
-	display_return "0" "Check $DIR_ENVVARS/$WEB_ENVVARS"
-	${GREP} "export PYTHON_EGG_CACHE" "$DIR_ENVVARS/$WEB_ENVVARS" >> $LOG_FILE 2>> $LOG_FILE
-	if [ $? -eq "0" ] ; then
-	    echo_success "File \"$WEB_ENVVARS\" is already configured" "$ok"
-	else
-	    modify_envvars;
-	    if [ $? -eq "0" ] ; then
-		echo_success "\nFile \"$WEB_ENVVARS\" is correctly configured" "$ok"
-	    else
-		echo_failure "\nFile \"$WEB_ENVVARS\" isn't correctly configured" "$fail"
-	    fi
-	fi
-    else
-	echo_failure "\nFile \"$WEB_ENVVARS\" isn't readable and/or writable!" "$fail"
-    fi
-}
-
-#----
-## {Add a variable definition in envvars file if necessary}
-##
-## @Stdout Actions realised by function
-## @Stderr Log into $LOG_FILE
-#----
-function modify_envvars(){
-    err=1
-    while [ $err != 0 ]
-    do
-	yes_no_default "Cnfigure $DIR_ENVVARS/$WEB_ENVVARS ?" 
-	if [ "$?" -eq 0 ] ; then
-	    err=0
-	    echo -e "\n\n#Modify by install centreon-Discovery module at `date -R`" >> $DIR_ENVVARS/$WEB_ENVVARS
-	    echo -e "export PYTHON_EGG_CACHE=/tmp\n" >> $DIR_ENVVARS/$WEB_ENVVARS
-	    if [ "$?" -eq 0 ] ; then
-		yes_no_default "Restart Apache2 server ?"
-		if [ "$?" -eq 0 ] ; then
-#		    apachectl -k graceful
-		    echo "apache2 restarted" >> $LOG_FILE 2>> $LOG_FILE
-		    /etc/init.d/apache2 restart >> $LOG_FILE 2>> $LOG_FILE
-		else
-		    echo "apache2 no restarted" >> $LOG_FILE 2>> $LOG_FILE
-		    echo -e "Don't forget restart your web server ;-)"
-		fi
-	    fi
-	    return 0
-	else
-	    return 1
-	fi
-    done
-}

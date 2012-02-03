@@ -40,7 +40,7 @@
 
 # Define Discovery version
 NAME="Discovery"
-VERSION="0.1"
+VERSION="0.1a"
 MODULE=$NAME.$VERSION
 
 # Define vars

@@ -1,18 +1,21 @@
+------------------------------------------------
 #	Description:
-
+------------------------------------------------
 Nom: Centreon-Discovery
-Version: 0.1a
+Version: 0.1b
 Distribution : Debian/CentOS
 
+------------------------------------------------
 #	Prerequis
-
+------------------------------------------------
 * Python (version 2.6) doit être installé à la fois sur le ou les pollers ainsi que sur le central.
 * Le logiciel nmap (version 5.00 ou plus) doit être installé sur chaque poller. Dans le cas d'une architecture centralisée, nmap doit être installé sur le central.
 * Le paquet python-dev (python-devel en fonction des distributions) doit être installé à la fois sur le ou les pollers ainsi que sur le central.
 * Le paquet mysql-devel (sur CentOS) doit être installé sur le central.
 
+------------------------------------------------
 #	Installation:
-
+------------------------------------------------
 1. Télécharger la dernière version du module depuis la page de téléchargement
 
 Se rendre sur la page http://community.centreon.com/projects/centreon-discovery
@@ -35,19 +38,49 @@ Exemple pour poller : $# ./install.sh -i -t poller
 
 L'option "-i" permet de spécifier que l'on désire installer le module.
 
-4. Se rendre sur l'interface de Centreon
+4. Dans l'interface de Centreon
 
 Se rendre ensuite dans le menu 'Administration > Modules > Centreon-Discovery
 Le module Discovery doit figurer dans la liste des modules mais non installé.
-Cliquer sur l'icone à droite ""Install Module" puis sur le bouton "install module" pour lancer l'installation.
+Cliquer sur l'icone à droite "Install Module" puis sur le bouton "install module" pour lancer l'installation.
 
 5. Exécuter l'agent Poller en fond de tâche (installé par défaut dans /etc/centreon-discovery) en root
 
 $# python /etc/centreon-discovery/DiscoveryAgent_poller.py &
 (ou $# python26 /etc/centreon-discovery/DiscoveryAgent_poller.py &)
 
-#	FAQ
+------------------------------------------------
+#	MISE A JOUR
+------------------------------------------------
+1. Dans l'interface de Centreon
 
+Se rendre ensuite dans le menu 'Administration > Modules > Centreon-Discovery
+Le module Discovery doit figurer dans la liste des modules.
+Cliquer sur l'icone à droite "Uninstall Module" puis sur le bouton "OK" pour confirmer.
+
+2. Suppression de(s) agent(s)
+
+Vérifier que l'agent poller est bien arrêté
+
+Supprimer le(s) agent(s)
+$# cd /etc/centreon-discovery
+$# rm -f *.py
+
+Le chemin "/etc/centreon-discovery" est à adapter en fonction de votre configuration.
+
+3. Suppression du module
+
+Supprimer le module
+$# cd /usr/local/centreon/www/modules
+$# rm -rf Discovery
+
+Le chemin "/usr/local/centreon/www/modules" est à adapter en fonction de votre configuration.
+
+4. Aller à "#	Installation:"
+
+------------------------------------------------
+#	FAQ
+------------------------------------------------
 Q: Dans quel type d'installation je me trouve : poller? central? ou both ?
 
 R1 : poller : si vous n'avez que Nagios d'installé sur cette machine et que ce dernier renvoit les infos collectées vers un serveur central. Voir la liste dans l'interface Centreon : "Configuration" --> "Centreon"  --> colonne localhost = NO)
@@ -59,9 +92,9 @@ Q:	Une erreur apparaît lorsque le module Python MySQLdb a besoin de créer un fic
 R:	La solution consiste a rendre l'utilisateur Apache propriétaire de dossier www
 	$#chown www-data:www-data /var/www
 
-
+------------------------------------------------
 #	Liens utiles:
-
+------------------------------------------------
 	Centreon-Discovery
 	
 Documentation:	http://community.centreon.com/projects/centreon-discovery/documents
@@ -74,9 +107,9 @@ Wiki:			http://doc.centreon.com/
 SVN:			http://svn.centreon.com/
 Forum:			http://forum.centreon.com/
 
-
+------------------------------------------------
 #	ERREUR
-
+------------------------------------------------
 Traceback (most recent call last):
   File "./modules/Centreon-Discovery/DiscoveryAgent_central.py", line 4, in <module>
     import MySQLdb

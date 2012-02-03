@@ -1,0 +1,100 @@
+/* 
+    Document   : SAD
+    Created on : 15 janv. 2011, 07:20:21
+    Author     : Alexis DONADIO
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+root { 
+    display: block;
+}
+
+body{
+    background-color: #fff;
+}
+
+body,input,option,select,table,div,td,a,textarea,.link a {
+    font-family:'Bitstream Vera Sans', arial, Tahoma, 'Sans serif';
+}
+
+body,input,option,select,tab,div,td,a,textarea {
+	color:#555;
+	font-size:11px;
+	margin:0;
+	padding:0;
+}
+
+table {
+    border-collapse:collapse;
+    empty-cells:show;
+    border-spacing:0;
+}
+
+img {
+    margin:0 0 -4px;
+    padding:0;
+	border:none;
+}
+
+checkbox {
+    border:0px;
+    margin:0;
+    padding:0px;
+}
+
+select {
+    border-style:none;
+    padding-left:1px;
+    padding-right:1px;
+}
+
+form {
+    padding-top: 10px;
+    padding-bottom:10px;
+    margin-left: 10px;
+}
+	
+#header {
+    height:83px;
+    padding-left:20px;
+    background-color: #F4F9FD;
+}
+
+#logo {
+    position:absolute;
+    left:15px;
+    top:10px;
+}
+
+#onglets{
+    list-style-type: none;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #9EA0A1;
+    margin-left: 0px;
+}
+
+#onglets li{
+    float: left;
+    height: 21px;
+    background-color: #F4F4F4;
+    margin: 2px 0 0 0 !important;
+    margin: 1px 2px 0 2px;
+    border: 1px solid #9EA0A1;
+}
+
+#onglets li.active{
+    background-color: #99DFF0;
+	border-bottom: 1px solid #99DFF0;
+}
+
+#onglets a{
+    display: block;
+    color: #666;
+    text-decoration: none;
+    padding: 4px;
+}
+
+#onglets a:hover{
+    background: #fff;
+}

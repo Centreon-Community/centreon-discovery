@@ -19,7 +19,7 @@
 
 $module_conf['Discovery']["name"] = "Discovery";
 $module_conf['Discovery']["rname"] = "Module Centreon-Discovery";
-$module_conf['Discovery']["mod_release"] = "0.1";
+$module_conf['Discovery']["mod_release"] = "0.1a";
 $module_conf['Discovery']["infos"] = "Module for auto discovery equipments.";
 $module_conf['Discovery']["is_removeable"] = "1";
 $module_conf['Discovery']["author"] = "Esiee 2012";

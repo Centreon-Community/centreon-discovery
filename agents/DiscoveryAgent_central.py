@@ -15,7 +15,8 @@ ID = 0
 IP = 1
 PLAGE = 2
 CIDR = 3
-CONF_PATH = "/etc/centreon/centreon.conf.php"
+#CONF_PATH = "/etc/centreon/centreon.conf.php"
+CONF_PATH = "@CENTREON_ETC@/centreon.conf.php"
 
 # Connection to the database
 def connectToDB():

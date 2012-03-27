@@ -126,18 +126,6 @@ if [ "$USERID" != "0" ]; then
     exit 1
 fi
 
-## Find OS
-echo "$line"
-echo -e "\tFind distribution"
-echo "$line"
-find_OS;
-if [ $? -eq 0 ] ; then
-     echo_success "\nOS found $distrib" "$ok"
-else
-     echo_failure "OS not found" "$fail"
-     exit 1
-fi
-
 #Export variable for all programs
 export silent_install CENTREON_CONF  
 
@@ -164,6 +152,20 @@ ${CAT} << __EOT__
 #                                                                             #
 ###############################################################################
 __EOT__
+
+## Find OS
+echo "$line"
+echo -e "\tFind distribution"
+echo "$line"
+OS=find_OS
+echo "$OS"
+if [ $? -eq 0 ] ; then
+    echo_success "\nOS found $distrib" "$ok"
+else 
+    echo_failure "OS not found" "$fail"
+    log "ERR" "\$distrib not found"
+fi
+
 
 BINARIES="rm cp mv ${CHMOD} ${CHOWN} echo more mkdir find ${GREP} ${CAT} ${SED} ${PYTHON} ${GCC}"
 ## binaries in function typeInstall

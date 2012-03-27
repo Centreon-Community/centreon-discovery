@@ -157,13 +157,12 @@ __EOT__
 echo "$line"
 echo -e "\tFind distribution"
 echo "$line"
-OS=find_OS
-echo "$OS"
+find_OS;
 if [ $? -eq 0 ] ; then
     echo_success "\nOS found $distrib" "$ok"
 else 
     echo_failure "OS not found" "$fail"
-    log "ERR" "\$distrib not found"
+    exit 1
 fi
 
 

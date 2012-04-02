@@ -38,31 +38,36 @@ VALUES ('', 'Centreon Discovery', NULL, 6, 612, 100, 1, './modules/Discovery/inc
  * Création de la table mod_discovery_rangeip contenant les informations relatives aux plages IP à scanner
  *
  */
+DROP TABLE IF EXISTS `mod_discovery_rangeip`;
 CREATE TABLE IF NOT EXISTS `mod_discovery_rangeip` (
   `id` int(11) AUTO_INCREMENT,
   `plage` varchar(15) COLLATE utf8_bin NOT NULL,
   `masque` varchar(15) COLLATE utf8_bin NOT NULL,
   `cidr` int(2) NOT NULL,
-  `ping` int(1) NOT NULL,
-  `ping_count` int(1) NOT NULL,
-  `ping_wait` int(1) NOT NULL,
-  `tcp` int(1) NOT NULL,
-  `tcp_port` varchar(256) COLLATE utf8_bin DEFAULT NULL,
-  `snmp` int(1) NOT NULL,
-  `snmp_version` int(1) DEFAULT NULL,
-  `snmp_community` varchar(256) COLLATE utf8_bin DEFAULT NULL,
-  `oid_hostname` varchar(256) COLLATE utf8_bin DEFAULT NULL,
-  `oid_os` varchar(256) COLLATE utf8_bin DEFAULT NULL,
-  `snmp_method` varchar(5) COLLATE utf8_bin DEFAULT NULL,
-  `nagios_server_id` int(11) DEFAULT NULL,
+/* pour nmap */
+  `nmap_profil` varchar(15) COLLATE utf8_bin NOT NULL DEFAULT 'Insane(T5)', /* [sneaky (T1)] [polite (T2)] [normal (T3)] [aggressive (T4)] [insane(T5) */
+  `nmap_max_retries` int(2) NOT NULL DEFAULT 1,
+  `nmap_host_timeout` int(6) NOT NULL DEFAULT 5000,
+  `nmap_max_rtt_timeout` int(6) NOT NULL DEFAULT 100,
+/* pour snmp */
+  `oid_hostname` varchar(256) COLLATE utf8_bin DEFAULT '.1.3.6.1.2.1.1.5.0',
+  `oid_os` varchar(256) COLLATE utf8_bin DEFAULT '.1.3.6.1.2.1.1.1.0', 
+  `snmp_version` varchar(2) DEFAULT "2c",
+  `snmp_port` int(5) DEFAULT 161,
+  `snmp_community` varchar(256) COLLATE utf8_bin DEFAULT 'public',
+  `snmp_timeout` int(2) NOT NULL DEFAULT 10,
+  `snmp_retries` int(2) NOT NULL DEFAULT 1,
+  `nagios_server_id` int(11) DEFAULT '0',
   `done` int(1) NOT NULL DEFAULT '0',
-  `poller_status` int(1) DEFAULT NULL,
+  `poller_status` int(1) DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=0 ;
 
-INSERT INTO `mod_discovery_rangeip` (`id`, `plage`, `masque`, `cidr`, `ping`, `ping_count`, `ping_wait`, `tcp`, `tcp_port`, `snmp`, `snmp_version`, `snmp_community`, `oid_hostname`, `oid_os`, `snmp_method`, `nagios_server_id`, `done`) VALUES
-(0, 'default', '0', 0, 0, 1, 500, 0, NULL, 0, 2, 'public', '.1.3.6.1.2.1.1.5.0', '.1.3.6.1.2.1.1.1.0', NULL, NULL, 0);
-UPDATE  `@DB_NAME_CENTREON@`.`mod_discovery_rangeip` SET  `id` =  '0' WHERE  `mod_discovery_rangeip`.`id` =1 LIMIT 1 ;
+INSERT INTO `centreon`.`mod_discovery_rangeip` (`id`, `plage`, `masque`, `cidr`, `nmap_profil`, `nmap_max_retries`, `nmap_host_timeout`, `nmap_max_rtt_timeout`, `oid_hostname`, `oid_os`, `snmp_version`, `snmp_port`, `snmp_community`, `snmp_timeout`, `snmp_retries`, `nagios_server_id`, `done`, `poller_status`) VALUES ('1', 'default', '0', '0', 'Insane(T5)', '1', '5000', '100', '.1.3.6.1.2.1.1.5.0', '.1.3.6.1.2.1.1.1.0', "2", '161', 'public', '10', '1', '0', '0', '0');
+UPDATE  `centreon`.`mod_discovery_rangeip` SET  `id` =  '0' WHERE  `mod_discovery_rangeip`.`id` =1 LIMIT 1 ;
+
+INSERT INTO `centreon`.`mod_discovery_rangeip` (`id`, `plage`, `masque`, `cidr`, `nmap_profil`, `nmap_max_retries`, `nmap_host_timeout`, `nmap_max_rtt_timeout`, `oid_hostname`, `oid_os`, `snmp_version`, `snmp_port`, `snmp_community`, `snmp_timeout`, `snmp_retries`, `nagios_server_id`, `done`, `poller_status`) VALUES ('2', 'default', '0', '0', 'Insane(T5)', '1', '5000', '100', '.1.3.6.1.2.1.1.5.0', '.1.3.6.1.2.1.1.1.0', "2", '161', 'public', '10', '1', '0', '0', '0');
+UPDATE  `centreon`.`mod_discovery_rangeip` SET  `id` =  '-1' WHERE  `mod_discovery_rangeip`.`id` =2 LIMIT 1 ;
 
 /*
  * DATABASE : @DB_NAME_CENTREON@

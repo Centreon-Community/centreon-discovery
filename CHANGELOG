@@ -1,0 +1,22 @@
+## Centreon-Discovery 2.1
+- add secure exchanges between agents (Enhancement #1571)
+- add options management (Enhancement #1572)
+- bug correction (Bug #1576)
+
+## Centreon-Discovery 2.0
+- add hosts identification with SNMP
+- add hosts creation
+- new "About" page
+- add multithreading to detection and identification
+- creation script to start/stop/restart poller agent in "init.d"
+- add rc levels links
+
+## Centreon-Discovery 0.1b
+- improve refresh page results
+- correction bugs
+- new logo
+- minor improvements
+
+## Centreon-Discovery 0.1a
+- just discovery
+Begin !

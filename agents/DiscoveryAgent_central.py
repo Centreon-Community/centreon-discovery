@@ -17,7 +17,7 @@ import MySQLdb
 # For debug only, 0:log // 1:console
 LOG_FILE = "@AGENT_DIR@" + "/log/"+time.strftime('%Y%m',time.localtime())  +"_Central_DiscoveryAgent.log"
 #LOG_FILE = "log/"+time.strftime('%Y%m',time.localtime())  +"_Central_DiscoveryAgent.log"
-MODE_DEBUG = 1
+MODE_DEBUG = 0
 
 ID = 0
 IP = 1

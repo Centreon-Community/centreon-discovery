@@ -38,36 +38,6 @@
 # SVN : $URL: http://svn.modules.centreon.com/centreon-discovery $
 #
 
-# Define Discovery version
-NAME="Discovery"
-VERSION="0.1b"
-MODULE=$NAME.$VERSION
-
-# Define vars
-LOG_VERSION="Centreon Module $MODULE installation"
-FILE_CONF="instCentWeb.conf"
-FILE_CONF_CENT="centreon.conf.php"
-FILE_CONF_CENTPLUGIN="instCentPlugins.conf"
-CENTREON_CONF="/etc/centreon"
-AGENT_DIR="/etc/centreon-discovery"
-MODULE_DIR="www/modules/Discovery"
-INSTALL_DIR_CENTREON=""
-WEB_USER=""
-WEB_GROUP=""
-#WEB_ENVVARS="envvars"
-#DIR_ENVVARS="/etc/apache2"
-NAGIOS_USER=""
-NAGIOS_GROUP=""
-NAGIOS_PLUGIN=""
-DB_NAME_CENTREON=""
-BACKUP="www/modules/Discovery_backup"
-PWD=`pwd`
-TEMP=/tmp/install.$$
-_tmp_install_opts="0"
-silent_install="0"
-user_conf=""
-distrib=""
-typeInstall=""
 
 #---
 ## {Print help and usage}
@@ -90,25 +60,28 @@ function usage() {
 ### Main
 echo "Waiting ..."
 
-# define where is a centreon source 
+# define where is a centreon-module source 
 BASE_DIR=$(dirname $0)
 ## set directory
 BASE_DIR=$( cd $BASE_DIR; pwd )
 export BASE_DIR
 if [ -z "${BASE_DIR#/}" ] ; then
-    echo -e "I think it is not right to have Centreon source on slash"
+    echo -e "I think it is not right to have Centreon-Discovery source on slash"
     exit 1
 fi
 
 INSTALL_DIR="$BASE_DIR/install"
 export INSTALL_DIR
 
-# init variables
-line="------------------------------------------------------------------------"
-export line
-
 ## load all functions used in this script
+. $INSTALL_DIR/variables
+. $INSTALL_DIR/display_functions
 . $INSTALL_DIR/functions
+
+#INSTALL_DIR="$BASE_DIR/install"
+#export INSTALL_DIR
+
+#export line
 
 ## Define a default log file
 LOG_DIR="$BASE_DIR/log"
@@ -153,9 +126,6 @@ if [ "$USERID" != "0" ]; then
     exit 1
 fi
 
-## Find OS
-find_OS 
-
 #Export variable for all programs
 export silent_install CENTREON_CONF  
 
@@ -178,19 +148,28 @@ ${CAT} << __EOT__
 #          http://community.centreon.com/projects/centreon-discovery          #
 #                          Thanks for using Centreon                          #
 #                                                                             #
-#                                    v$VERSION                                     #
+#                                    v$VERSION                                   #
 #                                                                             #
 ###############################################################################
 __EOT__
 
-BINARIES="rm cp mv ${CHMOD} ${CHOWN} echo more mkdir find ${GREP} ${CAT} ${SED} ${PYTHON}"
-## binaries in function typeInstall
-if [ "$typeInstall" == "poller" ] ; then
-    BINARIES=$BINARIES" ${NMAP}"
-elif [ "$typeInstall" == "central" ] ; then
-    BINARIES=$BINARIES" ${GCC}"
+## Find OS
+echo "$line"
+echo -e "\tFind distribution"
+echo "$line"
+find_OS;
+if [ $? -eq 0 ] ; then
+     echo_success "OS found: $distrib" "$ok"
 else
-    BINARIES=$BINARIES" ${GCC} ${NMAP}"
+     echo_failure "OS not found" "$fail"
+     exit 1
+fi
+echo ""
+
+BINARIES="rm cp mv ${CHMOD} ${CHOWN} echo more mkdir find ${GREP} ${CAT} ${SED} ${PYTHON} ${GCC}"
+## binaries in function typeInstall
+if [ "$typeInstall" != "central" ] ; then
+    BINARIES=$BINARIES" ${NMAP}"
 fi    
 
 ## binaries/packages in function distrib 
@@ -214,18 +193,18 @@ echo "$line"
 echo -e "\tChecking all needed binaries"
 echo "$line"
 
-error=0
+binary_fail=0
 # For the moment, I check if all binary exists in path.
 # After, I must look a solution to use complet path by binary
 for binary in $BINARIES; do
     if [ ! -e ${binary} ] ; then 
 	pathfind "$binary"
-	if [ $? -eq 0 ] ; then
+	if [ "$?" -eq 0 ] ; then
 	    echo_success "${binary}" "$ok"
 	else 
 	    echo_failure "${binary}" "$fail"
 	    log "ERR" "\$binary not found in \$PATH"
-	    error=1
+		binary_fail=1
 	fi
     else
 	echo_success "${binary}" "$ok"
@@ -233,8 +212,9 @@ for binary in $BINARIES; do
 done
 
 # Script stop if one binary wasn't found
-if [ "$error" -eq 1 ] ; then
-    echo_info "\nPlease check fail binary and retry"
+if [ "$binary_fail" -eq 1 ] ; then
+	echo ""
+    echo_info "Please check fail binary/package and retry"
     exit 1
 fi
 
@@ -247,19 +227,18 @@ for package in $PACKAGES; do
     echo -n $package
     check_package $package;
     if [ $? -eq 0 ] ; then
-	#package not installed !
+  	#package not installed !
 	display_return "1" "$package"
 	error=1
     else
-		#package installed !
+  	#package installed !
 	display_return "0" "$package"
     fi
 done
-#check_bin_version
 if [ $error == 1 ]; then
-    echo_info "\nPlease check fail package and retry"
+    echo_info "\nPlease check fail packages and retry"
     exit 1
-fi	
+fi
 
 echo -e "\n$line"
 echo -e "\tAccepting licence"
@@ -283,7 +262,7 @@ if [ "$silent_install" -eq 0 ] ; then
 	install_modPython;
 	if [ "$?" -eq 0 ] ; then
 	    install_agent;
-	else
+        else
 	    echo_failure "Modules Python weren't installed with success" "$fail"
 	    echo -e "\tINSTALL ABORT"
 	    exit 1
@@ -302,7 +281,7 @@ if [ "$silent_install" -eq 0 ] ; then
 	if [ "$?" -eq 0 ] ; then
 	    install_agent;
 	    install_module;
-	else
+        else
 	    echo_failure "Modules Python weren't installed with success" "$fail"
 	    echo -e "\tINSTALL ABORT"
 	    exit 1
@@ -310,34 +289,6 @@ if [ "$silent_install" -eq 0 ] ; then
     fi
 fi
 
-if [ "$silent_install" -eq 1 ] ; then
-    if [ -d $user_conf ] && [ -f $user_conf/$FILE_CONF ] ; then
-	CENTREON_CONF=$user_conf/;
-	get_centreon_parameters;
-	if [ "$?" -eq 0 ] ; then
-	    echo_success "Parameters were loaded with success" "$ok"
-	    install_agent;
-	    exit 0
-	    install_modPython;
-	    if [ "$?" -eq 0 ] ; then
-		echo_success "Modules Python were installed with success" "$ok"
-		if [ $typeInstall = "central" || $typeInstall = "both" ] ; then
-		    install_module;
-		fi
-	    else
-		echo_failure "Modules Python weren't installed with success" "$fail"
-	    fi
-	else
-	    echo_failure "Unable to load all parameters in \"$FILE_CONF\"" "$fail"
-	    echo -e "\tINSTALL ABORT"
-	    exit 1
-	fi
-    else
-	echo_failure "File \"$FILE_CONF\" does not exist in your specified directory!" "$fail"
-	echo -e "\tINSTALL ABORT"
-	exit 1
-    fi
-fi
 
 ${CAT} << __EOT__
 ###############################################################################

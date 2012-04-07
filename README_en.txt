@@ -2,14 +2,14 @@
 #	Description:
 ------------------------------------------------
 Name: Centreon-Discovery
-Version: 0.1b
+Version: 2.1.1
 Distribution: Debian/CentOS
 
 ------------------------------------------------
 #	Requirements
 ------------------------------------------------
 * Nmap (version 5.00 or highter) must be installed on each poller. In the case of a centralized architecture, nmap must be installed on the central.
-* Python (version 2.6) must be installed too on the central and on every pollers.
+* Python (version 2.4) must be installed too on the central and on every pollers.
 * The package python-dev (or python-devel depending on linux distribution) must be installed too on the central and on every pollers.
 * The package mysql-devel (on CentOS) must be installed on the central.
 
@@ -22,19 +22,19 @@ Go to the page http://community.centreon.com/projects/centreon-discovery
 
 2. Extract files from the archive
 
-$# tar xzf centreon-discovery-x.x.tar.gz
+	# tar xzf centreon-discovery-x.x.tar.gz
 
 3. Launch setup script
 
-$# cd centreon-discovery-x.x/
-$# chmod 755 install.sh
+	# cd centreon-discovery-x.x/
+	# chmod 755 install.sh
 
 Choose the setup type :
  - as poller : "-t poller"
  - as central : "-t central"
  - as both : "-t both"
  
-Example for poller : $# ./install.sh -i -t poller
+Example for poller : # ./install.sh -i -t poller
 The "-i-" option allows you to specify the setup mode
 
 4. Go to Centreon interface
@@ -45,7 +45,7 @@ Click on the icon to the right "Install Module" then on button "install module" 
 
 5. Execute Poller agent (installed in /etc/centreon-discovery by default) in root
 
-$# /etc/centreon-discovery/DiscoveryAgent_poller.py &
+	# /etc/centreon-discovery/DiscoveryAgent_poller.py &
 (or $# python26 /etc/centreon-discovery/DiscoveryAgent_poller.py &)
 
 ------------------------------------------------
@@ -62,16 +62,16 @@ Click on the icon to the right "Uninstall Module" then on button "OK" to confirm
 Check that poller agent is stopped.
 
 Delete agent(s)
-$# cd /etc/centreon-discovery
-$# rm -f *.py
+	# cd /etc/centreon-discovery
+	# rm -f *.py
 
 Change directory "/etc/centreon-discovery" depending on your configuration.
 
 3. Delete module
 
 Delete module
-$# cd /usr/local/centreon/www/modules
-$# rm -rf Discovery
+	# cd /usr/local/centreon/www/modules
+	# rm -rf Discovery
 
 Change directory "/usr/local/centreon/www/modules" depending on your configuration.
 
@@ -91,6 +91,9 @@ Q:	An error appears when the Python MySQLdb module needs to create a file in the
 A:	The Apache user must become owner of www folder
 	$#chown www-data:www-data /var/www
 
+Q : How to install the lastest nmap release on CentOS ?
+
+R : rpm -vhU http://nmap.org/dist/nmap-5.51-1.i386.rpm
 ------------------------------------------------
 #	Useful links :
 ------------------------------------------------
@@ -99,7 +102,7 @@ A:	The Apache user must become owner of www folder
 Module:			http://community.centreon.com/projects/centreon-discovery
 Documentation:	http://community.centreon.com/projects/centreon-discovery/documents
 SVN:			http://svn.modules.centreon.com/centreon-discovery/
-Forum:			In progress
+Forum:			http://forum.centreon.com/forumdisplay.php/36-Centreon-discovery-s-modules
 
 	Centreon
 	

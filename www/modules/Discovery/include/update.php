@@ -3,8 +3,8 @@
 $filepath = '@CENTREON_ETC@/centreon.conf.php';
 //$filepath = '/etc/centreon/centreon.conf.php';
 
+//$agentDir = "/usr/share/centreon-discovery/DiscoveryAgent_central.py";
 $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
-//$agentDir = "/etc/centreon-discovery/DiscoveryAgent_central.py";
 
 if (file_exists($filepath)) {
 	include($filepath);

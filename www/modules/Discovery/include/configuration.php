@@ -74,7 +74,7 @@
 				<tr>
 					<td width="30%"></td>
 					<td width="40%"><h1 ALIGN=CENTER>Discovery - Configuration page</h1></td>
-					<td width="30%"><img ALIGN=right alt="CentESIEEon" src="./modules/Discovery/include/images/logo.jpg"/><td>		
+					<td width="30%"><img ALIGN=right alt="Centreon-Discovery" src="./modules/Discovery/include/images/logo.png"/><td>		
 				<br><br></tr>
 			<?php
 			
@@ -104,13 +104,6 @@
 				echo '<a href="./main.php?p=61203&id=2">  Template / OS Relation  </a></li>'."\n";
 				echo '  </ul>'."\n";
 				echo '</div>'."\n";
-				echo '<div id="tab1" class="tab">'."\n";
-				echo '    <table class="ListTable">'."\n";
-				echo '        <tr class="ListHeader">'."\n";
-				echo '            <td class="FormHeader">&nbsp;&nbsp;</td> '."\n";
-				echo '        </tr>'."\n";
-				echo '        <tr>'."\n";
-				echo '            <td align="center">'."\n";
 			}
 			
 			function doForm($id,$error){
@@ -121,79 +114,75 @@
 						#Default values configuration
 						$values=mysql_query("SELECT * FROM mod_discovery_rangeip WHERE id=0;");
 						$valuesData=mysql_fetch_array($values,MYSQL_ASSOC);
+						echo '<div id="tab1" class="tab">'."\n";
+						echo '    <table class="ListTable">'."\n";
+						echo '        <tr class="ListHeader"><td class="FormHeader" colspan="2">&nbsp;<img src="./img/icones/16x16/tool.gif">&nbsp;Modify General Options</td></tr>'."\n";
 						echo '<form method="post" action="">'."\n";
-						echo '  <table>'."\n";
-						echo '      <tr>'."\n";
-						echo '          <td>Ping count : </td>'."\n";
-						echo '          <td>&nbsp;</td>'."\n";
-						echo '          <td><input style="text-align:center;"  type="text" name="pingcount" size="12" value="'.$valuesData["ping_count"].'"></td>'."\n";
+						echo '	<tr class="list_lvl_1"><td class="ListColLvl1_name" colspan="2">&nbsp;<img src="./modules/Discovery/include/images/nmap_logo16x16.png">&nbsp;&nbsp;NMAP Settings</td></tr>'."\n";
+						echo '	<tr class="list_one"><td class="FormRowField">Profil</td><td class="FormRowValue">'."\n";
+						switch ($valuesData["nmap_profil"]){
+							case 'Sneaky (T1)';
+								$select1="selected";
+								break;
+							case 'Polite (T2)';
+								$select2="selected";
+								break;
+							case 'Normal (T3)';
+								$select3="selected";
+								break;
+							case 'Aggressive (T4)';
+								$select4="selected";
+								break;
+							case 'Insane(T5)';
+								$select5="selected";
+								break;
+						}
+						echo '          <select name="profil_nmap">'."\n";
+						echo '              <option '.$select1.'>Sneaky (T1)</option>'."\n";
+						echo '              <option '.$select2.'>Polite (T2)</option>'."\n";
+						echo '              <option '.$select3.'>Normal (T3)</option>'."\n";
+						echo '              <option '.$select4.'>Aggressive (T4)</option>'."\n";
+						echo '              <option '.$select5.'>Insane(T5)</option>'."\n";
+						echo '          </select>'."\n";	
 						echo '      </tr>'."\n";
-						echo '      <tr>'."\n";
-						echo '          <td>Ping timeout (milliseconds) : </td>'."\n";
-						echo '          <td>&nbsp;</td>'."\n";
-						echo '          <td><input style="text-align:center;"  type="text" name="pingtimeout" size="12" value="'.$valuesData["ping_wait"].'"></td>'."\n";
-						echo '      </tr>'."\n";
-						echo '      <tr>'."\n";
-						echo '          <td>Hostname OID : </td>'."\n";
-						echo '          <td>&nbsp;</td>'."\n";
-						echo '          <td><input style="text-align:center;"  type="text" name="hostname" size="12" value="'.$valuesData["oid_hostname"].'"></td>'."\n";
-						echo '      </tr>'."\n";
-						echo '      <tr><td colspan=2>&nbsp;</td></tr>',"\n";
-						echo '      <tr>'."\n";
-						echo '          <td>OS Version OID : </td>'."\n";
-						echo '          <td>&nbsp;</td>'."\n";
-						echo '          <td><input style="text-align:center;" type="text" name="OS" size="12" value="'.$valuesData["oid_os"].'"></td>'."\n";
-						echo '      </tr>'."\n";
-						echo '      <tr><td colspan=2>&nbsp;</td></tr>',"\n";
-						echo '      <tr>'."\n";
-						echo '          <td>SNMP version : </td>'."\n";
-						echo '          <td>&nbsp;</td>'."\n";
+						echo '	<tr class="list_two"><td class="FormRowField">Host Timeout</td><td class="FormRowValue"><input style="text-align:center;"  type="text" name="nmap_timeout" size="12" value="'.$valuesData["nmap_host_timeout"].'">&nbsp;milliseconds</td></tr>'."\n";
+						echo '	<tr class="list_one"><td class="FormRowField">Max RTT Timeout</td><td class="FormRowValue"><input style="text-align:center;"  type="text" name="nmap_timeout_rtt" size="12" value="'.$valuesData["nmap_max_rtt_timeout"].'">&nbsp;milliseconds</td></tr>'."\n";
+						echo '	<tr class="list_two"><td class="FormRowField">Max Retries</td><td class="FormRowValue"><input style="text-align:center;"  type="text" name="nmap_retries" size="12" value="'.$valuesData["nmap_max_retries"].'"></td></tr>'."\n";						
+						echo '	<tr class="list_lvl_1"><td class="ListColLvl1_name" colspan="2">&nbsp;<img src="./img/icones/16x16/oreon.gif">&nbsp;&nbsp;SNMP Settings</td></tr>'."\n";
+						echo '	<tr class="list_two"><td class="FormRowField">Port</td><td class="FormRowValue"><input style="text-align:center;"  type="text" name="port" size="12" value="'.$valuesData["snmp_port"].'"></td></tr>'."\n";												
+						echo '	<tr class="list_one"><td class="FormRowField">Version</td><td class="FormRowValue">'."\n";
 						if ($valuesData["snmp_version"]==1){
-							$select1="selected";
+							$select6="selected";
 						}
-						else $select2="selected";
-						echo '          <td><select name="version">'."\n";
-						echo '              <option '.$select1.'>v1</option>'."\n";
-						echo '              <option '.$select2.'>v2c</option>'."\n";
-						echo '          </select></td>'."\n";
-						echo '      </tr>'."\n";
-						echo '      <tr><td colspan=2>&nbsp;</td></tr>',"\n";
-						echo '      <tr>'."\n";
-						echo '          <td>SNMP method : </td>'."\n";
-						echo '          <td>&nbsp;</td>'."\n";
-						$select3="";
-						$select4="";
-						if ($valuesData["snmp_method"]=="walk"){
-							$select3="selected";
-						}
-						else{
-							$select4="selected";
-						}
-						echo '          <td><select name="method">'."\n";
-						echo '              <option '.$select3.'>Walk</option>'."\n";
-						echo '              <option '.$select4.'>Get</option>'."\n";
-						echo '          </select></td>'."\n";
-						echo '      </tr>'."\n";
-						echo '      <tr><td colspan=2>&nbsp;</td></tr>',"\n";
-						echo '      <tr>'."\n";
-						echo '          <td>SNMP Comumnity : </td>'."\n";
-						echo '          <td>&nbsp;</td>'."\n";
-						echo '          <td><input style="text-align:center;"  type="text" name="community" size="12" value="'.$valuesData["snmp_community"].'"></td>'."\n";
-						echo '      </tr>'."\n";
-						echo '      <tr><td colspan=2>&nbsp;</td></tr>',"\n";
-						echo '      <tr>'."\n";
-						echo '          <td>&nbsp;</td>'."\n";
-						echo '          <td>&nbsp;</td>'."\n";
-						echo '          <td><input name="save" type="submit" value=" Save "></td>'."\n";
-						echo '          <td><input name="defaults" type="submit" value=" Defaults "></td>'."\n";
-						echo '  </table>'."\n";
+						else $select7="selected";
+						echo '         	<select name="version">'."\n";
+						echo '              <option '.$select6.'>1</option>'."\n";
+						echo '              <option '.$select7.'>2c</option>'."\n";
+						echo '          </select></td></tr>'."\n";							
+						echo '	<tr class="list_one"><td class="FormRowField">Community</td><td class="FormRowValue"><input style="text-align:center;"  type="text" name="community" size="12" value="'.$valuesData["snmp_community"].'"></td></tr>'."\n";
+						echo '	<tr class="list_two"><td class="FormRowField">Timeout</td><td class="FormRowValue"><input style="text-align:center;"  type="text" name="timeout" size="12" value="'.$valuesData["snmp_timeout"].'">&nbsp;seconds</td></tr>'."\n";
+						echo '	<tr class="list_one"><td class="FormRowField">Retries</td><td class="FormRowValue"><input style="text-align:center;"  type="text" name="retries" size="12" value="'.$valuesData["snmp_retries"].'"></td></tr>'."\n";
+						echo '	<tr class="list_lvl_1"><td class="ListColLvl1_name" colspan="2">&nbsp;<img src="./modules/Discovery/include/images/logo_oid.gif">&nbsp;&nbsp;OID</td></tr>'."\n";
+						echo '	<tr class="list_one"><td class="FormRowField">Hostname</td><td class="FormRowValue"><input style="text-align:center;"  type="text" name="hostname" size="12" value="'.$valuesData["oid_hostname"].'"></td></tr>'."\n";
+						echo '	<tr class="list_two"><td class="FormRowField">OS Version</td><td class="FormRowValue"><input style="text-align:center;" type="text" name="OS" size="12" value="'.$valuesData["oid_os"].'"></td></tr>'."\n";
+						echo ' </table>'."\n";
+						echo '	<div id="validForm">'."\n";
+						echo '		<p><input name="save" value=" Save " type="submit" />&nbsp;&nbsp;&nbsp;<input name="defaults" value=" Default Values " type="submit" /></p>'."\n";
+						echo '	</div>'."\n";
 						echo '</form>'."\n";
 						
 					} break;
 					case 2: {
 						#template os relation configuration
 						$relations=mysql_query("SELECT * FROM mod_discovery_template_os_relation");
-						
+						echo '<div id="tab1" class="tab">'."\n";
+						echo '    <table class="ListTable">'."\n";
+						echo '        <tr class="ListHeader">'."\n";
+						echo '            <td class="FormHeader">&nbsp;&nbsp;</td> '."\n";
+						echo '            <td class="FormHeader">&nbsp;&nbsp;</td> '."\n";
+						echo '        </tr>'."\n";
+						echo '        <tr>'."\n";
+						echo '            <td align="center">'."\n";
 						echo ' <form method="post" action="">'."\n";
 						echo '     <center>'."\n";
 						echo '     <table>'."\n";
@@ -255,111 +244,65 @@
 				}
 
 				if(isset($_POST["save"])){
-					if (isset($_POST["pingcount"])){
-						if(empty($_POST["pingcount"])){
-							mysql_query("UPDATE mod_discovery_rangeip SET ping_count=DEFAULT WHERE id=0;");
-						}
-						elseif($_POST["pingcount"]<=0){
-							mysql_query("UPDATE mod_discovery_rangeip SET ping_count=DEFAULT WHERE id=0;");
-						}
-						else{
-							mysql_query("UPDATE mod_discovery_rangeip SET ping_count='".$_POST["pingcount"]."' WHERE id=0;");
-						}
+				
+					/* NMAP */
+					
+					if (isset($_POST["profil_nmap"])){
+						mysql_query("UPDATE mod_discovery_rangeip SET nmap_profil='".$_POST["profil_nmap"]."' WHERE id=0;");
 					}
 
-					if (isset($_POST["pingtimeout"])){
-						if(empty($_POST["pingtimeout"])){
-							mysql_query("UPDATE mod_discovery_rangeip SET ping_wait=DEFAULT WHERE id=0;");
-						}
-						elseif($_POST["pingtimeout"]<=0){
-							mysql_query("UPDATE mod_discovery_rangeip SET ping_wait=DEFAULT WHERE id=0;");
-						}
-						else{
-							mysql_query("UPDATE mod_discovery_rangeip SET ping_wait='".$_POST["pingtimeout"]."' WHERE id=0;");
-						}
+					if (isset($_POST["nmap_timeout"]) && is_int(intval($_POST["nmap_timeout"])) && $_POST["nmap_timeout"]>=15000 && $_POST["nmap_timeout"]<100000){
+						mysql_query("UPDATE mod_discovery_rangeip SET nmap_host_timeout='".$_POST["nmap_timeout"]."' WHERE id=0;");
 					}
 
-					if (isset($_POST["tcpport"])){
-						if(empty($_POST["tcpport"])){
-							mysql_query("UPDATE mod_discovery_rangeip SET tcp_port=DEFAULT WHERE id=0;");
-						}
-						elseif(!ereg("^(6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{1,2}|6[0-4][0-9]{1,3}|[1-5][0-9]{1,4}|[1-9][0-9]{1,3}|[0-9])(-(6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{1,2}|6[0-4][0-9]{1,3}|[1-5][0-9]{1,4}|[1-9][0-9]{1,3}|[0-9]))?(;(6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{1,2}|6[0-4][0-9]{1,3}|[1-5][0-9]{1,4}|[1-9][0-9]{1,3}|[0-9])(-(6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{1,2}|6[0-4][0-9]{1,3}|[1-5][0-9]{1,4}|[1-9][0-9]{1,3}|[0-9]))?)*$", $_POST["tcpport"])){
-							mysql_query("UPDATE mod_discovery_rangeip SET tcp_port=DEFAULT WHERE id=0;");
-						}
-						else{
-							mysql_query("UPDATE mod_discovery_rangeip SET tcp_port='".$_POST["tcpport"]."' WHERE id=0;");
-						}
+					if (isset($_POST["nmap_timeout_rtt"]) && is_int(intval($_POST["nmap_timeout_rtt"])) && $_POST["nmap_timeout_rtt"]>=100 && $_POST["nmap_timeout_rtt"]<10000){
+						mysql_query("UPDATE mod_discovery_rangeip SET nmap_max_rtt_timeout='".$_POST["nmap_timeout_rtt"]."' WHERE id=0;");
 					}
 
-					if (isset($_POST["hostname"])){
-						if(empty($_POST["hostname"])){
-							mysql_query("UPDATE mod_discovery_rangeip SET oid_hostname=DEFAULT WHERE id=0;");
-						}
-						elseif(!ereg("^(\.([1-9][0-9]+|[0-9]))+$", $_POST["hostname"])){
-							mysql_query("UPDATE mod_discovery_rangeip SET oid_hostname=DEFAULT WHERE id=0;");
-						}
-						else{
-							mysql_query("UPDATE mod_discovery_rangeip SET oid_hostname='".$_POST["hostname"]."' WHERE id=0;");
-						}
+					if (isset($_POST["nmap_retries"]) && is_int(intval($_POST["nmap_retries"])) && $_POST["nmap_retries"]>=0 && $_POST["nmap_retries"]<100){
+						mysql_query("UPDATE mod_discovery_rangeip SET nmap_max_retries='".$_POST["nmap_retries"]."' WHERE id=0;");
 					}
 					
-					if (isset($_POST["OS"])){
-						if(empty($_POST["OS"])){
-							mysql_query("UPDATE mod_discovery_rangeip SET oid_os=DEFAULT WHERE id=0;");
-						}
-						elseif(!ereg("^(\.([1-9][0-9]+|[0-9]))+$", $_POST["OS"])){
-							mysql_query("UPDATE mod_discovery_rangeip SET oid_os=DEFAULT WHERE id=0;");
-						}
-						else{
-							mysql_query("UPDATE mod_discovery_rangeip SET oid_os='".$_POST["OS"]."' WHERE id=0;");
-						}
+					/* OID */
+					
+					if (isset($_POST["hostname"]) && !empty($_POST["hostname"]) && ereg("^(\.([1-9][0-9]+|[0-9]))+$", $_POST["hostname"])){
+						mysql_query("UPDATE mod_discovery_rangeip SET oid_hostname='".$_POST["hostname"]."' WHERE id=0;");
 					}
+					
+					if (isset($_POST["OS"]) && !empty($_POST["OS"]) && ereg("^(\.([1-9][0-9]+|[0-9]))+$", $_POST["OS"])){
+						mysql_query("UPDATE mod_discovery_rangeip SET oid_os='".$_POST["OS"]."' WHERE id=0;");
+					}
+					
+					/* SNMP */
 					
 					if (isset($_POST["version"])){
-						if ($_POST["version"] == 'v1') {
-							$version =1;
-						}
-						else if ($_POST["version"] == 'v2c') {
-							$version =2;
-						}
-						mysql_query("UPDATE mod_discovery_rangeip SET snmp_version='".$version."' WHERE id=0;");
-					}
-					if (isset($_POST["method"])){
-						if ($_POST["method"] == 'Walk') {
-							$method ="walk";
-						}
-						else if ($_POST["method"] == 'Get') {
-							$method ="get";
-						}
-						mysql_query("UPDATE mod_discovery_rangeip SET snmp_method='".$method."' WHERE id=0;");
+						mysql_query("UPDATE mod_discovery_rangeip SET snmp_version='".$_POST["version"]."' WHERE id=0;");
 					}
 					
-					if (isset($_POST["community"])){
-						if(empty($_POST["community"])){
-							mysql_query("UPDATE mod_discovery_rangeip SET snmp_community=DEFAULT WHERE id=0;");
-						}
-						else{
-							mysql_query("UPDATE mod_discovery_rangeip SET snmp_community='".$_POST["community"]."' WHERE id=0;");
-						}
+					if (isset($_POST["port"]) && is_int(intval($_POST["port"])) && $_POST["port"]>0 && $_POST["port"]<65536){
+						mysql_query("UPDATE mod_discovery_rangeip SET snmp_port='".$_POST["port"]."' WHERE id=0;");
+					}
+
+					if (isset($_POST["retries"]) && is_int(intval($_POST["retries"])) && $_POST["retries"]>=0 && $_POST["retries"]<100){
+						mysql_query("UPDATE mod_discovery_rangeip SET snmp_retries='".$_POST["retries"]."' WHERE id=0;");
 					}
 					
-					if (isset($_POST["poller"])){
-						if(empty($_POST["poller"])){
-							mysql_query("UPDATE mod_discovery_rangeip SET def_poller=DEFAULT WHERE id=0;");
-						}
-						elseif(!ereg("^(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[1-9])(.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])){3}$", $_POST["community"])){
-							mysql_query("UPDATE mod_discovery_rangeip SET def_poller=DEFAULT WHERE id=0;");
-						}
-						else{
-							mysql_query("UPDATE mod_discovery_rangeip SET def_poller='".$_POST["poller"]."' WHERE id=0;");
-						}
+					if (isset($_POST["timeout"]) && is_int(intval($_POST["timeout"])) && $_POST["timeout"]>0 && $_POST["timeout"]<100){
+						mysql_query("UPDATE mod_discovery_rangeip SET snmp_timeout='".$_POST["timeout"]."' WHERE id=0;");
+					}
+					
+					if (isset($_POST["community"]) && !strpos($_POST["community"]," ") && !empty($_POST["community"])){
+						mysql_query("UPDATE mod_discovery_rangeip SET snmp_community='".$_POST["community"]."' WHERE id=0;");
 					}
 				}
 				
 				if(isset($_POST["defaults"])){
-					mysql_query("UPDATE mod_discovery_rangeip SET def_poller=DEFAULT, snmp_community=DEFAULT, snmp_method=DEFAULT, snmp_version=DEFAULT, oid_os=DEFAULT, oid_hostname=DEFAULT, tcp_port=DEFAULT, ping_timeout=DEFAULT, ping_count=DEFAULT WHERE id=0;");
+					$reqDefault=mysql_query("SELECT * FROM mod_discovery_rangeip WHERE id=-1;");
+					while ($default=mysql_fetch_array($reqDefault,MYSQL_ASSOC)) {
+						mysql_query("UPDATE mod_discovery_rangeip SET nmap_profil='".$default['nmap_profil']."', nmap_host_timeout='".$default['nmap_host_timeout']."', nmap_max_rtt_timeout='".$default['nmap_max_rtt_timeout']."', nmap_max_retries='".$default['nmap_max_retries']."', snmp_port='".$default['snmp_port']."', snmp_retries='".$default['snmp_retries']."', snmp_timeout='".$default['snmp_timeout']."', snmp_community='".$default['snmp_community']."', snmp_version='".$default['snmp_version']."', oid_os='".$default['oid_os']."', oid_hostname='".$default['oid_hostname']."' WHERE id=0;");
+					}
 				}
-
+				
 				if (isset($_POST["clear"]) && $_POST["clear"]==" Clear All ") {
 					mysql_query("DELETE FROM mod_discovery_template_os_relation");
 				}

@@ -16,10 +16,6 @@
  * For information : contact@centreon.com
  */
 
-	/*if (!isset($oreon)) {
-		exit();
-	}*/
-
         /*
          * {DataBase connexion function}
          *
@@ -32,7 +28,7 @@
          * @return	int
          */
 
-	function dbConnect($db_host,$db_user,$db_passwd,$db_name,$arg){
+		function dbConnect($db_host,$db_user,$db_passwd,$db_name,$arg){
             $mysql = mysql_connect($db_host,$db_user,$db_passwd,$arg);
             if (!$mysql) {
                 echo '<br><br><br>';
@@ -46,7 +42,6 @@
                 return 0;
             }
             return $mysql;
-
         }
 
         /*
@@ -61,5 +56,49 @@
             mysql_close($db);
             return 0;
         }
+		
+		function callInsertHostInDb($data){
+		
+			global $centreon_path;
+			global $oreon;  
+			global $centreon;  
+			
+			require_once $centreon_path."www/include/configuration/configObject/host/DB-Func.php";
+			require_once $centreon_path."www/include/configuration/configObject/service/DB-Func.php";
+			
+			//Création de l'hôte dans la bdd
+			$host_id = insertHostInDB($data);
+			
+			//Mise à jour du template associé à cette hôte
+			$req = mysql_query("INSERT INTO host_template_relation (host_host_id,host_tpl_id,`order`) VALUES('".$host_id."','".$data["host_template_model_htm_id"]."','1');");
+			
+			//Mise à jour du host_group
+			if (isset($data["host_hgs"])) {updateHostHostGroup($host_id, $data);}
+						
+			//Association des services au template
+			$req2 = mysql_query("SELECT service_service_id FROM `host_service_relation` WHERE host_host_id = '".$data["host_template_model_htm_id"]."';");
+			while ($values=mysql_fetch_array($req2))
+			{
+				$alias = getMyServiceAlias($values["service_service_id"]);
+				if (testServiceExistence($alias, array(0 => $host_id))) {
+					$service = array(
+						"service_template_model_stm_id" => $values["service_service_id"],
+						"service_description" => $alias,
+						"service_register" => array("service_register" => 1),
+						"service_activate" => array("service_activate" => 1),
+						"service_hPars" => array("0" => $host_id));
+					$service_id = insertServiceInDB($service);
+				}
+			}			
+			generateHostServiceMultiTemplate($host_id, $data["host_template_model_htm_id"]);
+	
+			//Mise à jour du poller associé à cette hôte
+			updateNagiosServerRelation($host_id, $data);
+			
+			$centreon->user->access->updateACL();
+			insertHostExtInfos($host_id, $data);
+
+			return $host_id;
+		}
 
 ?>

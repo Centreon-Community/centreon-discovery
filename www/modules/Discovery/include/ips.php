@@ -52,7 +52,7 @@ require_once './modules/Discovery/include/common.php';
 
 /* Variable indiquant la position de l'agent Python, elle est modifiée par le fichier install.sh lors de l'installation du module. */
 $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
-//$agentDir = "/etc/centreon-discovery/DiscoveryAgent_central.py";
+//$agentDir = "/usr/share/centreon-discovery/DiscoveryAgent_central.py";
 
  ?>
 
@@ -83,7 +83,7 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 				<tr>
 					<td style="text-align:center;" width="30%"></td>					
 					<td style="text-align:center;" width="40%"><h1 ALIGN=center>IP range(s) to scan</h1></td>
-					<td width="30%"><img ALIGN=right alt="CentESIEEon" src="./modules/Discovery/include/images/logo.jpg"/><td>					
+					<td width="30%"><img ALIGN=right alt="Centreon-Discovery" src="./modules/Discovery/include/images/logo.png"/><td>					
 				</tr>
 			</table>
 			<div id="xmlhttp"></div>
@@ -148,8 +148,7 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 					
 					//Appel le script python avec le paramètre STATUS_POLLER, cela permet de vérifier si les pollers sont actifs.
 					if (file_exists($agentDir)) {
-//						shell_exec('python '.$agentDir.' STATUS_POLLER > /dev/null 2>&1 &');
-						shell_exec('python '.$agentDir.' STATUS_POLLER >> /tmp/agent_central.log 2>&1 &');
+						shell_exec('python '.$agentDir.' STATUS_POLLER > /dev/null 2>&1 &');
 						}
 					else { echo "<CENTER><b><font size=\"3px\" color=\"red\">ERROR</b> : File $agentDir not found...</font></CENTER>\n"; }
 					
@@ -191,36 +190,71 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 										<div style="display:none" id="td_toggle'.$i.'" class="td_toggle">
 										<input type="hidden" name="id'.$i.'" value="'.$data["id"].'">
 										<table>
-											<td>												
-												Ping count :<br>
-												Wait :<br>
-											</td>
 											<td>
-												<input type="text" name="ping_count'.$i.'" tabindex="2" value="'.$default_conf["ping_count"].'" title="Enter the number of ICMP ECHO packets to send"><br>
-												<input type="text" name="ping_wait'.$i.'" tabindex="3" value="'.$default_conf["ping_wait"].'" title="Enter the number of milliseconds to wait for response"><br>
+												<b>NMAP</b><br>
+												Profil:<br>
+												Host Timeout :<br>
+												Max RTT Timeout :<br>
+												Max Retries :<br>
 											</td>
+											<td><br>'," \n ";
+						switch ($default_conf["nmap_profil"]){
+							case 'Sneaky (T1)';
+								$select1="selected";
+								break;
+							case 'Polite (T2)';
+								$select2="selected";
+								break;
+							case 'Normal (T3)';
+								$select3="selected";
+								break;
+							case 'Aggressive (T4)';
+								$select4="selected";
+								break;
+							case 'Insane(T5)';
+								$select5="selected";
+								break;
+						}
+						echo '          <select name="profil_nmap">'."\n";
+						echo '              <option '.$select1.'>Sneaky (T1)</option>'."\n";
+						echo '              <option '.$select2.'>Polite (T2)</option>'."\n";
+						echo '              <option '.$select3.'>Normal (T3)</option>'."\n";
+						echo '              <option '.$select4.'>Aggressive (T4)</option>'."\n";
+						echo '              <option '.$select5.'>Insane(T5)</option>'."\n";
+						echo '          </select><br>'."\n";	
+						echo '					<input type="text" name="nmap_timeout'.$i.'" tabindex="3" value="'.$default_conf["nmap_host_timeout"].'"><br>
+												<input type="text" name="nmap_timeout_rtt'.$i.'" tabindex="3" value="'.$default_conf["nmap_max_rtt_timeout"].'"><br>
+												<input type="text" name="nmap_retries'.$i.'" tabindex="3" value="'.$default_conf["nmap_max_retries"].'"><br>
+											</td>
+											<td width="40px"></td>
 											<td>
-												SNMP :<br>
-												Method :<br>
-												Hostname OID :<br>
-												OS OID :<br>
+												<b>SNMP</b><br>
+												Port :<br>
 												Version :<br>
 												Community :<br>
+												Timeout :<br>
+												Retries :<br>
 											</td>
 											<td><br>'."\n ";
-						if ($default_conf["snmp_method"] == "get"){
-							echo '				<select name="snmp_method'.$i.'" tabindex="7" title="Choose the SNMP method to use"><option value="get" selected="selected">Get</option><option value="walk">Walk</option></select><br>'."\n ";
+						echo '					<input type="text" name="port'.$i.'" tabindex="3" value="'.$default_conf["snmp_port"].'"><br>'."\n";
+						if ($default_conf["snmp_version"] == "2c"){
+							echo '				<select name="snmp_version'.$i.'" tabindex="10" title="Choose the SNMP version to use"><option value="1">1</option><option selected="selected" value="2c">2c</option></select><br>'."\n ";
 						}else{
-							echo '				<select name="snmp_method'.$i.'" tabindex="7" title="Choose the SNMP method to use"><option value="get">Get</option><option selected="selected" value="walk">Walk</option></select><br>'."\n ";								
-						}
-						echo '					<input type="text" name="oid_hostname'.$i.'" tabindex="8" value="'.$default_conf["oid_hostname"].'" title="Exemple: .1.3.6.1.4.1.5518.1.5.47"><br>
-												<input type="text" name="oid_os'.$i.'" tabindex="9" value="'.$default_conf["oid_os"].'" title="Exemple: .1.3.6.1.4.1.5518.1.5.47"><br>'."\n ";	
-						if ($default_conf["snmp_version"] == "2"){
-							echo '				<select name="snmp_version'.$i.'" tabindex="10" title="Choose the SNMP version to use"><option value="1">v1</option><option selected="selected" value="2">v2c</option></select><br>'."\n ";
-						}else{
-							echo '				<select name="snmp_version'.$i.'" tabindex="10" title="Choose the SNMP version to use"><option selected="selected" value="1">v1</option><option value="2">v2c</option></select><br>'."\n ";								
+							echo '				<select name="snmp_version'.$i.'" tabindex="10" title="Choose the SNMP version to use"><option selected="selected" value="1">1</option><option value="2c">2c</option></select><br>'."\n ";								
 						}	
-						echo '					<input type="text" name="snmp_community'.$i.'" tabindex="11" value="'.$default_conf["snmp_community"].'" title="Enter your SNMP community">
+						echo '					<input type="text" name="snmp_community'.$i.'" tabindex="11" value="'.$default_conf["snmp_community"].'" title="Enter your SNMP community"><br>'."\n";
+						echo '					<input type="text" name="timeout'.$i.'" tabindex="3" value="'.$default_conf["snmp_timeout"].'"><br>'."\n";
+						echo '					<input type="text" name="retries'.$i.'" tabindex="3" value="'.$default_conf["snmp_retries"].'"><br>'."\n";
+						echo '				</td>
+											<td width="40px"></td>
+											<td>
+												<b>OID</b><br>
+												Hostname :<br>
+												OS :<br>
+											</td>
+											<td><br>
+												<input type="text" name="oid_hostname'.$i.'" tabindex="8" value="'.$default_conf["oid_hostname"].'" title="Exemple: .1.3.6.1.4.1.5518.1.5.47"><br>
+												<input type="text" name="oid_os'.$i.'" tabindex="9" value="'.$default_conf["oid_os"].'" title="Exemple: .1.3.6.1.4.1.5518.1.5.47"><br>							
 											</td>
 										</table>
 									</div>
@@ -268,7 +302,7 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 				function isPoller ($poller_addr,$plage_addr,$cidr){
 					$poller_addr = ip2bin($poller_addr);
 					$plage_addr = ip2bin($plage_addr);
-					return strncasecmp($poller_addr,$plage_addr,$cidr);
+					return strncasecmp($poller_addr,$plage_addr,$cidr+1);
 				}
 				
 				/*
@@ -484,7 +518,7 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 				 */
 				
 				function clearArray(){
-					$sql=mysql_query("DELETE FROM mod_discovery_rangeip WHERE id!=0;");
+					$sql=mysql_query("DELETE FROM mod_discovery_rangeip WHERE id!=0 AND id!=-1;");
 				}
 
 				/*

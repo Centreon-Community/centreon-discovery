@@ -1,0 +1,129 @@
+#!/bin/bash 
+
+## load all functions used in this script
+. $INSTALL_DIR/variables
+
+#----
+## print info message
+## add info message to log file
+## @param	message info
+## @param	type info (ex: INFO, username...)
+## @Stdout	info message
+## @Globals	LOG_FILE
+#----
+function echo_info() {
+    echo -e "${1}${MOVE_TO_COL}${SETCOLOR_INFO}${2}${SETCOLOR_NORMAL}" 
+    echo -e "$1 : $2" >> $LOG_FILE
+}
+
+#----
+## print success message
+## add success message to log file
+## @param	message
+## @param	word to specify success (ex: OK)
+## @Stdout	success message
+## @Globals	LOG_FILE
+#----
+function echo_success() {
+    echo -e "${1}${MOVE_TO_COL}${SETCOLOR_SUCCESS}${2}${SETCOLOR_NORMAL}"
+    echo -e "$1 : $2" >> $LOG_FILE
+}
+
+#----
+## print failure message
+## add failure message to log file
+## @param	message
+## @param	word to specify failure (ex: fail)
+## @Stdout	failure message
+## @Globals	LOG_FILE
+#----
+function echo_failure() {
+    echo -e "${1}${MOVE_TO_COL}${SETCOLOR_FAILURE}${2}${SETCOLOR_NORMAL}"
+    echo -e "$1 : $2" >> $LOG_FILE
+}
+
+#----
+## print passed message
+## add passed message to log file
+## @param	message
+## @param	word to specify pass (ex: passed)
+## @Stdout	passed message
+## @Globals	LOG_FILE
+#----
+function echo_passed() {
+    echo -e "${1}${MOVE_TO_COL}${SETCOLOR_WARNING}${2}${SETCOLOR_NORMAL}"
+    echo -e "$1 : $2" >> $LOG_FILE
+}
+
+#----
+## print warning message
+## add warning message to log file
+## @param	message
+## @param	word to specify warning (ex: warn)
+## @Stdout	warning message
+## @Globals	LOG_FILE
+#----
+function echo_warning() {
+    echo -e "${1}${MOVE_TO_COL}${SETCOLOR_WARNING}${2}${SETCOLOR_NORMAL}"
+    echo -e "$1 : $2" >> $LOG_FILE
+}
+
+#----
+## add message on log file
+## @param	type of message level (debug, info, ...)
+## @param	message
+## @Globals	LOG_FILE
+#----
+function log() {
+	local program="$0"
+	local type="$1"
+	shift
+	local message="$@"
+	echo -e "[$program]:$type: $message" >> $LOG_FILE
+}
+
+#----
+## make a question with yes/no possiblity
+## use "no" response by default
+## @parammessage to print
+## @param default response (default to no)
+## @return 0 yes
+## @return 1 no
+#----
+function yes_no_default() {
+	local message=$1
+	local default=${2:-$no}
+	local res="not_define"
+	while [ "$res" != "$yes" ] && [ "$res" != "$no" ] && [ ! -z "$res" ] ; do
+		echo -e "\n$message\n[y/n], default to [$default]:"
+		echo -en "> "
+		read res
+		[ -z "$res" ] && res="$default"
+	done
+	if [ "$res" = "$yes" ] ; then 
+		return 0
+	else 
+		return 1
+	fi
+}
+
+#----
+## print ok for $1=0 or fail for $1=1
+## add failure message to log file
+## @param1integer : 0 OK // .. KO
+## @param2message
+## @return      @param1
+## @Stdoutmessage + OK/FAIL
+## @Globals     LOG_FILE
+#----
+function display_return(){
+    if [ "$1" -eq 0 ] ; then
+	echo -e "${MOVE_TO_COL}${SETCOLOR_SUCCESS}${ok}${SETCOLOR_NORMAL}"
+	echo -e "$2 : $ok" >> $LOG_FILE
+	return $1
+    else
+	echo -e "${MOVE_TO_COL}${SETCOLOR_FAILURE}${fail}${SETCOLOR_NORMAL}"
+	echo -e "$2 : $fail" >> $LOG_FILE
+	return $1
+    fi
+}

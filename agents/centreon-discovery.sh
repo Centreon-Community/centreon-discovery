@@ -1,5 +1,26 @@
 #!/bin/sh
+
+# This file is part of Centreon-Discovery module.
 #
+# Centreon-Discovery is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, see <http://www.gnu.org/licenses>.
+#
+# Module name: Centreon-Discovery
+#
+# Developped by: Sub2.13
+#
+# WEBSITE: http://community.centreon.com/projects/centreon-discovery
+# SVN: http://svn.modules.centreon.com/centreon-discovery
+
 ### BEGIN INIT INFO
 # Provides:           discovery-agent.sh
 # Required-Start:     $all
@@ -9,10 +30,6 @@
 # Short-Description:  Discovery Agent poller
 # Description:        Poller agent for centreon-discovery module
 ### END INIT INFO
-
-#
-# Author:    Sub2.13
-#
 
 DIR=@AGENT_DIR@
 #DIR=/usr/share

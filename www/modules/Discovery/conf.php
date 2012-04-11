@@ -1,21 +1,31 @@
 <?php
-/*  This file is part of CentreonDiscovery.
- *
- *	 CentreonDiscovery is developped with GPL Licence 3.0 :
- *	 Developped by : ESIEE 2012
- *   
- *   CentreonDiscovery is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License.
- *   
- *   CentreonDiscovery is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with CentreonDiscovery.  If not, see <http://www.gnu.org/licenses/>.
- */
+
+  /* This file is part of Centreon-Discovery module.
+   *
+   * Centreon-Discovery is free software; you can redistribute it and/or modify
+   * it under the terms of the GNU General Public License as published by the
+   *  Free Software Foundation, either version 2 of the License.
+   *
+   * This program is distributed in the hope that it will be useful,
+   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+   * GNU General Public License for more details.
+   *
+   * You should have received a copy of the GNU General Public License
+   * along with this program; if not, see <http://www.gnu.org/licenses>.
+   *
+   * Linking this program statically or dynamically with other modules is making a
+   * combined work based on this program. Thus, the terms and conditions of the GNU
+   * General Public License cover the whole combination.
+   *
+   * Module name: Centreon-Discovery
+   *
+   * First developpement by: Merethis team
+   * Adapted by: Sub2.13
+   *
+   * WEBSITE: http://community.centreon.com/projects/centreon-discovery
+   * SVN: http://svn.modules.centreon.com/centreon-discovery
+   */
 
 $module_conf['Discovery']["name"] = "Discovery";
 $module_conf['Discovery']["rname"] = "Module Centreon-Discovery";

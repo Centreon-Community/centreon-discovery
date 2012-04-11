@@ -1,15 +1,31 @@
-/*  This file is part of Centreon-Discovery.
+/* This file is part of Centreon-Discovery module.
  *
- *	 Centreon-Discovery is developped with GPL Licence 3.0 :
- *	 Developped by : Sub2.13
+ * Centreon-Discovery is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License.
  *
- *	 Command : mysql -u root --password=admin centreon < install/relations.sql
- * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, see <http://www.gnu.org/licenses>.
+ *
+ * Module name: Centreon-Discovery
+ *
+ * Developped by: Sub2.13
+ *
+ * WEBSITE: http://community.centreon.com/projects/centreon-discovery
+ * SVN: http://svn.modules.centreon.com/centreon-discovery
+ *
+ * Command : mysql -u root --password=admin centreon < install/template.sql > /dev/null
+ *
  */
 
 /*
- * DATABASE : @DB_NAME_CENTREON@
- * TABLE : mod_discovery_template_os_relation
+ * DATABASE: @DB_NAME_CENTREON@
+ * TABLE: mod_discovery_template_os_relation
  *	
  */
  

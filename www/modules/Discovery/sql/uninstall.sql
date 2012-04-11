@@ -1,11 +1,29 @@
-/*  This file is part of CentreonDiscovery.
+/* This file is part of Centreon-Discovery module.
  *
- *	 CentreonDiscovery is developped with GPL Licence 3.0 :
- *	 Developped by : Jonathan Teste - Cedric Dupre
- *	 Modified by : Sub2.13
- *   
+ * Centreon-Discovery is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation, either version 2 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, see <http://www.gnu.org/licenses>.
+ *
+ * Linking this program statically or dynamically with other modules is making a
+ * combined work based on this program. Thus, the terms and conditions of the GNU
+ * General Public License cover the whole combination.
+ *
+ * Module name: Centreon-Discovery
+ *
+ * Developped by : Jonathan Teste - Cedric Dupre
+ * Modified by : Sub2.13
+ *
+ * WEBSITE: http://community.centreon.com/projects/centreon-discovery
+ * SVN: http://svn.modules.centreon.com/centreon-discovery
  */
-
 
 /*
  * DATABASE : @DB_NAME_CENTREON@
@@ -20,6 +38,7 @@ DELETE FROM `topology` WHERE `topology_page` = '61202';
 DELETE FROM `topology` WHERE `topology_page` = '61203';
 DELETE FROM `topology` WHERE `topology_page` = '61204';
 DELETE FROM `topology` WHERE `topology_page` = '61205';
+
 /*
  * DATABASE : @DB_NAME_CENTREON@
  * TABLE : mod_discovery_*

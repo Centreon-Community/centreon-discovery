@@ -1,22 +1,38 @@
-﻿/*  This file is part of Centreon-Discovery.
+/* This file is part of Centreon-Discovery module.
  *
- *	 Centreon-Discovery is developped with GPL Licence 3.0 :
- *	 Developped by : Sub2.13
+ * Centreon-Discovery is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License.
  *
- *	 Command : mysql -u root --password=admin centreon < install/template.sql > /dev/null
- * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, see <http://www.gnu.org/licenses>.
+ *
+ * Module name: Centreon-Discovery
+ *
+ * Developped by: Sub2.13
+ *
+ * WEBSITE: http://community.centreon.com/projects/centreon-discovery
+ * SVN: http://svn.modules.centreon.com/centreon-discovery
+ *
+ * Command : mysql -u root --password=admin centreon < install/template.sql > /dev/null
+ *
  */
 
-/* ************************************************************************************************* */
-/* -------------------------------------------------------------------------------------------------
-/*
- * DATABASE : @DB_NAME_CENTREON@
- * TABLE : command / command_arg_description
+/* ************************************************************************************************* 
+ * -------------------------------------------------------------------------------------------------
+ *
+ * DATABASE: @DB_NAME_CENTREON@
+ * TABLE: command / command_arg_description
  *	
  * Create generic commands
  *
- * ------------------------------------------------------------------------------------------------- */
-/* ************************************************************************************************* */
+ * -------------------------------------------------------------------------------------------------
+ * ************************************************************************************************* */
   
  /* Command to monitor CPU/LOAD */
 INSERT INTO `command` (`command_name`, `command_line`, `command_example`, `command_type`, `graph_id`) VALUES ('check_discovery_load', '$USER1$/check_snmp_load.pl -H $HOSTADDRESS$ -C $_HOSTSNMPCOMMUNITY$ -2 -T $ARG1$ -w $ARG2$ -c $ARG3$ -f', '!cisco!50,40,30!80,70,60', '2', '');
@@ -77,16 +93,16 @@ SELECT @newCmdId := MAX(command_id) FROM command;
 DELETE FROM `command_arg_description` WHERE cmd_id = '@newCmdId';
 INSERT INTO `command_arg_description` (cmd_id, macro_name, macro_description) VALUES (@newCmdId, 'ARG1', 'interface number'),(@newCmdId, 'ARG2', 'warning bandwidth'),(@newCmdId, 'ARG3', 'critical bandwidth');
  
-/* ************************************************************************************************* */
-/* -------------------------------------------------------------------------------------------------
+/* *************************************************************************************************
+ * -------------------------------------------------------------------------------------------------
  *
- * DATABASE : @DB_NAME_CENTREON@
- * TABLE : host / command / command_arg_description / service / host_service_relation / servicegroup_relation / extended_service_information
+ * DATABASE: @DB_NAME_CENTREON@
+ * TABLE: host / command / command_arg_description / service / host_service_relation / servicegroup_relation / extended_service_information
  *	
  * Create template
  *
- * ------------------------------------------------------------------------------------------------- */
-/* ************************************************************************************************* */
+ * -------------------------------------------------------------------------------------------------
+ * ************************************************************************************************* */
 
 
 /* ---------------------------- *
@@ -319,7 +335,7 @@ DELETE FROM servicegroup_relation WHERE service_service_id = '@newServiceId';
 INSERT INTO `extended_service_information` ( `esi_id` , `service_service_id`, `esi_notes` , `esi_notes_url` , `esi_action_url` , `esi_icon_image` , `esi_icon_image_alt`, `graph_id` )VALUES ( NULL, @newServiceId, NULL, NULL, NULL, NULL, NULL, NULL);
 
 /* ---------------------------- *
- * Template for Alcatel switch    *
+ * Template for Alcatel switch  *
  * -----------------------------*/
 
 INSERT INTO host (host_template_model_htm_id, command_command_id, command_command_id_arg1, timeperiod_tp_id, timeperiod_tp_id2, command_command_id2, command_command_id_arg2,host_name, host_alias, host_address, host_max_check_attempts, host_check_interval, host_retry_check_interval, host_active_checks_enabled, host_passive_checks_enabled, host_checks_enabled, host_obsess_over_host, host_check_freshness, host_freshness_threshold, host_event_handler_enabled, host_low_flap_threshold, host_high_flap_threshold, host_flap_detection_enabled, host_process_perf_data, host_retain_status_information, host_retain_nonstatus_information, host_notification_interval, host_first_notification_delay, host_notification_options, host_notifications_enabled, host_stalking_options, host_snmp_community, host_snmp_version, host_location, host_comment, host_register, host_activate) VALUES ( '2', NULL, NULL, NULL, NULL, NULL, NULL, 'discovery-alcatel-sw', 'Model for Alcatel switch from Discovery module', NULL, NULL, NULL, NULL, '2', '2', '2', '2', '2', NULL, '2', NULL, NULL, '2', '2', '2', '2', NULL, NULL, NULL, '2', NULL, NULL, '0', NULL, NULL, '0', '1');
@@ -565,16 +581,16 @@ DELETE FROM servicegroup_relation WHERE service_service_id = '@newServiceId';
 INSERT INTO `extended_service_information` ( `esi_id` , `service_service_id`, `esi_notes` , `esi_notes_url` , `esi_action_url` , `esi_icon_image` , `esi_icon_image_alt`, `graph_id` )VALUES ( NULL, @newServiceId, NULL, NULL, NULL, NULL, NULL, NULL);
 
 
-/* ************************************************************************************************* */
-/* -------------------------------------------------------------------------------------------------
+/* *************************************************************************************************
+ * -------------------------------------------------------------------------------------------------
  *
- * DATABASE : @DB_NAME_CENTREON@
- * TABLE : service / host_service_relation / servicegroup_relation / extended_service_information
+ * DATABASE: @DB_NAME_CENTREON@
+ * TABLE: service / host_service_relation / servicegroup_relation / extended_service_information
  *	
  * Create generic service
  *
- * -------------------------------------------------------------------------------------------------/
-/* ************************************************************************************************* */
+ * -------------------------------------------------------------------------------------------------
+ * ************************************************************************************************* */
  
  /* Command to monitor environment on Cisco equipment */
 SELECT @newCmdId := command_id FROM command where command_name = 'check_discovery_env';

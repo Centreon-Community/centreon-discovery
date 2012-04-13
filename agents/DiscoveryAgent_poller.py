@@ -31,8 +31,6 @@ import threading
 import re
 from Crypto.Cipher import AES
 
-
-
 # For debug only, 0:log // 1:console
 LOG_FILE = "@AGENT_DIR@" + "/log/"+time.strftime('%Y%m',time.localtime())  +"_Poller_DiscoveryAgent.log"
 #LOG_FILE = "log/"+time.strftime('%Y%m',time.localtime())  +"_Poller_DiscoveryAgent.log"
@@ -81,9 +79,9 @@ def connectToCentral():
 						data = enc_dec(data, 1)
 					conn.send(data)
 				elif data.startswith("#scanip#"):
-					strSplit = data.lstrip().split("#")
-					plage = strSplit[2]
-					args = [strSplit[3], strSplit[4], strSplit[5], strSplit[6], strSplit[7], strSplit[8], strSplit[9], strSplit[10], strSplit[11], strSplit[12], strSplit[13]]
+					strSplit = data.lstrip().split("#$#")
+					plage = strSplit[1]
+					args = [strSplit[2], strSplit[3], strSplit[4], strSplit[5], strSplit[6], strSplit[7], strSplit[8], strSplit[9], strSplit[10], strSplit[11], strSplit[12]]
 					print 'DiscoveryAgent_poller.py : SCAN_RANGEIP for ' + plage
 					scanRangeIP(plage, conn, s, args)
 					data = "#scanip#done"		
@@ -136,7 +134,7 @@ def scanRangeIP(rangeIP, conn, s, args):
 			thread.join()
 		print "#scanip#done"		
 	except nmap.PortScannerError:
-		print "Error using connection. Scan stopped"
+		print "Error using nmap. Scan stopped"
 		return
 
 def getHostOS(host,args,status,conn):
@@ -151,7 +149,7 @@ def getHostOS(host,args,status,conn):
 		req_snmp = "snmpget -c %s -v %s -t %s -r %s -O nq %s:%s %s 2>&1 | grep %s" % (args[8], args[6], args[9], args[10], host, args[7], args[5], args[5])
 		os_name = commands.getoutput(req_snmp)
 		os_name = os_name.split(' ',1)[1]
-	state = "#state#%s#%s#%s#%s"%(host,status,hostname,os_name)
+	state = "#state#$#%s#$#%s#$#%s#$#%s"%(host,status,hostname,os_name)
 	state = "%475s"%state
 	print "Send : ",state.lstrip()
 	if KEY != "":

@@ -38,7 +38,7 @@ import MySQLdb
 # For debug only, 0:log // 1:console
 LOG_FILE = "@AGENT_DIR@" + "/log/"+time.strftime('%Y%m',time.localtime())  +"_Central_DiscoveryAgent.log"
 #LOG_FILE = "log/"+time.strftime('%Y%m',time.localtime())  +"_Central_DiscoveryAgent.log"
-MODE_DEBUG = 1
+MODE_DEBUG = 0
 
 ID = 0
 IP = 1
@@ -157,7 +157,7 @@ def getHostsFromPoller(poller):
 	try:
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		s.connect((poller[IP], 1080))
-		data = "#scanip#%s/%s#%s#%s#%s#%s#%s#%s#%s#%s#%s#%s#%s"%(poller[PLAGE],poller[CIDR],poller[4],poller[5],poller[6],poller[7],poller[8],poller[9],poller[10],poller[11],poller[12],poller[13],poller[14])
+		data = "#scanip#$#%s/%s#$#%s#$#%s#$#%s#$#%s#$#%s#$#%s#$#%s#$#%s#$#%s#$#%s#$#%s"%(poller[PLAGE],poller[CIDR],poller[4],poller[5],poller[6],poller[7],poller[8],poller[9],poller[10],poller[11],poller[12],poller[13],poller[14])
 		if KEY != "":
 			data = enc_dec(data, 1)
 		s.send(data)
@@ -176,11 +176,11 @@ def getHostsFromPoller(poller):
 				return
 			print "SCAN_RANGEIP : " +rcv.lstrip()
 			if rcv.lstrip().startswith("#state#"):
-				strSplit = rcv.split("#", 6)
+				strSplit = rcv.split("#$#", 5)
 				#adr_ip = rc.findall(rcv)[0]
-				adr_ip = strSplit[2]
-				hostname = strSplit[4]
-				os_name = strSplit[5]
+				adr_ip = strSplit[1]
+				hostname = strSplit[3]
+				os_name = strSplit[4]
 				req = "INSERT INTO mod_discovery_results(ip, plage_id,hostname,os) VALUES ('%s', %d, '%s', '%s')" % (adr_ip, poller[ID], hostname, os_name)
 				c.execute(req)
 		req = "UPDATE mod_discovery_rangeip SET done = %d WHERE id=%d" % (2, poller[ID])

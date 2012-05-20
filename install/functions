@@ -587,8 +587,6 @@ function install_agent() {
 		;;
 	esac
 
-	
-
 	echo -n "Delete temp install directory"
 	/bin/rm -Rf $TEMP_D $TEMP >> $LOG_FILE 2>&1
 	display_return "$?" "Delete temp install directory"
@@ -614,13 +612,20 @@ function install_agent() {
 function execute_discovery-agent() {
     yes_no_default "Do you want execute discovery poller agent now ?" $yes
     if [ "$?" -eq 0 ] ; then
-        echo -ne "Starting discovery agent"
-	$INIT_D/$SCRIPT_AGENT_INIT start >> $LOG_FILE 2>&1
-	display_return "$?" "Starting discovery agent"
-	return 0
-    else
+	$INIT_D/$SCRIPT_AGENT_INIT status >> $LOG_FILE 2>&1			
+	if [ "$?" -eq 0 ] ; then
+	    echo -ne "Restarting discovery agent" 
+	    $INIT_D/$SCRIPT_AGENT_INIT restart >> $LOG_FILE 2>&1
+	    display_return "$?" "Restarting discovery agent"
+	else
+	    echo -ne "Starting discovery agent"
+	    $INIT_D/$SCRIPT_AGENT_INIT start >> $LOG_FILE 2>&1
+	    display_return "$?" "Starting discovery agent"
+	fi
+	return 0			
+    else  
 	echo "Don't forget to execute poller agent at installation end :"
-        echo -e "\t$INIT_D/$SCRIPT_AGENT_INIT start"
+	echo -e "\t$INIT_D/$SCRIPT_AGENT_INIT start"
 	return 1
     fi
 }

@@ -33,7 +33,7 @@ require_once './modules/Discovery/include/common.php';
 $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 //$agentDir = "/usr/share/centreon-discovery/DiscoveryAgent_central.py";
 
-?>
+ ?>
 
 <html lang="fr">
 	<head>
@@ -294,13 +294,16 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 				 
 				function findPoller ($plage_addr,$cidr){
 					$sql = mysql_query("SELECT id,name,ns_ip_address FROM nagios_server WHERE ns_activate=1;");					
-					while($poller= mysql_fetch_array($sql,MYSQL_ASSOC)){					
+					while($poller = mysql_fetch_array($sql,MYSQL_ASSOC)){					
 						if (isPoller($poller["ns_ip_address"],$plage_addr,$cidr) == 0){
 							$result = array ("poller_id" => $poller["id"], "poller_name" => $poller["name"], "poller_ip" => $poller["ns_ip_address"]);	
 							return $result;
 						}
 					}
-					$result = array ("poller_id" => "1", "poller_name" => "Localhost", "poller_ip" => "127.0.0.1");
+					// Poller par défaut (avec id le plus petit) si aucun ne correspond
+					$sql = mysql_query("SELECT MIN(id) as id, name, ns_ip_address FROM nagios_server WHERE ns_activate=1;");
+					$poller = mysql_fetch_array($sql,MYSQL_ASSOC);
+					$result = array ("poller_id" => $poller["id"], "poller_name" => $poller["name"], "poller_ip" => $poller["ns_ip_address"]);	
 					return $result;
 				}
 				
@@ -579,5 +582,6 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
         </span>
     </body>
 </html>
+
 
 

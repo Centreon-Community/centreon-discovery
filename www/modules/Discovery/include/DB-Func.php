@@ -1,42 +1,42 @@
 <?php
 
-  /* This file is part of Centreon-Discovery module.
-   *
-   * Centreon-Discovery is free software; you can redistribute it and/or modify
-   * it under the terms of the GNU General Public License as published by the
-   *  Free Software Foundation, either version 2 of the License.
-   *
-   * This program is distributed in the hope that it will be useful,
-   * but WITHOUT ANY WARRANTY; without even the implied warranty of
-   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-   * GNU General Public License for more details.
-   *
-   * You should have received a copy of the GNU General Public License
-   * along with this program; if not, see <http://www.gnu.org/licenses>.
-   *
-   * Linking this program statically or dynamically with other modules is making a
-   * combined work based on this program. Thus, the terms and conditions of the GNU
-   * General Public License cover the whole combination.
-   *
-   * Module name: Centreon-Discovery
-   *
-   * Developped by: Nicolas Dietrich
-   *
-   * WEBSITE: http://community.centreon.com/projects/centreon-discovery
-   * SVN: http://svn.modules.centreon.com/centreon-discovery
-   */
+/* This file is part of Centreon-Discovery module.
+ *
+ * Centreon-Discovery is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation, either version 2 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, see <http://www.gnu.org/licenses>.
+ *
+ * Linking this program statically or dynamically with other modules is making a
+ * combined work based on this program. Thus, the terms and conditions of the GNU
+ * General Public License cover the whole combination.
+ *
+ * Module name: Centreon-Discovery
+ *
+ * Developped by: Nicolas Dietrich
+ *
+ * WEBSITE: http://community.centreon.com/projects/centreon-discovery
+ * SVN: http://svn.modules.centreon.com/centreon-discovery
+ */
 
-  /*
-   * {DataBase connexion function}
-   *
-   * @param	string	$db_host database hostname
-   * @param	string	$db_user database user login
-   * @param	string	$db_passwd database password
-   * @param	string	$db_name database name
-   * @param	boulean	$arg create new link
-   * @throws Exception Description
-   * @return	int
-   */
+/*
+ * {DataBase connexion function}
+ *
+ * @param	string	$db_host database hostname
+ * @param	string	$db_user database user login
+ * @param	string	$db_passwd database password
+ * @param	string	$db_name database name
+ * @param	boulean	$arg create new link
+ * @throws Exception Description
+ * @return	int
+ */
 
 function dbConnect($db_host,$db_user,$db_passwd,$db_name,$arg){
   $mysql = mysql_connect($db_host,$db_user,$db_passwd,$arg);

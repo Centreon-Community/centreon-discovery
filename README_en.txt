@@ -2,7 +2,7 @@
 #	Description:
 ------------------------------------------------
 Name: Centreon-Discovery
-Version: 2.1.1
+Version: 2.2
 Distribution: Debian/CentOS
 
 ------------------------------------------------

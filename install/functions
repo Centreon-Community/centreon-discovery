@@ -749,7 +749,7 @@ function check_version(){
     local error=0 result
     while read ligne
     do
-        if [ -n "${line:0:1}" ] && [ "${line:0:1}" != '#' ] ; then
+        if [ -n "${ligne:0:1}" ] && [ "${ligne:0:1}" != '#' ] ; then
             pgm=$(echo $ligne | cut -f1 -d "=")
             major_min=$(echo $ligne | cut -f2 -d "=")
             minor_min=$(echo $ligne | cut -f3 -d "=")

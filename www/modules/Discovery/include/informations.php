@@ -73,12 +73,9 @@ function findVersion (){
 					</tr>
 					<tr><td></td>
 						<td align="right" valign="top">Developers&nbsp;&nbsp;&nbsp;</td>
-						<td valign="top">Btissame ALAMI<br />
-							Zineb ALAMI<br />
-							Nicolas DIETRICH<br />
+						<td valign="top">Nicolas DIETRICH<br />
 							Baptiste GAZUI<br />
-							Guillaume HANS<br />
-							Hugo PROTHIN<br /></td>
+							Vincent VAN DEN BOSSCHE<br /></td>
 					</tr>
 				</td>
 			</tr>

@@ -1,3 +1,15 @@
+## Centreon-Discovery 2.2
+- bug correction (Bug #1602)
+- support "#" in hostname (Enhancement #1579)
+- stop agent during update (Enhancement #1586)
+- filtering FQDN in hostname (Enhancement #1589)
+- check host existence with hostname and/or IP address (Enhancement #1604)
+- colours settings for display results (Enhancement #1608)
+- check version number binaries during install (Enhancement #1610)
+- update JQuery and compatibilty with Scriptaculous (Enhancement #1611)
+- possibility to change hostname discovered (Enhancement #1612)
+- minor improvements
+
 ## Centreon-Discovery 2.1.1
 - bug correction (Bug #1584 / #1600) - compatibility Python2.4 now
 - bug correction (Bug #1583 / #1590)

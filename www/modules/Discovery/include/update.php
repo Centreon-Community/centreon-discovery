@@ -20,17 +20,19 @@
  *
  * Module name: Centreon-Discovery
  *
- * Developpedby: Nicolas Dietrich
+ * Adapted by: Nicolas Dietrich & Vincent Van Den Bossche
  *
  * WEBSITE: http://community.centreon.com/projects/centreon-discovery
  * SVN: http://svn.modules.centreon.com/centreon-discovery
  */
-
+ 
 $filepath = '@CENTREON_ETC@/centreon.conf.php';
 //$filepath = '/etc/centreon/centreon.conf.php';
 
-//$agentDir = "/usr/share/centreon-discovery/DiscoveryAgent_central.py";
 $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
+//$agentDir = "/usr/share/centreon-discovery/DiscoveryAgent_central.py";
+
+
 
 if (file_exists($filepath)) {
 	include($filepath);

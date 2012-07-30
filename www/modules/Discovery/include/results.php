@@ -1,4 +1,4 @@
-<?php
+<?
 
 /* This file is part of Centreon-Discovery module.
  *
@@ -20,376 +20,334 @@
  *
  * Module name: Centreon-Discovery
  *
- * Adapted by: Nicolas Dietrich
+ * Adapted by: Nicolas Dietrich & Vincent Van Den Bossche
  *
  * WEBSITE: http://community.centreon.com/projects/centreon-discovery
  * SVN: http://svn.modules.centreon.com/centreon-discovery
  */
  
+?>
+<link href="./modules/Discovery/css/discovery.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="./modules/Discovery/include/jquery.min.js"></script>
+<script type="text/javascript" src="./modules/Discovery/include/JS-Func.js"></script>
+<script type="text/javascript" src="./modules/Discovery/include/script.js"></script>
+<script type="text/javascript">
+	var hostsNameExist=new Array();
+	var hostsIPExist=new Array();
+	var hostsNew=new Array();
+	var hostsNewOrig=new Array();
+</script>
+<?
+if (!isset ($oreon)) {
+	exit ();
+}
 require_once'./modules/Discovery/include/DB-Func.php';
 require_once "HTML/QuickForm.php";
 require_once 'HTML/QuickForm/select.php';
 require_once 'HTML/QuickForm/Renderer/ArraySmarty.php';
 $form = new HTML_QuickForm('form_import','post','main.php?p=61202');
 
-/* Variable indiquant la position de l'agent Python, elle est modifi√©e par le fichier install.sh lors de l'installation du module. */
+/* Variable indiquant la position de l'agent Python, elle est modifiÈe par le fichier install.sh lors de l'installation du module. */
 $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 //$agentDir = "/usr/share/centreon-discovery/DiscoveryAgent_central.py";
 
- ?>
 
-<html lang="fr">
-    <head>
-            <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
-            <title>Discovery</title>
-            <link href="./Themes/Centreon-2/style.css" rel="stylesheet" type="text/css"/>
-            <meta content="Discovery - Results Page" name="Nicolas DIETRICH">
-            <!-- Fonctions JavaScript -->
-            <script type="text/javascript" src="./modules/Discovery/include/JS-Func.js"></script>
-			<script type="text/javascript" src="./modules/Discovery/include/jquery-1.6.4.min.js"></script>
-            <script type="text/javascript" src="./modules/Discovery/include/script.js"></script>
-            <!-- End Fonctions JavaScript -->
-    </head>
-    <body style="background-color: rgb(255, 255, 255); color: rgb(0, 0, 0); height: 158px;" alink="#ff6600" link="#ff6600" vlink="#ff6600" <?php if ((isset($_GET['stop'])) && ($_GET['stop'] == 1)){ echo '';} else {echo 'onload="refresh_div();"';} ?>>
-        <span class="" style="font-family: Candara;  font-weight: bold;"><br>
-            <?php
-            if (!isset ($oreon)) {
-            	exit ();
-            }
-			?>
-            <br>
-            <table width="100%">
-                <tr>
-                 	<td width="30%"></td>
-                    <td width="40%"><h1 ALIGN=CENTER>Discovery Results</h1></td>
-					<td width="30%"><img ALIGN=right alt="Centreon-Discovery" src="./modules/Discovery/include/images/logo.png"/><td>					
-                </tr>
-            </table>
-            <br><br>
+$CONFIG=getConfig();
+if (!empty($_POST)){
+	setScanValues();
+}
 
-            <?php
-			
-                /*
-                 * {Display subnets detection mod_discovery_results as an array of IP,
-                 * Hostname, OS and checkboxes for selecting hosts to create}
-                 *
-                 * {Display each input data in an array}
-                 *
-                 */
+		/*
+			Fonction permettant de tronquer une chaine de caractËre et de remplacer la fin par des points de suspentions.
+		*/
+		function strCut($string, $max = 36, $end = '...') 
+		{
+			if (strlen($string) > $max) {
+				$string = substr($string, 0, $max - strlen($end)).$end;
+			}
+			return $string;
+		}
+		
+		/*
+			Fonction qui rÈcupËre et classe les HÙtes et les Templates d'hÙtes
+		*/
 
-                function doFormTab(){
-                    $cbgroup = 0;
-                    $elt_number = 0;
-                    $group_number = 0;
-
-                    echo '       <form method="POST" action="main.php?p=61202&stop=1">',"\n";
-                    echo '           <table align="right">',"\n";
-                    echo '              <tr>',"\n";
-                    echo '                   <td>&nbsp;<p align="right"><input type=button value=" << Back " onClick="self.location=\'./main.php?p=61201\'">&nbsp;&nbsp;</p></td>',"\n";
-                    echo '                   <td>&nbsp;<p align="right"><input type="submit" value=" Create Selected Hosts ">&nbsp;&nbsp;</p></td>',"\n";
-                    echo '              </tr>',"\n";
-                    echo '           </table>',"\n";
-                    echo '           <br><br><br>'," \n ";
-                    //on cherche les subnets marqu√©s comme achev√©s : done!=0 ou 2
-                    $subnetsDone = mysql_query("SELECT id,plage,masque,cidr,nagios_server_id,done FROM mod_discovery_rangeip WHERE id!=0 AND done!='0';");
-                    while($subnetDoneData = mysql_fetch_array($subnetsDone,MYSQL_ASSOC)){
-                        $subnetPoller=mysql_query("SELECT name,ns_ip_address FROM nagios_server WHERE id='".$subnetDoneData["nagios_server_id"]."';");
-                        $subnetPollerData=mysql_fetch_array($subnetPoller,MYSQL_ASSOC);
-                        $cbgroup++;
-
-						//Si done=2 alors le scan de la plage en question est termin√©
-						if ($subnetDoneData["done"]==2){
-                            $netoctets=explode(".",$subnetDoneData["plage"]);
-                            $maskoctets=explode(".",$subnetDoneData["masque"]);
-							
-							//Par defaut on classe les resultats dans l'ordre des adresses ip
-							$subnetHostsList = mysql_query("SELECT * FROM mod_discovery_results WHERE SUBSTRING_INDEX(`ip`, '.', 1)&".$maskoctets[0]." = ".$netoctets[0]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-3),'.',1)&".$maskoctets[1]." = ".$netoctets[1]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-2),'.',1)&".$maskoctets[2]." = ".$netoctets[2]." AND SUBSTRING_INDEX(`ip`,'.',-1)&".$maskoctets[3]." = ".$netoctets[3]." ORDER BY INET_ATON(ip) ASC ;");
-							
-							//Affichage des resultats selon l'ordre de tri choisi
-							if (isset($_GET['orderby'])){
-								switch ($_GET['orderby']){
-									case "ip_asc":
-									$subnetHostsList = mysql_query("SELECT * FROM mod_discovery_results WHERE SUBSTRING_INDEX(`ip`, '.', 1)&".$maskoctets[0]." = ".$netoctets[0]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-3),'.',1)&".$maskoctets[1]." = ".$netoctets[1]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-2),'.',1)&".$maskoctets[2]." = ".$netoctets[2]." AND SUBSTRING_INDEX(`ip`,'.',-1)&".$maskoctets[3]." = ".$netoctets[3]." ORDER BY INET_ATON(ip) ASC ;");
-									break;
-
-									case "ip_desc":
-									$subnetHostsList = mysql_query("SELECT * FROM mod_discovery_results WHERE SUBSTRING_INDEX(`ip`, '.', 1)&".$maskoctets[0]." = ".$netoctets[0]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-3),'.',1)&".$maskoctets[1]." = ".$netoctets[1]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-2),'.',1)&".$maskoctets[2]." = ".$netoctets[2]." AND SUBSTRING_INDEX(`ip`,'.',-1)&".$maskoctets[3]." = ".$netoctets[3]." ORDER BY INET_ATON(ip) DESC ;");
-									break;
-									
-									case "hostname_asc":
-									$subnetHostsList = mysql_query("SELECT * FROM mod_discovery_results WHERE SUBSTRING_INDEX(`ip`, '.', 1)&".$maskoctets[0]." = ".$netoctets[0]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-3),'.',1)&".$maskoctets[1]." = ".$netoctets[1]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-2),'.',1)&".$maskoctets[2]." = ".$netoctets[2]." AND SUBSTRING_INDEX(`ip`,'.',-1)&".$maskoctets[3]." = ".$netoctets[3]." ORDER BY hostname ASC ;");
-									break;
-
-									case "hostname_desc":
-									$subnetHostsList = mysql_query("SELECT * FROM mod_discovery_results WHERE SUBSTRING_INDEX(`ip`, '.', 1)&".$maskoctets[0]." = ".$netoctets[0]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-3),'.',1)&".$maskoctets[1]." = ".$netoctets[1]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-2),'.',1)&".$maskoctets[2]." = ".$netoctets[2]." AND SUBSTRING_INDEX(`ip`,'.',-1)&".$maskoctets[3]." = ".$netoctets[3]." ORDER BY hostname DESC ;");
-									break;
-									
-									case "os_asc":
-									$subnetHostsList = mysql_query("SELECT * FROM mod_discovery_results WHERE SUBSTRING_INDEX(`ip`, '.', 1)&".$maskoctets[0]." = ".$netoctets[0]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-3),'.',1)&".$maskoctets[1]." = ".$netoctets[1]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-2),'.',1)&".$maskoctets[2]." = ".$netoctets[2]." AND SUBSTRING_INDEX(`ip`,'.',-1)&".$maskoctets[3]." = ".$netoctets[3]." ORDER BY os ASC ;");
-									break;
-									
-									case "os_desc":
-									$subnetHostsList = mysql_query("SELECT * FROM mod_discovery_results WHERE SUBSTRING_INDEX(`ip`, '.', 1)&".$maskoctets[0]." = ".$netoctets[0]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-3),'.',1)&".$maskoctets[1]." = ".$netoctets[1]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-2),'.',1)&".$maskoctets[2]." = ".$netoctets[2]." AND SUBSTRING_INDEX(`ip`,'.',-1)&".$maskoctets[3]." = ".$netoctets[3]." ORDER BY os DESC ;");
-									break;
-								}
-							}
-							
-							//Si il y a des adresses d√©couvertes
-                            if (mysql_num_rows($subnetHostsList)>0){
-                                $GlobalCbDisable="";
-                                $nbSNMPKo=mysql_query("SELECT Count(*) FROM mod_discovery_results WHERE hostname='N/A' AND SUBSTRING_INDEX(`ip`, '.', 1)&".$maskoctets[0]." = ".$netoctets[0]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-3),'.',1)&".$maskoctets[1]." = ".$netoctets[1]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-2),'.',1)&".$maskoctets[2]." = ".$netoctets[2]." AND SUBSTRING_INDEX(`ip`,'.',-1)&".$maskoctets[3]." = ".$netoctets[3]." ;");
-                                $nbSNMPKoData=mysql_fetch_array($nbSNMPKo,MYSQL_ASSOC);
-								//On compte le nombre d'IP d√©couvertes dans la plage
-								$reqNbIpFound=mysql_query("SELECT Count(*) FROM mod_discovery_results WHERE plage_id=".$subnetDoneData["id"].";");
-								$nbIpFound=mysql_fetch_array($reqNbIpFound);
-                                if ($nbSNMPKoData['Count(*)']==mysql_num_rows($subnetHostsList)) $GlobalCbDisable="disabled";
-                                echo '          <br><font size="3px">'.$subnetDoneData["plage"].' /'.$subnetDoneData["cidr"].' polled by '.$subnetPollerData["name"].' ('.$subnetPollerData["ns_ip_address"].') | <a href="#" title="View addresses" onClick="$(\'#scan'.$subnetDoneData["id"].'\').slideToggle(\'fast\');"><font color="green" size="2px"> '.$nbIpFound[0].' address(es) discovered</font></a><br>'," \n ";
-								echo'			<div id="scan'.$subnetDoneData["id"].'">'," \n ";
-								echo '          <br><br><table class="ListTable">'," \n ";
-                                echo '             <tr class="ListHeader">'," \n ";
-								echo '                  <td width="5%" class="ListColHeaderCenter"><input type=checkbox NAME="cb'.$cbgroup.'[]" VALUE="'. $subnetDoneData["plage"] .'" OnClick="checkall(document.getElementsByName(\'cb'.$cbgroup.'[]\'));" '.$GlobalCbDisable.'/></td>'," \n ";
-                                echo '                  <INPUT TYPE=HIDDEN NAME="group_list[]" VALUE="'. $cbgroup .'" />'," \n ";
-                                echo '                  <td width="10%" class="ListColHeaderCenter"><a href="./main.php?p=61202&stop=1&orderby=ip_asc"><img src="./img/icones/7x7/sort_asc.gif" style="position:relative;bottom:5px;left:-3px;"></a>Host<a href="./main.php?p=61202&stop=1&orderby=ip_desc"><img src="./img/icones/7x7/sort_desc.gif" style="position:relative;bottom:5px;left:3px;"></a></td>'," \n ";
-                                echo '                  <td width="15%" class="ListColHeaderCenter"><a href="./main.php?p=61202&stop=1&orderby=hostname_asc"><img src="./img/icones/7x7/sort_asc.gif" style="position:relative;bottom:5px;left:-3px;"></a>Hostname<a href="./main.php?p=61202&stop=1&orderby=hostname_desc"><img src="./img/icones/7x7/sort_desc.gif" style="position:relative;bottom:5px;left:3px;"></a></td>'," \n ";
-                                echo '                  <td width="15%" class="ListColHeaderCenter"><a href="./main.php?p=61202&stop=1&orderby=os_asc"><img src="./img/icones/7x7/sort_asc.gif" style="position:relative;bottom:5px;left:-3px;"></a>Operating System<a href="./main.php?p=61202&stop=1&orderby=os_desc"><img src="./img/icones/7x7/sort_desc.gif" style="position:relative;bottom:5px;left:3px;"></a></td>'," \n ";
-                                echo '                  <td width="15%" class="ListColHeaderCenter">Host Template</td>'," \n ";
-                                echo '                  <td width="15%" class="ListColHeaderCenter">Host Group</td>'," \n ";
-                                echo '                  <td width="8%" class="ListColHeaderCenter">Exist</td>'," \n ";
-								echo '					<td width="5%" class="ListColHeaderCenter"><a href="#" ><img style="border:none" type="image" src="./modules/Discovery/include/images/clearAll1.png" title="Delete all from list" onmouseover="javascript:this.src=\'./modules/Discovery/include/images/clearAll2.png\';" onmouseout="javascript:this.src=\'./modules/Discovery/include/images/clearAll1.png\';" onClick="self.location=\'./main.php?p=61202&clearall='.$subnetDoneData["id"].'\'"></td>'," \n";
-                                echo '              </tr>'," \n ";
-                                while ($subnetHostData = mysql_fetch_array($subnetHostsList,MYSQL_ASSOC)){
-									$elt_number++;
-									$status = verifHostExistence($subnetHostData["ip"],$subnetHostData["hostname"]);
-                                    echo '            	<tr class="list_one">'," \n";
-                                    echo '                  <td width="5%" class="ListColCenter"><INPUT TYPE=CHECKBOX NAME="cb'.$cbgroup.'[]" VALUE="'.$subnetHostData["id"].'" '.$status['checkbox'].'/></td>',"\n";
-                                    echo '                  <td width="10%" class="ListColCenter">'.$subnetHostData["ip"].'</td>'."\n ";
-                                    echo '                  <td width="17%" class="ListColCenter">'.$subnetHostData["hostname"].'</td>'."\n ";
-                                    echo '                  <td width="17%" class="ListColCenter" title="'.$subnetHostData["os"].'">'.strCut($subnetHostData["os"]).'</td>'."\n ";
-                                    
-									/* Liste des templates */
-									$default = findOs($subnetHostData["os"]);
-									echo '                  <td width="10%" class="ListColCenter"><select name=select_template'.$subnetHostData["id"].' width=95%>'."\n ";
-                                    $listTemplate=mysql_query("SELECT * FROM host WHERE host_register='0' ORDER BY host_id DESC;");
-                                    while ($listTemplateData=mysql_fetch_array($listTemplate,MYSQL_ASSOC)){
-                                        echo "                  <option value='".$listTemplateData["host_id"]."'";
-										if ($default == $listTemplateData["host_name"]) echo ' selected = "selected" ';
-										echo "					>".$listTemplateData["host_name"]."</option>"."\n ";
-                                    }
-                                    echo '                  </select></td>'."\n ";
-									
-									/* Liste des groupes */
-									echo '                  <td width="10%" class="ListColCenter"><select name=select_group'.$subnetHostData["id"].' width=95%><option value="-1">None</option>'."\n ";
-                                    $listGroup=mysql_query("SELECT * FROM hostgroup;");
-                                    while ($listGroupData=mysql_fetch_array($listGroup,MYSQL_ASSOC)){
-                                        echo "                  <option value='".$listGroupData["hg_id"]."'>".$listGroupData["hg_name"]."</option>"."\n ";
-                                    }
-                                    echo '                  </select></td>'."\n ";
-									echo '                  <td width="10%" class="ListColCenter" style="color:'.$status['color'].'"><b>'.$status['status'].'</b></td>'."\n ";
-									echo ' 					<td width="10%" class="ListColCenter"><a href="#"><img style="border:none" type="image" src="./modules/Discovery/include/images/delete16x16.png" title="Delete one from list" name="ClearRow" onClick="self.location=\'./main.php?p=61202&id='.$subnetHostData["id"].'\'"></a></td>',"\n ";
-                                    echo '              </tr>'," \n ";
-                                }
-                                echo '          </table>'," \n ";
-								echo '			</div>'," \n ";
-                            }
-							
-							//Si le scan est termin√©, mais que aucune IP n'est d√©couverte
-							if (mysql_num_rows($subnetHostsList)==0){
-								echo '          <br><font size="3px">'.$subnetDoneData["plage"].' /'.$subnetDoneData["cidr"].' polled by '.$subnetPollerData["name"].' ('.$subnetPollerData["ns_ip_address"].') | <a href="#" title="View addresses" onClick="$(\'#scan'.$subnetDoneData["id"].'\').slideToggle(\'fast\');"><font color="orange" size="2px"> 0 address discovered</font></a><br>'," \n ";
-								echo '			<div id="scan'.$subnetDoneData["id"].'">'," \n ";
-								echo '          <br><br><table class="ListTable">'," \n ";
-								echo '             <tr class="ListHeader">'," \n ";
-								echo '                  <td width="22%" class="ListColHeaderCenter">Host</td>'," \n ";
-								echo '                  <td width="22%" class="ListColHeaderCenter">Hostname</td>'," \n ";
-								echo '                  <td width="22%" class="ListColHeaderCenter">Operating System</td>'," \n ";
-								echo '                  <td width="22%" class="ListColHeaderCenter">Host Template</td>'," \n ";
-								echo '              </tr>'," \n ";
-								echo '             <tr class="list_one">'," \n";
-								echo '                  <td width="22%" colspan="5" class="ListColCenter"> No result </td>'."\n ";
-								echo '              </tr>'," \n ";
-								echo '          </table>'," \n ";
-								echo '          <br>'," \n ";
-								echo '			</div>'," \n ";
-							}     
-						}
-						
-						//Si le scan n'est pas fini on affiche un logo "patientez"
-                        else if ($subnetDoneData["done"]==1) {
-							echo '          <br><font size="3px">'.$subnetDoneData["plage"]." /".$subnetDoneData["cidr"]." polled by ".$subnetPollerData["name"]." (".$subnetPollerData["ns_ip_address"].")<br><br> \n ";
-							echo '          <table class="ListTable">'," \n ";
-							echo '             <tr class="ListHeader">'," \n ";
-							echo '                  <td width="22%" class="ListColHeaderCenter">Host</td>'," \n ";
-							echo '                  <td width="22%" class="ListColHeaderCenter">Hostname</td>'," \n ";
-							echo '                  <td width="22%" class="ListColHeaderCenter">Operating System</td>'," \n ";
-							echo '                  <td width="22%" class="ListColHeaderCenter">Host Template</td>'," \n ";
-							echo '              </tr>'," \n ";
-							echo '             <tr class="list_one">'," \n";
-							echo '                  <td width="22%" colspan="5" class="ListColCenter"><img style="border:none" type="image" src="./modules/Discovery/include/images/loading2.gif" title="Loading..."></td>'."\n ";
-							echo '              </tr>'," \n ";
-							echo '          </table>'," \n ";
-							echo '          <br>'," \n ";
-                        }   
-						/* Si une erreur est survenue pendant le scan */
-                        else if ($subnetDoneData["done"]==3) {
-							echo '          <br><font size="3px">'.$subnetDoneData["plage"].' /'.$subnetDoneData["cidr"].' polled by '.$subnetPollerData["name"].' ('.$subnetPollerData["ns_ip_address"].') | <a href="#" title="View addresses" onClick="$(\'#scan'.$subnetDoneData["id"].'\').slideToggle(\'fast\');"><font color="red" size="2px"> ERROR : Connection lost with the poller agent</font></a><br>'," \n ";
-							echo '			<div id="scan'.$subnetDoneData["id"].'">'," \n ";
-							echo '          <br><br><table class="ListTable">'," \n ";
-							echo '             <tr class="ListHeader">'," \n ";
-							echo '                  <td width="22%" class="ListColHeaderCenter">Host</td>'," \n ";
-							echo '                  <td width="22%" class="ListColHeaderCenter">Hostname</td>'," \n ";
-							echo '                  <td width="22%" class="ListColHeaderCenter">Operating System</td>'," \n ";
-							echo '                  <td width="22%" class="ListColHeaderCenter">Host Template</td>'," \n ";
-							echo '              </tr>'," \n ";
-							echo '             <tr class="list_one">'," \n";
-							echo '                  <td width="22%" colspan="5" class="ListColCenter"> No result </td>'."\n ";
-							echo '              </tr>'," \n ";
-							echo '          </table>'," \n ";
-							echo '          <br>'," \n ";
-							echo '			</div>'," \n ";
-                        }  						
-                    }
-                    echo '          <table align="right">',"\n";
-                    echo '              <tr>',"\n";
-                    echo '                  <td>&nbsp;<p align="right"><input type=button value=" << Back " onClick="self.location=\'./main.php?p=61201\'">&nbsp;&nbsp;</p></td>',"\n";
-                    echo '                  <td>&nbsp;<p align="right"><input type="submit" value=" Create Selected Hosts ">&nbsp;&nbsp;</p></td>',"\n";
-                    echo '              </tr>',"\n";
-                    echo '          </table>',"\n";
-                    echo '         </form>',"\n";
-                }
-				
-				/* V√©rification si l'h√¥te existe d√©ja */
-				function verifHostExistence ($ip,$hostname){
-					$reqHost=mysql_query("SELECT * FROM host WHERE host_name='".$hostname."';");
-					//Si le hostname n'existe pas
-					if (mysql_num_rows($reqHost)==0){
-						$reqHostIp=mysql_query("SELECT * FROM host WHERE host_address='".$ip."';");
-						//Si l'ip n'existe pas non plus
-						if (mysql_num_rows($reqHostIp)==0){
-							//On teste si il y a eu un timeout snmp
-							if ($hostname == "* TimeOut SNMP *"){
-								return array('color' => 'grey', 'status' => 'Not Defined', 'checkbox' => 'disabled');
-							//Sinon l'h√¥te n'existe pas est peut √™tre cr√©√©e
-							}else{
-								return array('color' => 'green', 'status' => 'Not Exist', 'checkbox' => '');
-							}
-						// Si l'ip existe on le signale
-						}else{
-							return array('color' => 'orange', 'status' => 'IP Already Exist', 'checkbox' => '');
-						}
-					//Si le hostname existe d√©ja on empeche la cr√©ation de l'h√¥te
-					}else{
-						return array('color' => 'red', 'status' => 'Host Already Exist', 'checkbox' => 'disabled');
-					}
-				}
-				
-                function getListHost() {
-                    $listhost=Array();
-					$req=mysql_query("SELECT count(*) FROM mod_discovery_rangeip WHERE id!=0 AND done!=1;");
-                    $nbPlage=mysql_fetch_array($req);
-                    for ($i=1;$i<=$nbPlage[0];$i++){
-						$cbgroup_name='cb'.$i;
-                        if (isset($_POST["$cbgroup_name"]) && count($_POST["$cbgroup_name"])>0)
-						{
-                            foreach ($_POST["$cbgroup_name"] as $key => $value){
-                                if ($key>=0){
-                                    $listHost[]=$value;
-                                }
-                            }
-                        }
-                    }
-                    return $listHost;
-                }
-				
-				/*
-					Fonction permettant de tronquer une chaine de caract√®re et de remplacer la fin par des points de suspensions.
-				*/
-				function strCut($string, $max = 36, $end = '...') 
+?>
+<table width="100%">
+	<tr>
+		<td width="30%"></td>
+		<td width="40%"><h1 align="center">Discovery Results</h1></td>
+		<td width="30%"><img align="right" alt="Centreon-Discovery" src="./modules/Discovery/include/images/logo.png"/><td>					
+	</tr>
+</table>
+<table width="100%">
+	<tr>
+		<td width="30%">&nbsp;</td>
+		<td width="40%"><div id="mon_div" style="font-weight:bold;"></div></td>
+		<td width="30%">&nbsp;</td>
+	</tr>
+</table>
+<form method="POST" action="main.php?p=61202" name="results">
+<?
+	if(isset($_GET['delid'])){
+		$delid=(int)$_GET['delid'];
+		if(mysql_query("DELETE FROM mod_discovery_results WHERE id='".$delid."'")){
+			echo 'Resultat Supprime';
+		}
+	}
+	elseif(isset($_GET['delall'])){
+		$delid=(int)$_GET['delall'];
+		if(mysql_query("DELETE FROM mod_discovery_results WHERE plage_id='".$delid."'")){
+			echo 'Resultats suprimes';
+		}
+	}
+	//if (!empty($_POST) && isset($_POST['cb1'])){
+	if (!empty($_POST)){
+		//CrÈation des hosts 
+		function getListHost() {
+			$listhost=Array();
+			$req=mysql_query("SELECT count(*) FROM mod_discovery_rangeip WHERE id!=0 AND done!=1;");
+			$nbPlage=mysql_fetch_array($req);
+			for ($i=1;$i<=$nbPlage[0];$i++){
+				$cbgroup_name='cb'.$i;
+				if (isset($_POST["$cbgroup_name"]) && count($_POST["$cbgroup_name"])>0)
 				{
-					if (strlen($string) > $max) {
-						$string = substr($string, 0, $max - strlen($end)).$end;
-					}
-					return $string;
-				}
-				
-				/* 	
-					Cette fonction doit r√©cuperer les informations du formulaire lors de la saisie des plages √† scanner.
-					Elle doit les saisir dans la bdd.
-				*/
-				function setScanValues(){				
-					global $agentDir;
-					
-					$req=mysql_query("SELECT count(*) FROM mod_discovery_rangeip WHERE id!=0;");
-                    $nbPlage=mysql_fetch_array($req);
-					for ($i=0;$i<$nbPlage[0];$i++){
-						if ((isset($_POST["RangeToScan".$i])) && ($_POST["RangeToScan".$i] == 'true')){
-						
-							/* NMAP */
-							
-							if (isset($_POST["profil_nmap".$i])){
-								mysql_query("UPDATE mod_discovery_rangeip SET nmap_profil='".$_POST["profil_nmap".$i]."' WHERE id='".$_POST["id".$i]."';");
-							}
-							if (isset($_POST["nmap_timeout".$i]) && is_int(intval($_POST["nmap_timeout".$i])) && $_POST["nmap_timeout".$i]>=15000 && $_POST["nmap_timeout".$i]<100000){
-								mysql_query("UPDATE mod_discovery_rangeip SET nmap_host_timeout='".$_POST["nmap_timeout".$i]."' WHERE id='".$_POST["id".$i]."';");
-							}
-							if (isset($_POST["nmap_timeout_rtt".$i]) && is_int(intval($_POST["nmap_timeout_rtt".$i])) && $_POST["nmap_timeout_rtt".$i]>=100 && $_POST["nmap_timeout_rtt".$i]<10000){
-								mysql_query("UPDATE mod_discovery_rangeip SET nmap_max_rtt_timeout='".$_POST["nmap_timeout_rtt".$i]."' WHERE id='".$_POST["id".$i]."';");
-							}
-							if (isset($_POST["nmap_retries".$i]) && is_int(intval($_POST["nmap_retries".$i])) && $_POST["nmap_retries".$i]>=0 && $_POST["nmap_retries".$i]<100){
-								mysql_query("UPDATE mod_discovery_rangeip SET nmap_max_retries='".$_POST["nmap_retries".$i]."' WHERE id='".$_POST["id".$i]."';");
-							}
-							
-							/* SNMP */
-							
-							if (isset($_POST["snmp_version".$i])){
-								mysql_query("UPDATE mod_discovery_rangeip SET snmp_version='".$_POST["snmp_version".$i]."' WHERE id='".$_POST["id".$i]."';");
-							}
-							
-							if (isset($_POST["port".$i]) && is_int(intval($_POST["port".$i])) && $_POST["port".$i]>0 && $_POST["port".$i]<65536){
-								mysql_query("UPDATE mod_discovery_rangeip SET snmp_port='".$_POST["port".$i]."' WHERE id='".$_POST["id".$i]."';");
-							}
-							
-							if (isset($_POST["retries".$i]) && is_int(intval($_POST["retries".$i])) && $_POST["retries".$i]>=0 && $_POST["retries".$i]<100){
-								mysql_query("UPDATE mod_discovery_rangeip SET snmp_retries='".$_POST["retries".$i]."' WHERE id='".$_POST["id".$i]."';");
-							}
-							
-							if (isset($_POST["timeout".$i]) && is_int(intval($_POST["timeout".$i])) && $_POST["timeout".$i]>0 && $_POST["timeout".$i]<100){
-								mysql_query("UPDATE mod_discovery_rangeip SET snmp_timeout='".$_POST["timeout".$i]."' WHERE id='".$_POST["id".$i]."';");
-							}
-							
-							if (isset($_POST["snmp_community".$i]) && !strpos($_POST["snmp_community".$i]," ") && !empty($_POST["snmp_community".$i])){
-								mysql_query("UPDATE mod_discovery_rangeip SET snmp_community='".$_POST["snmp_community".$i]."' WHERE id='".$_POST["id".$i]."';");
-							}
-							
-							/* OID */
-							
-							if (isset($_POST["oid_hostname".$i]) && !empty($_POST["oid_hostname".$i]) && ereg("^(\.([1-9][0-9]+|[0-9]))+$", $_POST["oid_hostname".$i])){
-								mysql_query("UPDATE mod_discovery_rangeip SET oid_hostname='".$_POST["oid_hostname".$i]."' WHERE id='".$_POST["id".$i]."';");
-							}
-							
-							if (isset($_POST["oid_os".$i]) && !empty($_POST["oid_os".$i]) && ereg("^(\.([1-9][0-9]+|[0-9]))+$", $_POST["oid_os".$i])){
-								mysql_query("UPDATE mod_discovery_rangeip SET oid_os='".$_POST["oid_os".$i]."' WHERE id='".$_POST["id".$i]."';");
-							}
-					
-							//Mise √† jour du champs done √† 1 pour dire qu'il faut le scanner
-							mysql_query("UPDATE mod_discovery_rangeip SET done=1 WHERE id='".$_POST["id".$i]."'");
-							
-							//Vider la table mod_discovery_results
-							mysql_query("DELETE FROM mod_discovery_results;");
-						}else{
-							mysql_query("UPDATE mod_discovery_rangeip SET done=0 WHERE id='".$_POST["id".$i]."'");
+					foreach ($_POST["$cbgroup_name"] as $key => $value){
+						if ($key>=0){
+							$listHost[]=$value;
 						}
 					}
-					mysql_query("UPDATE mod_discovery_rangeip SET done=0 WHERE id='0'");
-					//Executer le shell
-					if (file_exists($agentDir)) {
-						shell_exec('python '.$agentDir.' SCAN_RANGEIP > /dev/null 2>&1 &');
-					}
-					else { echo "<CENTER><b><font size=\"3px\" color=\"red\">ERROR</b> : File $agentDir not found...</font></CENTER>\n"; }
 				}
+			}
+			return $listHost;
+		}
+		$hostList = getListHost();
+		if ($hostList != null){
+			foreach ($hostList as $host)
+			{
+				//On rÈcupere les infos sur l'hote ‡ crÈer (hostname, ip, template, group)
+				$reqHostToCreate = mysql_query("SELECT * FROM mod_discovery_results WHERE id=".$host.";");
+				$hostToCreate = mysql_fetch_array($reqHostToCreate,MYSQL_ASSOC);
 				
-				/* 	
-					Cette fonction permet de d√©terminer quel est le template le plus appropri√© en fonction des informations fournie
-					dans le sysDescr ainsi que de la table mod_discovery_template_os_relation
-				*/
+				//On rÈcupere des infos sur l'hotes ‡ crÈer
+				$reqHostInfos = mysql_query("SELECT snmp_community,snmp_version,nagios_server_id FROM mod_discovery_rangeip WHERE id=".$hostToCreate["plage_id"].";");
+				$hostInfos = mysql_fetch_array($reqHostInfos,MYSQL_ASSOC);
+				
+				//On rempli la variable tmpConf qui sera envoyÈe ‡ la fonction callInsertHostInDb()
+				$tmpConf = array();
+				$id=$hostToCreate["id"];
+				$tmpConf["host_name"] = $_POST["hostname"][$id];
+				$tmpConf["host_alias"] = $_POST["hostname"][$id];
+				$tmpConf["host_address"] = $hostToCreate["ip"];
+				$tmpConf["nagios_server_id"] = $hostInfos["nagios_server_id"];
+				$tmpConf["host_snmp_community"] =  $hostInfos["snmp_community"];
+				$tmpConf["host_snmp_version"] =  $hostInfos["snmp_version"];
+				$tmpConf["host_register"]["host_register"] = "1";
+				$tmpConf["host_activate"]["host_activate"] = "1";
+				$tmpConf["host_template_model_htm_id"] = $_POST["select_template".$host];
+				if ($_POST["select_group".$host]!= -1)
+				{
+					$tmpConf["host_hgs"] = array($_POST["select_group".$host]);
+				}
+				$tmpConf["dupSvTplAssoc"]["dupSvTplAssoc"] = "1";
+				callInsertHostInDb($tmpConf);
+			}
+			if (count($hostList)>1){
+				$hostMsgAlert = '<script>alert("'.count($hostList).' hosts were successfully created");</script>';
+			} else {
+				$hostMsgAlert = '<script>alert("The host has been created successfully");</script>';
+			}
+			echo $hostMsgAlert;
+		}
+	}
+	
+	function getTemplateHostsGroups(){
+		global $Hosts_Templates;
+		global $Hosts;
+		global $HostGroup;
+			echo '<script type="text/javascript">'."\n";
+			$GetGroups_SQL=mysql_query("SELECT * FROM hostgroup")or die(mysql_error());
+			$GetHosts_SQL=mysql_query("SELECT * FROM host ORDER BY host_id DESC")or die(mysql_error());
+			while($Hosts_SQL=mysql_fetch_array($GetHosts_SQL,MYSQL_ASSOC)){
+				if($Hosts_SQL["host_register"]=='0'){
+					$Hosts_Templates[]=$Hosts_SQL;
+				}
+				else {
+					$Hosts[]=$Hosts_SQL;
+					echo 'hostsNameExist['.$Hosts_SQL["host_id"].']=\''.strtoupper($Hosts_SQL["host_name"]).'\';'."\n";
+					echo 'hostsIPExist['.$Hosts_SQL["host_id"].']=\''.strtoupper($Hosts_SQL["host_address"]).'\';'."\n";
+				}
+			}
+			echo '</script>';
+			while($Groups_SQL=mysql_fetch_array($GetGroups_SQL,MYSQL_ASSOC)){
+				$HostGroup[]=$Groups_SQL;
+			}
+		}
+	getTemplateHostsGroups();
+	?>
+	<table align="right">
+		<tr>
+			<td>&nbsp;<p align="right"><input type="button" value=" << Back " onClick="self.location='./main.php?p=61201'">&nbsp;&nbsp;</p></td>
+			<td>&nbsp;<p align="right"><input type="button" value=" Create Selected Hosts " onClick="verifselection(results)">&nbsp;&nbsp;</p></td>
+		</tr>
+	</table>
+	<br /><br /><br />
+	<?	
+	$cbgroup = 0;
+	$subnetsDone = mysql_query("SELECT count(plage_id) as cnt, disco.id,plage,masque,cidr,done,nagios_server_id FROM (mod_discovery_rangeip AS disco) LEFT JOIN mod_discovery_results AS res ON disco.id=res.plage_id WHERE disco.id!=0 AND disco.done!=0 GROUP BY disco.id") or die(mysql_error());
+	while($subnetDoneData = mysql_fetch_array($subnetsDone,MYSQL_ASSOC)){
+	
+	$pollerSql = mysql_query("SELECT ns_ip_address, name FROM nagios_server WHERE id='".$subnetDoneData['nagios_server_id']."'")or die(mysql_error());
+	$poller = mysql_fetch_array($pollerSql); // Informations du poller
+	
+	$netoctets=explode(".",$subnetDoneData["plage"]);
+	$maskoctets=explode(".",$subnetDoneData["masque"]);
+	if (isset($_GET['orderby'])){
+		switch ($_GET['orderby']){
+			case "ip_asc":
+			$subnetHostsList = mysql_query("SELECT * FROM mod_discovery_results WHERE SUBSTRING_INDEX(`ip`, '.', 1)&".$maskoctets[0]." = ".$netoctets[0]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-3),'.',1)&".$maskoctets[1]." = ".$netoctets[1]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-2),'.',1)&".$maskoctets[2]." = ".$netoctets[2]." AND SUBSTRING_INDEX(`ip`,'.',-1)&".$maskoctets[3]." = ".$netoctets[3]." ORDER BY INET_ATON(ip) ASC ;");
+			break;
+
+			case "ip_desc":
+			$subnetHostsList = mysql_query("SELECT * FROM mod_discovery_results WHERE SUBSTRING_INDEX(`ip`, '.', 1)&".$maskoctets[0]." = ".$netoctets[0]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-3),'.',1)&".$maskoctets[1]." = ".$netoctets[1]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-2),'.',1)&".$maskoctets[2]." = ".$netoctets[2]." AND SUBSTRING_INDEX(`ip`,'.',-1)&".$maskoctets[3]." = ".$netoctets[3]." ORDER BY INET_ATON(ip) DESC ;");
+			break;
+			
+			case "hostname_asc":
+			$subnetHostsList = mysql_query("SELECT * FROM mod_discovery_results WHERE SUBSTRING_INDEX(`ip`, '.', 1)&".$maskoctets[0]." = ".$netoctets[0]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-3),'.',1)&".$maskoctets[1]." = ".$netoctets[1]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-2),'.',1)&".$maskoctets[2]." = ".$netoctets[2]." AND SUBSTRING_INDEX(`ip`,'.',-1)&".$maskoctets[3]." = ".$netoctets[3]." ORDER BY hostname ASC ;");
+			break;
+
+			case "hostname_desc":
+			$subnetHostsList = mysql_query("SELECT * FROM mod_discovery_results WHERE SUBSTRING_INDEX(`ip`, '.', 1)&".$maskoctets[0]." = ".$netoctets[0]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-3),'.',1)&".$maskoctets[1]." = ".$netoctets[1]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-2),'.',1)&".$maskoctets[2]." = ".$netoctets[2]." AND SUBSTRING_INDEX(`ip`,'.',-1)&".$maskoctets[3]." = ".$netoctets[3]." ORDER BY hostname DESC ;");
+			break;
+			
+			case "os_asc":
+			$subnetHostsList = mysql_query("SELECT * FROM mod_discovery_results WHERE SUBSTRING_INDEX(`ip`, '.', 1)&".$maskoctets[0]." = ".$netoctets[0]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-3),'.',1)&".$maskoctets[1]." = ".$netoctets[1]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-2),'.',1)&".$maskoctets[2]." = ".$netoctets[2]." AND SUBSTRING_INDEX(`ip`,'.',-1)&".$maskoctets[3]." = ".$netoctets[3]." ORDER BY os ASC ;");
+			break;
+			
+			case "os_desc":
+			$subnetHostsList = mysql_query("SELECT * FROM mod_discovery_results WHERE SUBSTRING_INDEX(`ip`, '.', 1)&".$maskoctets[0]." = ".$netoctets[0]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-3),'.',1)&".$maskoctets[1]." = ".$netoctets[1]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-2),'.',1)&".$maskoctets[2]." = ".$netoctets[2]." AND SUBSTRING_INDEX(`ip`,'.',-1)&".$maskoctets[3]." = ".$netoctets[3]." ORDER BY os DESC ;");
+			break;
+		}
+	}
+	else {
+		$subnetHostsList = mysql_query("SELECT * FROM mod_discovery_results WHERE SUBSTRING_INDEX(`ip`, '.', 1)&".$maskoctets[0]." = ".$netoctets[0]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-3),'.',1)&".$maskoctets[1]." = ".$netoctets[1]." AND SUBSTRING_INDEX(SUBSTRING_INDEX(`ip`, '.',-2),'.',1)&".$maskoctets[2]." = ".$netoctets[2]." AND SUBSTRING_INDEX(`ip`,'.',-1)&".$maskoctets[3]." = ".$netoctets[3]." ORDER BY INET_ATON(ip) ASC ;");
+	}
+	if($subnetDoneData["done"]==2){ // Recherche terminÈe
+			$cbgroup++;
+	?>
+	<font size="3px" style="font-weight:bold;"><? echo $subnetDoneData["plage"].' / '.$subnetDoneData["cidr"].' polled by '.$poller["name"].' ('.$poller["ns_ip_address"].') | <a href="#" title="View addresses" onClick="$j(\'#scan'.$subnetDoneData["id"].'\').slideToggle(\'fast\');"><font color="green" size="2px"> '.$subnetDoneData["cnt"].' address(es) discovered</font></a><br>'; ?>
+			<div id="scan<? echo $subnetDoneData["id"]; ?>">
+				<br><br><table class="ListTable">
+				<tr class="ListHeader">
+					<td width="5%" class="ListColHeaderCenter"><input type="checkbox" name="cb<? echo $cbgroup; ?>[]" value="<? echo $subnetDoneData["plage"]; ?>" OnClick="checkall(document.getElementsByName('cb<? echo $cbgroup; ?>[]'));"/></td>
+						<input type="hidden" name="group_list[]" value="'. $cbgroup .'" />
+						<td width="10%" class="ListColHeaderCenter"><a href="./main.php?p=61202&orderby=ip_asc"><img src="./img/icones/7x7/sort_asc.gif" style="position:relative;bottom:5px;left:-3px;"></a>Host<a href="./main.php?p=61202&orderby=ip_desc"><img src="./img/icones/7x7/sort_desc.gif" style="position:relative;bottom:5px;left:3px;"></a></td>
+						<td width="15%" class="ListColHeaderCenter"><a href="./main.php?p=61202&orderby=hostname_asc"><img src="./img/icones/7x7/sort_asc.gif" style="position:relative;bottom:5px;left:-3px;"></a>Hostname<a href="./main.php?p=61202&orderby=hostname_desc"><img src="./img/icones/7x7/sort_desc.gif" style="position:relative;bottom:5px;left:3px;"></a></td>
+						<td width="15%" class="ListColHeaderCenter"><a href="./main.php?p=61202&orderby=os_asc"><img src="./img/icones/7x7/sort_asc.gif" style="position:relative;bottom:5px;left:-3px;"></a>Operating System<a href="./main.php?p=61202&orderby=os_desc"><img src="./img/icones/7x7/sort_desc.gif" style="position:relative;bottom:5px;left:3px;"></a></td>
+						<td width="15%" class="ListColHeaderCenter">Host Template</td>
+						<td width="15%" class="ListColHeaderCenter">Host Group</td>
+						<td width="8%" class="ListColHeaderCenter">Status</td>
+						<td width="5%" class="ListColHeaderCenter"><a href="#">
+						<img style="border:none" type="image" src="./modules/Discovery/include/images/clearAll1.png" title="Delete all from list" onMouseOver="javascript:this.src='./modules/Discovery/include/images/clearAll2.png';" onMouseOut="javascript:this.src='./modules/Discovery/include/images/clearAll1.png';" onClick="self.location='./main.php?p=61202&delall=<? echo $subnetDoneData["id"]; ?>'" /></a></td>
+						</tr>
+				<?
+				$list1="list_one";
+				$list2="list_two";
+				$listcnt=1;
+				while($subnetHostData=mysql_fetch_array($subnetHostsList,MYSQL_ASSOC)){
+					if($CONFIG['consider_fqdn']==1){
+						$subnetHostData["hostname"]=explode('.', $subnetHostData["hostname"]);
+						$subnetHostData["hostname"]=$subnetHostData["hostname"][0];
+					}
+					if($listcnt%2==0){
+						$list=$list2;
+					}
+					else {
+						$list=$list1;
+					}
+				?>
+					<script type="text/javascript">
+						hostsNew[<? echo $subnetHostData["id"]; ?>]='<? echo $subnetHostData["hostname"]; ?>';
+						hostsNewOrig[<? echo $subnetHostData["id"]; ?>]='<? echo $subnetHostData["hostname"]; ?>';
+					</script>
+				<?
+						echo '            	<tr class="'.$list.'">'," \n";
+						echo '                  <td width="5%" class="ListColCenter"><input type="checkbox" name="cb'.$cbgroup.'[]" value="'.$subnetHostData["id"].'"/></td>';
+						echo '                  <td width="10%" class="ListColCenter" name="ip'.$subnetHostData["id"].'">'.$subnetHostData["ip"].'</td>';
+						echo '                  <td width="17%" class="ListColCenter"><input type="text" name="hostname['.$subnetHostData["id"].']" value="'.$subnetHostData["hostname"].'" onKeyUp="updateNameBox(\''.$subnetHostData["id"].'\');" />&nbsp;<a href="#"><img src="./modules/Discovery/include/images/undo_16.png" title="Rollback to detected hostname" onClick="Hostname_rollback(\''.$subnetHostData["id"].'\');" /></a></td>';
+						echo '                  <td width="17%" class="ListColCenter" title="'.$subnetHostData["os"].'">'.strCut($subnetHostData["os"]).'</td>';
+						echo '					<td width="17%" class="ListColCenter"><select name="select_template'.$subnetHostData["id"].'" width="95%"><option value="-1">None</option>';
+						$default = findOs($subnetHostData["os"]);
+						foreach($Hosts_Templates as $Hosts_TmPL){
+						?>
+							<option value="<? echo $Hosts_TmPL["host_id"]; ?>" <? echo ($default == $Hosts_TmPL["host_name"])? 'selected':''; ?> ><? echo $Hosts_TmPL["host_name"]; ?></option>
+						<?
+						}
+						echo '					</select></td>';
+						echo '					<td width="17%" class="ListColCenter"><select name="select_group'.$subnetHostData["id"].'" width="95%"><option value="-1">None</option>';
+						foreach($HostGroup as $Host_Group){
+							echo '<option value="'.$Host_Group["hg_id"].'">'.$Host_Group["hg_name"].'</option>';
+						}					
+						echo 					'</select></td>';
+						echo '					<td width="17%" class="ListColCenter" name="exist'.$subnetHostData["id"].'" style="font-weight:bold;">';
+						echo '</td>';
+						echo ' 					<td width="10%" class="ListColCenter"><a href="#"><img style="border:none" type="image" src="./modules/Discovery/include/images/delete16x16.png" title="Delete one from list" name="ClearRow" onClick="self.location=\'./main.php?p=61202&delid='.$subnetHostData["id"].'\'"></a></td>';
+						echo '				</tr>';
+				$listcnt++;
+				}
+			?>
+		</table>
+		</div>
+	</form>
+	<br />
+		<?
+		}
+		elseif ($subnetDoneData["done"]==1){ // Recherche en cours
+				echo '<script type="text/javascript">refresh_div();</script>';
+			echo '          <br><font size="3px" style="font-weight:bold;">'.$subnetDoneData["plage"]." /".$subnetDoneData["cidr"]." polled by ".$poller["name"]." (".$poller["ns_ip_address"].")<br><br> \n ";
+			echo '          <table class="ListTable">';
+			echo '             <tr class="ListHeader">';
+			echo '                  <td width="10%" class="ListColHeaderCenter">Host</td>';
+			echo '                  <td width="15%" class="ListColHeaderCenter">Hostname</td>';
+			echo '                  <td width="15%" class="ListColHeaderCenter">Operating System</td>';
+			echo '                  <td width="15%" class="ListColHeaderCenter">Host Template</td>';
+			echo '					<td width="15%" class="ListColHeaderCenter">Host Group</td>';
+			echo '					<td width="8%" class="ListColHeaderCenter">Status</td>';
+			echo '              </tr>';
+			echo '             <tr class="list_one">';
+			echo '                  <td width="22%" colspan="6" class="ListColCenter"><img style="border:none" type="image" src="./modules/Discovery/include/images/loading2.gif" title="Loading..."></td>';
+			echo '              </tr>';
+			echo '          </table>';
+			echo '          <br>';
+		}
+		elseif ($subnetDoneData["done"]==3) { // Recherche terminÈe -> No result
+			echo '          <br><font size="3px" style="font-weight:bold;">'.$subnetDoneData["plage"].' /'.$subnetDoneData["cidr"].' polled by '.$poller["name"].' ('.$poller["ns_ip_address"].') | <a href="#" title="View addresses" onClick="$j(\'#scan'.$subnetDoneData["id"].'\').slideToggle(\'fast\');"><font color="red" size="2px"> ERROR : Connection lost with the poller agent</font></a><br>';
+			echo '			<div id="scan'.$subnetDoneData["id"].'">';
+			echo '          <br><br><table class="ListTable">';
+			echo '             <tr class="ListHeader">';
+			echo '                  <td width="22%" class="ListColHeaderCenter">Host</td>';
+			echo '                  <td width="22%" class="ListColHeaderCenter">Hostname</td>';
+			echo '                  <td width="22%" class="ListColHeaderCenter">Operating System</td>';
+			echo '                  <td width="22%" class="ListColHeaderCenter">Host Template</td>';
+			echo '              </tr>';
+			echo '             <tr class="list_one">';
+			echo '                  <td width="22%" colspan="4" class="ListColCenter"> No result </td>';
+			echo '              </tr>';
+			echo '          </table>';
+			echo '          <br>';
+			echo '			</div>';
+		}  	
+	}
+?>
+	<table align="right">
+		<tr>
+			<td>&nbsp;<p align="right"><input type="button" value=" << Back " onClick="self.location='./main.php?p=61201'">&nbsp;&nbsp;</p></td>
+			<td>&nbsp;<p align="right"><input type="button" value=" Create Selected Hosts " onClick="verifselection(results)">&nbsp;&nbsp;</p></td>
+		</tr>
+	</table>
+	<br />
+<?
+
 				function findOs($sysDescr)
 				{
 					$req=mysql_query("SELECT * FROM mod_discovery_template_os_relation;");
@@ -426,7 +384,7 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 								}							
 							}
 						}
-						// Si on a qu'un seul mot cl√©
+						// Si on a qu'un seul mot clÈ
 						else
 						{
 							if (substr_count($sysDescr,$values['os']) != 0)
@@ -438,97 +396,45 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 					return 0;
 				}
 				
-				function clearRangeResult(){
-					$sql=mysql_query("DELETE FROM mod_discovery_results WHERE plage_id =".$_GET["clearall"].";");
-				}
-				
-				function clearResult(){
-					$sql=mysql_query("DELETE FROM mod_discovery_results WHERE id =".$_GET["id"].";");
-				}
-				
-	            /*
-                 * {main function}
-                 *
-                 */
-
-                function doPost() {
-                    global $conf_centreon;
-                    //connexion √† la base de donn√©es
-                    $db = dbConnect($conf_centreon['hostCentreon'], $conf_centreon['user'], $conf_centreon['password'],$conf_centreon['db'], true);
+				function setScanValues(){
+					global $agentDir;
 					
-					if (isset($_GET["clearall"])){
-						clearRangeResult($_GET["clearall"]);
-					}
-
-					if (isset($_GET["id"])){
-						clearResult($_GET["id"]);
-					}
-					
-					if (!empty($_POST)){
-					
-						/* Cr√©ation des hosts */
-						$hostList = getListHost();
-						if ($hostList != null){				
-							$nbHostNotCreate = 0;
-							foreach ($hostList as $host)
-							{
-								//On r√©cupere les infos sur l'hote √† cr√©er (hostname, ip, template, group)
-								$reqHostToCreate = mysql_query("SELECT * FROM mod_discovery_results WHERE id=".$host.";");
-								$hostToCreate = mysql_fetch_array($reqHostToCreate,MYSQL_ASSOC);
-								
-								if ($hostToCreate["hostname"] != "* TimeOut SNMP *"){
-																	
-									//On r√©cupere des infos sur l'hotes √† cr√©er
-									$reqHostInfos = mysql_query("SELECT snmp_community,snmp_version,nagios_server_id FROM mod_discovery_rangeip WHERE id=".$hostToCreate["plage_id"].";");
-									$hostInfos = mysql_fetch_array($reqHostInfos,MYSQL_ASSOC);
-									
-									//On rempli la variable tmpConf qui sera envoy√©e √† la fonction callInsertHostInDb()
-									$tmpConf = array();
-									$tmpConf["host_name"] = $hostToCreate["hostname"];
-									$tmpConf["host_alias"] = $hostToCreate["hostname"];
-									$tmpConf["host_address"] = $hostToCreate["ip"];
-									$tmpConf["nagios_server_id"] = $hostInfos["nagios_server_id"];
-									$tmpConf["host_snmp_community"] =  $hostInfos["snmp_community"];
-									$tmpConf["host_snmp_version"] =  $hostInfos["snmp_version"];
-									$tmpConf["host_register"]["host_register"] = "1";
-									$tmpConf["host_activate"]["host_activate"] = "1";
-									$tmpConf["host_template_model_htm_id"] = $_POST["select_template".$host];
-									if ($_POST["select_group".$host]!= -1)
-									{
-										$tmpConf["host_hgs"] = array($_POST["select_group".$host]);
-									}
-									$tmpConf["dupSvTplAssoc"]["dupSvTplAssoc"] = "1";
-									callInsertHostInDb($tmpConf);
-								}
-								else{
-									$nbHostNotCreate += 1;
-								}
+					$req=mysql_query("SELECT count(*) FROM mod_discovery_rangeip WHERE id!=0;");
+                    $nbPlage=mysql_fetch_array($req);
+					for ($i=0;$i<$nbPlage[0];$i++){
+						if ((isset($_POST["RangeToScan".$i])) && ($_POST["RangeToScan".$i] == 'true')){
+							/* NMAP */
+							$upd_SQL="UPDATE mod_discovery_rangeip SET ";
+							if (isset($_POST["nmap_retries".$i]) && is_int(intval($_POST["nmap_retries".$i])) && $_POST["nmap_retries".$i]>=0 && $_POST["nmap_retries".$i]<100 && isset($_POST["nmap_timeout_rtt".$i]) && is_int(intval($_POST["nmap_timeout_rtt".$i])) && $_POST["nmap_timeout_rtt".$i]>=100 && $_POST["nmap_timeout_rtt".$i]<10000 && isset($_POST["profil_nmap".$i]) && isset($_POST["nmap_timeout".$i]) && is_int(intval($_POST["nmap_timeout".$i])) && $_POST["nmap_timeout".$i]>=15000 && $_POST["nmap_timeout".$i]<100000){
+								$upd_SQL.="nmap_max_retries='".$_POST["nmap_retries".$i]."', nmap_profil='".$_POST["profil_nmap".$i]."', nmap_host_timeout='".$_POST["nmap_timeout".$i]."', nmap_max_rtt_timeout='".$_POST["nmap_timeout_rtt".$i]."', ";
 							}
-							if (count($hostList)-$nbHostNotCreate>1){
-								$hostMsgAlert = '<script>alert("'.count($hostList).' hosts were successfully created.");</script>';
-							} 
-							if (count($hostList)-$nbHostNotCreate==1){
-								$hostMsgAlert = '<script>alert("The host has been created successfully.");</script>';
+							/* SNMP */
+							if (isset($_POST["snmp_community".$i]) && !strpos($_POST["snmp_community".$i]," ") && !empty($_POST["snmp_community".$i]) && isset($_POST["timeout".$i]) && is_int(intval($_POST["timeout".$i])) && $_POST["timeout".$i]>0 && $_POST["timeout".$i]<100 && isset($_POST["retries".$i]) && is_int(intval($_POST["retries".$i])) && $_POST["retries".$i]>=0 && $_POST["retries".$i]<100 && isset($_POST["port".$i]) && is_int(intval($_POST["port".$i])) && $_POST["port".$i]>0 && $_POST["port".$i]<65536 && isset($_POST["snmp_version".$i])){
+								$upd_SQL.="snmp_community='".$_POST["snmp_community".$i]."', snmp_timeout='".$_POST["timeout".$i]."', snmp_retries='".$_POST["retries".$i]."', snmp_version='".$_POST["snmp_version".$i]."', snmp_port='".$_POST["port".$i]."', ";
 							}
-							if (count($hostList)-$nbHostNotCreate==0){
-								$hostMsgAlert = '<script>alert("Cannot create this host.");</script>';
+							/* OID */
+							if (isset($_POST["oid_os".$i]) && !empty($_POST["oid_os".$i]) && ereg("^(\.([1-9][0-9]+|[0-9]))+$", $_POST["oid_os".$i]) && isset($_POST["oid_hostname".$i]) && !empty($_POST["oid_hostname".$i]) && ereg("^(\.([1-9][0-9]+|[0-9]))+$", $_POST["oid_hostname".$i])){
+								$upd_SQL.="oid_os='".$_POST["oid_os".$i]."', oid_hostname='".$_POST["oid_hostname".$i]."', ";
+							}
+							//Mise ‡ jour du champs done ‡ 1 pour dire qu'il faut le scanner
+							$upd_SQL.="done=1 ";
+							$upd_SQL.="WHERE id='".$_POST["id".$i]."';";
+							mysql_query($upd_SQL)or die(mysql_error());
+							//Vider la table mod_discovery_results
+							mysql_query("DELETE FROM mod_discovery_results;");
+						}else{
+							if(isset($_POST["id".$i])){
+								mysql_query("UPDATE mod_discovery_rangeip SET done=0 WHERE id='".$_POST["id".$i]."'");
 							}
 						}
-						else
-						{					
-							setScanValues();
-						}
 					}
-					
-					echo '	<div id="mon_div"></div>'."\n";
-					
-					doFormTab();	
-					if (isset($hostMsgAlert)) echo $hostMsgAlert;
-                    dbClose($db);
-                }
-				doPost();
-             ?>
-        </span>
-    </body>
-</html>
-
+					if (file_exists($agentDir)) {
+						shell_exec('python '.$agentDir.' SCAN_RANGEIP > /dev/null 2>&1 &');
+					}else { echo "<CENTER><b><font size=\"3px\" color=\"red\">ERROR</b> : File $agentDir not found...</font></CENTER>\n"; }
+				}
+	?>
+	<br /><br />
+	
+	<script type="text/javascript">
+		updateNameBox('ALL');
+	</script>

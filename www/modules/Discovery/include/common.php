@@ -25,7 +25,7 @@
  * WEBSITE: http://community.centreon.com/projects/centreon-discovery
  * SVN: http://svn.modules.centreon.com/centreon-discovery
  */
-
+ 
 function clean_sql(){
     mysql_query("DELETE FROM mod_discovery_rangeip WHERE id!=0;");
     mysql_query("UPDATE mod_discovery_rangeip SET done=0, cidr=0 WHERE id=0;");

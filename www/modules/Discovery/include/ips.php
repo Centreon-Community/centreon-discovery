@@ -20,7 +20,7 @@
  *
  * Module name: Centreon-Discovery
  *
- * Adapted by: Nicolas Dietrich
+ * Adapted by: Nicolas Dietrich & Vincent Van Den Bossche
  *
  * WEBSITE: http://community.centreon.com/projects/centreon-discovery
  * SVN: http://svn.modules.centreon.com/centreon-discovery
@@ -42,7 +42,7 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 		<link href="./Themes/Centreon-2/style.css" />
 		<meta content="Centreon-Discovery - Subnet Declaration Page" name="Nicolas DIETRICH">
 		<!-- Fonctions JavaScript -->
-		<script type="text/javascript" src="./modules/Discovery/include/jquery-1.6.4.min.js"></script>
+		<script type="text/javascript" src="./modules/Discovery/include/jquery.min.js"></script>
 		<script type="text/javascript" src="./modules/Discovery/include/script.js"></script>
 			
 	</head>
@@ -151,10 +151,19 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 					//On récupere les valeurs de la configuration par défaut
 					$default_conf = findDefaultConfig();
 					
+					$list1="list_one";
+					$list2="list_two";
+					$listcnt=1;
 					//On selectionne tous les élèments de la table mod_discovery_rangeip ainsi que le poller correspondant et on affiche
-                    $sql = mysql_query("SELECT S.id,plage,masque,cidr,nagios_server_id,name,ns_ip_address FROM mod_discovery_rangeip S, nagios_server N WHERE S.id!=0 AND nagios_server_id=N.id ORDER BY S.id ASC;");
+                    $sql = mysql_query("SELECT S.id,plage,masque,cidr,nagios_server_id,name,ns_ip_address FROM mod_discovery_rangeip S, nagios_server N WHERE S.id!=0 AND S.id!=-1 AND nagios_server_id=N.id ORDER BY S.id ASC;");
                     while($data= mysql_fetch_array($sql,MYSQL_ASSOC)){
-						echo ' <tr class="list_one">'," \n ";
+						if($listcnt%2==0){
+							$list=$list2;
+						}
+						else {
+							$list=$list1;
+						}
+						echo ' <tr class="'.$list.'">'," \n ";
 						echo ' <td class="ListColCenter"><input type="checkbox" checked="yes" class="RangeToScan" id="RangeToScan'.$i.'" name="RangeToScan'.$i.'" value="true" title="Check if you want to scan this range"></td>'."\n ";
 						echo ' <td class="ListColCenter" onClick="afficher_cacher(\'td_toggle'.$i.'\',\'td_toggle\');">'.$data["plage"].'</td>'."\n ";
 						echo ' <td class="ListColCenter" onClick="afficher_cacher(\'td_toggle'.$i.'\',\'td_toggle\');">'.$data["masque"].'</td>'."\n ";
@@ -180,18 +189,23 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 						switch ($default_conf["nmap_profil"]){
 							case 'Sneaky (T1)';
 								$select1="selected";
+								$select2=$select3=$select4=$select5="";
 								break;
 							case 'Polite (T2)';
 								$select2="selected";
+								$select1=$select3=$select4=$select5="";
 								break;
 							case 'Normal (T3)';
 								$select3="selected";
+								$select2=$select1=$select4=$select5="";
 								break;
 							case 'Aggressive (T4)';
 								$select4="selected";
+								$select2=$select3=$select1=$select5="";
 								break;
 							case 'Insane(T5)';
 								$select5="selected";
+								$select2=$select3=$select4=$select1="";
 								break;
 						}
 						echo '          <select name="profil_nmap">'."\n";
@@ -240,6 +254,7 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 								</td>
 							</tr>'."\n ";
 						$i++;
+						$listcnt++;
 					}
 					echo '    </table>'," \n ";
 					echo ' <br>'," \n ";
@@ -294,16 +309,13 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 				 
 				function findPoller ($plage_addr,$cidr){
 					$sql = mysql_query("SELECT id,name,ns_ip_address FROM nagios_server WHERE ns_activate=1;");					
-					while($poller = mysql_fetch_array($sql,MYSQL_ASSOC)){					
+					while($poller= mysql_fetch_array($sql,MYSQL_ASSOC)){					
 						if (isPoller($poller["ns_ip_address"],$plage_addr,$cidr) == 0){
 							$result = array ("poller_id" => $poller["id"], "poller_name" => $poller["name"], "poller_ip" => $poller["ns_ip_address"]);	
 							return $result;
 						}
 					}
-					// Poller par défaut (avec id le plus petit) si aucun ne correspond
-					$sql = mysql_query("SELECT MIN(id) as id, name, ns_ip_address FROM nagios_server WHERE ns_activate=1;");
-					$poller = mysql_fetch_array($sql,MYSQL_ASSOC);
-					$result = array ("poller_id" => $poller["id"], "poller_name" => $poller["name"], "poller_ip" => $poller["ns_ip_address"]);	
+					$result = array ("poller_id" => "1", "poller_name" => "Localhost", "poller_ip" => "127.0.0.1");
 					return $result;
 				}
 				
@@ -582,6 +594,5 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
         </span>
     </body>
 </html>
-
 
 

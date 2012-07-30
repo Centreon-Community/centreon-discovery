@@ -20,7 +20,7 @@
  *
  * Module name: Centreon-Discovery
  *
- * Adapted by: Nicolas Dietrich
+ * Adapted by: Nicolas Dietrich & Vincent Van Den Bossche
  *
  * WEBSITE: http://community.centreon.com/projects/centreon-discovery
  * SVN: http://svn.modules.centreon.com/centreon-discovery
@@ -34,6 +34,8 @@
 		<title>Discovery</title>
         <link rel="stylesheet" media="screen" type="text/css" title="Discovery" href="./modules/Discovery/css/discovery.css"/>
 		<link href="./Themes/Centreon-2/style.css" rel="stylesheet" type="text/css"/>
+		<script type="text/javascript" src="./include/common/javascript/color_picker_mb.js"></script>
+		<script type="text/javascript" src="./modules/Discovery/include/colorPicker.js"></script>
 		<meta content="Discovery - Configuration Page" name="Nicolas DIETRICH">
 	</head>
 	<body style="background-color: rgb(255, 255, 255); color: rgb(0, 0, 0); height: 158px;" alink="#ff6600" link="#ff6600" vlink="#ff6600">  
@@ -46,15 +48,15 @@
 			}
 
 			require_once './modules/Discovery/include/DB-Func.php';
-			
+			 $CONFIG=getConfig();
 			?>
 
 			<br>
 			<table width="100%">
 				<tr>
 					<td width="30%"></td>
-					<td width="40%"><h1 ALIGN=CENTER>Discovery - Configuration page</h1></td>
-					<td width="30%"><img ALIGN=right alt="Centreon-Discovery" src="./modules/Discovery/include/images/logo.png"/><td>		
+					<td width="40%"><h1 align="center">Discovery - Configuration page</h1></td>
+					<td width="30%"><img align="right" alt="Centreon-Discovery" src="./modules/Discovery/include/images/logo.png"/><td>		
 				<br><br></tr>
 			<?php
 			
@@ -63,7 +65,7 @@
 				if ($id==1) {
 				echo '	<tr>
 							<td width="30%"></td>
-							<td width="40%"><h2 ALIGN=CENTER><i>Default Values</i></h2></td>
+							<td width="40%"><h2 align="center"><i>Default Values</i></h2></td>
 						</tr>
 					</table>
 					<br><br>';
@@ -71,7 +73,7 @@
 				if ($id==2) {
 				echo '	<tr>
 							<td width="30%"></td>
-							<td width="40%"><h2 ALIGN=CENTER><i>Template / OS Relation</i></h2></td>
+							<td width="40%"><h2 align="center"><i>Template / OS Relation</i></h2></td>
 						</tr>
 					</table>
 					<br><br>';
@@ -87,6 +89,7 @@
 			}
 			
 			function doForm($id,$error){
+				global $CONFIG;
 				$select1="";
 				$select2="";
 				switch ($id) {
@@ -97,24 +100,51 @@
 						echo '<div id="tab1" class="tab">'."\n";
 						echo '    <table class="ListTable">'."\n";
 						echo '        <tr class="ListHeader"><td class="FormHeader" colspan="2">&nbsp;<img src="./img/icones/16x16/tool.gif">&nbsp;Modify General Options</td></tr>'."\n";
-						echo '<form method="post" action="">'."\n";
+						echo '<form method="post" action="" name="Form">'."\n";
+						echo '	<tr class="list_lvl_1"><td class="ListColLvl1_name" colspan="2">&nbsp;<img src="./img/icones/16x16/text_rich_colored.gif">&nbsp;&nbsp;Display Settings</td></tr>'."\n";
+						?>
+						<tr class="list_one"><td class="FormRowField">Host exists color</td><td class="FormRowValue">
+							<input type="text" name="host_exists" size="7" maxlength="7" value="<? echo $CONFIG['host_exists_color']; ?>" style="text-align:center;" />
+							<input style="width:50px; height:15px; background-color: <? echo $CONFIG['host_exists_color']; ?>; border-width:0px; padding-bottom:2px;" onclick="popup_color_picker('host_exists','Hosts Exists Color');" name="host_exists_color" value="" type="button" />
+						</td>
+						<tr class="list_two"><td class="FormRowField">IP exists color</td><td class="FormRowValue">
+							<input type="text" name="ip_exists" size="7" maxlength="7" value="<? echo $CONFIG['ip_exists_color']; ?>" style="text-align:center;" />
+							<input style="width:50px; height:15px; background-color: <? echo $CONFIG['ip_exists_color']; ?>; border-width:0px; padding-bottom:2px;" onclick="popup_color_picker('ip_exists','IP Exists Color');" name="ip_exists_color" value="" type="button" />
+						</td>
+						</td>
+						<tr class="list_one"><td class="FormRowField">Host missing color</td><td class="FormRowValue">
+							<input type="text" name="host_missing" size="7" maxlength="7" value="<? echo $CONFIG['host_missing_color']; ?>" style="text-align:center;" />
+							<input style="width:50px; height:15px; background-color: <? echo $CONFIG['host_missing_color']; ?>; border-width:0px; padding-bottom:2px;" onclick="popup_color_picker('host_missing','Host Missing Color');" name="host_missing_color" value="" type="button" />
+						</td>
+						</td>
+						<tr class="list_two"><td class="FormRowField">Filtering hostname's FQDN</td><td class="FormRowValue">
+								<input type="radio" name="consider_fqdn" value="1" <? echo ($CONFIG['consider_fqdn']=='1')? 'checked':''; ?>> Yes
+								<input type="radio" name="consider_fqdn" value="0" <? echo ($CONFIG['consider_fqdn']=='0')? 'checked':''; ?>> No
+						</td>
+<?
+						
 						echo '	<tr class="list_lvl_1"><td class="ListColLvl1_name" colspan="2">&nbsp;<img src="./modules/Discovery/include/images/nmap_logo16x16.png">&nbsp;&nbsp;NMAP Settings</td></tr>'."\n";
 						echo '	<tr class="list_one"><td class="FormRowField">Profil</td><td class="FormRowValue">'."\n";
 						switch ($valuesData["nmap_profil"]){
 							case 'Sneaky (T1)';
 								$select1="selected";
+								$select2=$select3=$select4=$select5="";
 								break;
 							case 'Polite (T2)';
 								$select2="selected";
+								$select1=$select3=$select4=$select5="";
 								break;
 							case 'Normal (T3)';
 								$select3="selected";
+								$select2=$select1=$select4=$select5="";
 								break;
 							case 'Aggressive (T4)';
 								$select4="selected";
+								$select2=$select3=$select1=$select5="";
 								break;
 							case 'Insane(T5)';
 								$select5="selected";
+								$select2=$select3=$select4=$select1="";
 								break;
 						}
 						echo '          <select name="profil_nmap">'."\n";
@@ -133,15 +163,19 @@
 						echo '	<tr class="list_one"><td class="FormRowField">Version</td><td class="FormRowValue">'."\n";
 						if ($valuesData["snmp_version"]==1){
 							$select6="selected";
+							$select7="";
 						}
-						else $select7="selected";
+						else {
+						$select7="selected";
+						$select6="";
+						}
 						echo '         	<select name="version">'."\n";
 						echo '              <option '.$select6.'>1</option>'."\n";
 						echo '              <option '.$select7.'>2c</option>'."\n";
 						echo '          </select></td></tr>'."\n";							
-						echo '	<tr class="list_one"><td class="FormRowField">Community</td><td class="FormRowValue"><input style="text-align:center;"  type="text" name="community" size="12" value="'.$valuesData["snmp_community"].'"></td></tr>'."\n";
-						echo '	<tr class="list_two"><td class="FormRowField">Timeout</td><td class="FormRowValue"><input style="text-align:center;"  type="text" name="timeout" size="12" value="'.$valuesData["snmp_timeout"].'">&nbsp;seconds</td></tr>'."\n";
-						echo '	<tr class="list_one"><td class="FormRowField">Retries</td><td class="FormRowValue"><input style="text-align:center;"  type="text" name="retries" size="12" value="'.$valuesData["snmp_retries"].'"></td></tr>'."\n";
+						echo '	<tr class="list_two"><td class="FormRowField">Community</td><td class="FormRowValue"><input style="text-align:center;"  type="text" name="community" size="12" value="'.$valuesData["snmp_community"].'"></td></tr>'."\n";
+						echo '	<tr class="list_one"><td class="FormRowField">Timeout</td><td class="FormRowValue"><input style="text-align:center;"  type="text" name="timeout" size="12" value="'.$valuesData["snmp_timeout"].'">&nbsp;seconds</td></tr>'."\n";
+						echo '	<tr class="list_two"><td class="FormRowField">Retries</td><td class="FormRowValue"><input style="text-align:center;"  type="text" name="retries" size="12" value="'.$valuesData["snmp_retries"].'"></td></tr>'."\n";
 						echo '	<tr class="list_lvl_1"><td class="ListColLvl1_name" colspan="2">&nbsp;<img src="./modules/Discovery/include/images/logo_oid.gif">&nbsp;&nbsp;OID</td></tr>'."\n";
 						echo '	<tr class="list_one"><td class="FormRowField">Hostname</td><td class="FormRowValue"><input style="text-align:center;"  type="text" name="hostname" size="12" value="'.$valuesData["oid_hostname"].'"></td></tr>'."\n";
 						echo '	<tr class="list_two"><td class="FormRowField">OS Version</td><td class="FormRowValue"><input style="text-align:center;" type="text" name="OS" size="12" value="'.$valuesData["oid_os"].'"></td></tr>'."\n";
@@ -192,12 +226,22 @@
 						echo '             <td class="ListColHeaderCenter">SNMP OS Version</td>'."\n ";
 						echo '             <td class="ListColHeaderCenter"><input type="submit" title="Delete All from List" name="clear" value=" Clear All " onClick="return window.confirm(\'Are you sure you want delete all ?\');self.location=\'./main.php?p=61204&id=2\'"></td>'," \n";
 						echo '         </tr>'."\n";
+					$list1="list_one";
+					$list2="list_two";
+					$listcnt=1;
 						while ($relationsData=mysql_fetch_array($relations,MYSQL_ASSOC)){
-							echo ' <tr class="list_one">'." \n ";
+						if($listcnt%2==0){
+							$list=$list2;
+						}
+						else {
+							$list=$list1;
+						}
+							echo ' <tr class="'.$list.'">'." \n ";
 							echo '  <td class="ListColHeaderCenter">'.$relationsData["template"].'</td>'."\n";
 							echo '  <td class="ListColHeaderCenter">'.$relationsData["os"].'</td>'."\n";
 							echo '  <td class="ListColHeaderCenter"><input style="border:none" type="image" src="./modules/Discovery/include/images/delete16x16.png" title="Delete One from List" name="'.$relationsData["id"].'" value="'.$relationsData["id"].'" onClick="return window.confirm(\'Are you sure you want delete this item ?\n ('.$relationsData["template"].' | '.$relationsData["os"].')\');self.location=\'./main.php?p=61204&id=2\'"></td>',"\n";
 							echo ' </tr>'." \n ";
+							$listcnt++;
 						}
 						echo '    </table>'."\n";
 						echo ' </form>'."\n";
@@ -224,6 +268,11 @@
 				}
 
 				if(isset($_POST["save"])){
+					/* Couleurs */
+					
+					if (isset($_POST['host_exists']) && isset($_POST['ip_exists']) && isset($_POST['host_missing']) && isset($_POST['consider_fqdn'])){
+						mysql_query("UPDATE mod_discovery_config SET host_exists_color='".$_POST["host_exists"]."', ip_exists_color='".$_POST["ip_exists"]."', host_missing_color='".$_POST["host_missing"]."', consider_fqdn='".$_POST['consider_fqdn']."'")or die(mysql_error());
+					}
 				
 					/* NMAP */
 					
@@ -274,6 +323,8 @@
 					if (isset($_POST["community"]) && !strpos($_POST["community"]," ") && !empty($_POST["community"])){
 						mysql_query("UPDATE mod_discovery_rangeip SET snmp_community='".$_POST["community"]."' WHERE id=0;");
 					}
+					echo '<META HTTP-EQUIV="Refresh" CONTENT="1; URL=main.php?p=61203">';
+					echo '<META HTTP-EQUIV="Refresh" CONTENT="1; URL=main.php?p=61203">';
 				}
 				
 				if(isset($_POST["defaults"])){

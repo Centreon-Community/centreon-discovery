@@ -133,7 +133,7 @@ ${CAT} << __EOT__
 #          http://community.centreon.com/projects/centreon-discovery          #
 #                          Thanks for using Centreon                          #
 #                                                                             #
-#                                    v$VERSION                                   #
+#                                    v$VERSION                                     #
 #                                                                             #
 ###############################################################################
 __EOT__

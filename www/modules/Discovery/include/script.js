@@ -18,27 +18,18 @@
  *
  * Module name: Centreon-Discovery
  *
- * Adapted by: Nicolas Dietrich
+ * Adapted by: Nicolas Dietrich & Vincent Van Den Bossche
  *
  * WEBSITE: http://community.centreon.com/projects/centreon-discovery
  * SVN: http://svn.modules.centreon.com/centreon-discovery
  */
-
-$(document).ready(function()
-{	
-	var nb_elements = document.getElementsByClassName('status').length;
-	for (i=0;i<nb_elements;i++){
-		var plage = document.getElementById('status'+i).getElementsByTagName("p")[0].getAttribute("id");
-		setInterval('check('+i+','+plage+')', 3000);
-	}
-});
-
+ 
 function check(div_id,plage_id)
 {
-$.post('./modules/Discovery/include/verif_discovery_status.php', { id: plage_id }, function(data) 
+$j.post('./modules/Discovery/include/verif_discovery_status.php', { id: plage_id }, function(data) 
 	{
 			//On renvoie les données HTML
-			var result = $('#status'+div_id).html(data);
+			var result = $j('#status'+div_id).html(data);
 			
 			//On teste la valeur afin de savoir si on grise la checkbox ou non
 			var value = result[0].innerHTML;
@@ -53,15 +44,24 @@ $.post('./modules/Discovery/include/verif_discovery_status.php', { id: plage_id 
 );
 }
 
+$j(document).ready(function()
+{	
+	var nb_elements = document.getElementsByClassName('status').length;
+	for (i=0;i<nb_elements;i++){
+		var plage = document.getElementById('status'+i).getElementsByTagName("p")[0].getAttribute("id");
+		setInterval('check('+i+','+plage+')', 3000);
+	}
+});
+
 //Fonction permettant d'afficher ou de cacher les options dans le tableau
 function afficher_cacher(id, classe){
 	var objet = document.getElementById(id);
 	if (objet.style.display == "none"){
-		$('.'+classe).slideUp('fast');
-		$('#'+id).slideDown('fast');
+		$j('.'+classe).slideUp('fast');
+		$j('#'+id).slideDown('fast');
 	}
 	else{
-		$('#'+id).slideUp('fast');
+		$j('#'+id).slideUp('fast');
 	}
 }		
 
@@ -140,12 +140,12 @@ function refresh_div() {
 		if(XHR.readyState == 4 && XHR.status == 200)
 		{
 			var tmp = XHR.responseText;
-			document.getElementById('mon_div').innerHTML = tmp;
+			$j('#mon_div').html(tmp);
 			if (tmp.indexOf("end",0) != -1){
-				window.setTimeout("window.location='./main.php?p=61202&stop=1';",100);
+				window.setTimeout("window.location='./main.php?p=61202';",100);
 				XHR.abort();
 			}else{
-				window.setTimeout("refresh_div()",1000);
+				window.setTimeout("refresh_div()",2000);
 			}
 		}
 	}
@@ -156,5 +156,3 @@ function refresh_div() {
 	XHR.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
 	XHR.send(null);
 }
-
-	

@@ -29,5 +29,4 @@
 # Don't forget to press ENTER at end of file. You need a blank line
 
 python=2=4
-nmap=5=1
-
+nmap=5

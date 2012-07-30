@@ -64,6 +64,7 @@ function define_specific_binary_vars() {
     return 0
 }
 
+
 #----
 ## find in $PATH if binary exist
 ## @param	file to test
@@ -207,7 +208,7 @@ function get_agent_install_directory_location() {
 }
 
 #----
-## install modules Python in function $typeInstall (poller, central, both)
+## install modules Python in function $TYPE_INSTALL (poller, central, both)
 ##
 ## @return 0 if all install is ok
 ## @return 1 if any install is ko
@@ -227,7 +228,7 @@ function install_modPython() {
 	return 1
     fi
    
-    case $typeInstall in
+    case $TYPE_INSTALL in
 	poller )
 	    echo -ne "Module NMAP ..."
 	    cd $BASE_DIR/modPython/python-nmap-0.1.4
@@ -300,9 +301,9 @@ install_security_agent() {
 	       echo -e "Sorry, keys do not match !"
 	   fi
        done
-       key=`echo -n "$key" | md5sum | awk '{print $1}'`
+       key=$(echo -n "$key" | md5sum | awk '{print $1}')
        echo -n "Configuring secret key for "
-       case $typeInstall in
+       case $TYPE_INSTALL in
 	   poller )
 	       echo -n "poller agent"
 	       FILE="DiscoveryAgent_poller.py"
@@ -329,7 +330,7 @@ install_security_agent() {
        return 0
    else
        key=""
-       case $typeInstall in
+       case $TYPE_INSTALL in
 	   poller )
 	       FILE="DiscoveryAgent_poller.py"
 	       $SED -i -e 's|@KEY@|'"$key"'|g' $TEMP_D/$FILE >> $LOG_FILE 2>&1	
@@ -367,18 +368,18 @@ install_security_agent() {
 #----
 function install_init_service() {
     local service=$1
-    if [ "$distrib" = "DEBIAN" ] || [ "$distrib" = "UBUNTU" ]; then
+    if [ "$DISTRIB" = "DEBIAN" ] || [ "$DISTRIB" = "UBUNTU" ]; then
         update-rc.d $service start 99 2 3 4 5 . stop 30 0 1 6 . >> $LOG_FILE 2>&1
-    elif [ "$distrib" = "SUSE" ] ; then
+    elif [ "$DISTRIB" = "SUSE" ] ; then
         chkconfig --add $service  >> $LOG_FILE 2>&1
-    elif [ "$distrib" = "REDHAT"  ] || [ "$distrib" = "CENTOS" ]; then
+    elif [ "$DISTRIB" = "REDHAT"  ] || [ "DISTRIB" = "CENTOS" ]; then
 # Just for CentOS :p bug #1148
       	if [ -x /sbin/chkconfig ] ; then
       	    /sbin/chkconfig --add $service >> $LOG_FILE 2>&1
       	else
             chkconfig --add $service >> $LOG_FILE 2>&1
       	fi
-    elif [ "$distrib" = "FREEBSD" ] ; then
+    elif [ "$DISTRIB" = "FREEBSD" ] ; then
         echo_info "You must configure your /etc/rc.conf with": ${service}
     else
 	echo_faillure "Impossible to install your run level for " ${service} "$fail"
@@ -563,7 +564,7 @@ function install_agent() {
 	display_return "$?" "Setting rights"
 
 	echo -n "Copy Discovery "
-	case $typeInstall in
+	case $TYPE_INSTALL in
 	    poller )
 		echo -n "poller agent"
 	     	/bin/cp -Rf --preserve $TEMP_D/DiscoveryAgent_poller.py $AGENT_DIR >> $LOG_FILE 2>&1
@@ -646,42 +647,42 @@ function find_OS() {
     local lsb_release=""
     system="$(uname -s)"
     if [ "$system" = "Linux" ] ; then
-        if [ "$(pathfind lsb_release; echo $?)" -eq "0" ] ; then
+        if [ "$(lsb_release; echo $?)" -eq "0" ] ; then
             lsb_release="$(lsb_release -i -s)"
         else
             lsb_release="NOT_FOUND"
         fi
         if [ "$lsb_release" = "Debian" ] || [ -e "/etc/debian_version" ] ; then 
-            distrib="DEBIAN"
+            DISTRIB="DEBIAN"
             log "INFO" "$(gettext "GNU/Linux Debian Distribution")"
 	elif [ "$lsb_release" = "Ubuntu" ] ; then
-	    distrib="UBUNTU"
+	    DISTRIB="UBUNTU"
             log "INFO" "$(gettext "GNU/Linux Ubuntu Distribution")"
 	elif [ "$lsb_release" = "CentOS" ] ; then
-            distrib="CENTOS"
+            DISTRIB="CENTOS"
             log "INFO" "$(gettext "GNU/Linux CentOS Distribution")"
         elif [ "$lsb_release" = "RedHatEnterpriseES" ] || [ -e "/etc/redhat-release" ] ; then
-            distrib="REDHAT"
+            DISTRIB="REDHAT"
             log "INFO" "$(gettext "GNU/Linux Redhat Distribution")"
 	elif [ "$lsb_release" = "Fedora" ] ; then
-	    distrib="FEDORA"
+	    DISTRIB="FEDORA"
             log "INFO" "$(gettext "GNU/Linux Fedora Distribution")"
         else
-            distrib="NOT_FOUND"
+            DISTRIB="NOT_FOUND"
             log "INFO" "$(gettext "GNU/Linux distribution not found")"
             return 1
         fi
     elif [ "$system" = "FreeBSD" ] ; then
-        distrib="FREEBSD"
+        DISTRIB="FREEBSD"
         log "INFO" "$(gettext "FreeBSD System")"
     elif [ "$system" = "AIX" ] ; then
-        distrib="AIX"
+        DISTRIB="AIX"
         log "INFO" "$(gettext "AIX System")"
     elif [ "$system" = "SunOS" ] ; then
-        distrib="SUNOS"
+        DISTRIB="SUNOS"
         log "INFO" "$(gettext "SunOS System")"
     else
-        distrib="NOT_FOUND"
+        DISTRIB="NOT_FOUND"
         log "INFO" "$(gettext "System not found")"
     fi
     return 0
@@ -695,12 +696,84 @@ function find_OS() {
 ## @return 1      packages not found
 #---
 function check_package() {
-    if [ "$distrib" == "DEBIAN" ] || [ "$distrib" == "UBUNTU" ] ; then
+    if [ "$DISTRIB" == "DEBIAN" ] || [ "$DISTRIB" == "UBUNTU" ] ; then
 	return `${DPKG} -l | grep $1 | wc -l`
-    elif [ "$distrib" == "REDHAT" ] || [ "$distrib" == "CENTOS" ] ; then
+    elif [ "$DISTRIB" == "REDHAT" ] || [ "$DISTRIB" == "CENTOS" ] ; then
 	return `${YUM} list installed | grep $1 | wc -l`
     fi
 }
+
+#----
+## check the minimum version number for a binary
+## @param1      binary to check
+## @param2      number version minimum (major)
+## @param3      number version minimum (minor)
+## @return 0    ok
+## @return 1    ko
+## @Globals     PATH
+#----
+function check_min_version() {
+#    pathfind_ret $1 $1
+#    echo -e "\n\tchemin : $1"
+    if [ "$?" -ne 0 ] ; then
+	return 255
+    else
+	output=$($1 -V 2>&1)
+	major=$(echo $output | cut -f1 -d '.' | sed 's/[^0-9]//g')
+#	echo "output : $output"
+#	echo "para 2 : $2"
+#	echo "para 3 : $3"
+#	echo "major : $major"
+
+	if [ $major -ge $2 ]; then
+	    minor=$(echo $output | cut -f2 -d '.' | sed 's/[^0-9]//g')
+#	    echo "output : $output"
+#	    echo "para 2 : $2"
+#	    echo "para 3 : $3"
+#	    echo "minor : $minor"
+
+	    if [ $minor -lt $3 ] ; then
+		return 1
+	    fi
+	    return 0
+	else
+	    return 1
+	fi
+    fi
+}
+
+
+function check_version(){
+    local pgm major_min minor_min
+    local major minor
+    local error=0 result
+    while read ligne
+    do
+        if [ -n "${line:0:1}" ] && [ "${line:0:1}" != '#' ] ; then
+            pgm=$(echo $ligne | cut -f1 -d "=")
+            major_min=$(echo $ligne | cut -f2 -d "=")
+            minor_min=$(echo $ligne | cut -f3 -d "=")
+	    if [ -z $minor_min ] ; then
+		minor_min="0"
+	    fi
+	    echo -ne "$pgm"
+	    check_min_version $pgm $major_min $minor_min
+	    result=$?
+	    echo -ne "\t\t\t\t$major.$minor\t(min. $major_min.$minor_min)"
+	    if [ $result -eq 0 ] ; then
+		display_return "0" "$pgm (min. $major_min.$minor_min)"
+	    else
+		display_return "1" "$pgm (min. $major_min.$minor_min)"
+		error=1
+            fi
+	fi
+    done < $1
+    if [ $error == 1 ]; then
+	echo_info "\nPlease check fail version number and retry"
+	exit 1
+    fi
+}
+
 
 #----
 ## (Copy start/stop script in the /etc/init.d directory)

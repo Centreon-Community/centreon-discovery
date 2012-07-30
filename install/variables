@@ -55,9 +55,8 @@ PWD=`pwd`
 TEMP=/tmp/install.$$
 _tmp_install_opts="0"
 silent_install="0"
-user_conf=""
-distrib=""
-typeInstall=""
+DISTRIB=""
+TYPE_INSTALL=""
 SCRIPT_AGENT_INIT="centreon-discovery.sh"
 
 BINARIES="rm cp mv ${CHMOD} ${CHOWN} echo more mkdir find ${GREP} ${CAT} ${SED} ${PYTHON} ${GCC}"

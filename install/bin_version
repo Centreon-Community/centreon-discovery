@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # This file is part of Centreon-Discovery module.
 #
 # Centreon-Discovery is free software; you can redistribute it and/or modify
@@ -25,6 +23,11 @@
 # Used by install.sh  #
 #---------------------#
 
-python=2.6
-nmap=5.0
+# Syntaxe : programme=MAJOR(=MINOR)
+#
+# This feature if command execution "pgm -V" is ok ;-)
+# Don't forget to press ENTER at end of file. You need a blank line
+
+python=2=4
+nmap=5=1
 

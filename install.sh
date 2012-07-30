@@ -84,10 +84,9 @@ do
 	u )	
 	    _tmp_install_opts="1"
 	    silent_install="1"
-	    user_conf="${OPTARG%/}"
 	    ;;
 	t )
-	    typeInstall=$OPTARG
+	    TYPE_INSTALL=$OPTARG
 	    ;;
 	\?|h)
 	    usage ; 
@@ -100,7 +99,7 @@ do
     esac
 done
 
-if [ "$_tmp_install_opts" -eq 0 ] || ([ "$typeInstall" != "poller" ] && [ "$typeInstall" != "central" ] && [ "$typeInstall" != "both" ]) ; then
+if [ "$_tmp_install_opts" -eq 0 ] || ([ "$TYPE_INSTALL" != "poller" ] && [ "$TYPE_INSTALL" != "central" ] && [ "$TYPE_INSTALL" != "both" ]) ; then
     usage
     exit 1
 fi
@@ -145,7 +144,7 @@ echo -e "\tFind distribution"
 echo "$line"
 find_OS;
 if [ $? -eq 0 ] ; then
-     echo_success "OS found: $distrib" "$ok"
+     echo_success "OS found: $DISTRIB" "$ok"
 else
      echo_failure "OS not found" "$fail"
      exit 1
@@ -153,22 +152,22 @@ fi
 echo ""
 
 BINARIES="rm cp mv ${CHMOD} ${CHOWN} echo more mkdir find ${GREP} ${CAT} ${SED} ${PYTHON} ${GCC}"
-## binaries in function typeInstall
-if [ "$typeInstall" != "central" ] ; then
+## binaries in function $TYPE_INSTALL
+if [ "$TYPE_INSTALL" != "central" ] ; then
     BINARIES=$BINARIES" ${NMAP}"
 fi    
 
 ## binaries/packages in function distrib 
-if [ "$distrib" == "DEBIAN" ] || [ "$distrib" == "UBUNTU" ] ; then
+if [ "$DISTRIB" == "DEBIAN" ] || [ "$DISTRIB" == "UBUNTU" ] ; then
     BINARIES=$BINARIES" ${DPKG}"
-    if [ "$typeInstall" == "poller" ] ; then
+    if [ "$TYPE_INSTALL" == "poller" ] ; then
 	PACKAGES="python-dev"
     else
 	PACKAGES="python-dev libmysqlclient-dev"
     fi
-elif [ "$distrib" == "REDHAT" ] || [ "$distrib" == "CENTOS" ] ; then
+elif [ "$DISTRIB" == "REDHAT" ] || [ "$DISTRIB" == "CENTOS" ] ; then
     BINARIES=$BINARIES" ${YUM}"
-    if [ "$typeInstall" == "poller" ] ; then
+    if [ "$TYPE_INSTALL" == "poller" ] ; then
 	PACKAGES="python-devel"
     else
 	PACKAGES="python-devel mysql-devel"
@@ -226,6 +225,21 @@ if [ $error == 1 ]; then
     exit 1
 fi
 
+# Check version number
+# Script stop if one binary wasn't found
+if [ "$binary_fail" -eq 1 ] ; then
+        echo ""
+    echo_info "Please check fail binary/package and retry"
+    exit 1
+fi
+
+# Check package
+echo -e "\n$line"
+echo -e "\tChecking version number"
+echo "$line"
+check_version $INSTALL_DIR/bin_version
+
+# License
 echo -e "\n$line"
 echo -e "\tAccepting licence"
 echo "$line"
@@ -244,7 +258,7 @@ if [ "$silent_install" -eq 0 ] ; then
 	log "INFO" "You accepted GPL license"
     fi
     
-    if [ "$typeInstall" == "poller" ] ; then
+    if [ "$TYPE_INSTALL" == "poller" ] ; then
 	install_modPython;
 	if [ "$?" -eq 0 ] ; then
 	    install_agent;

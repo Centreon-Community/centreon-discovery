@@ -138,10 +138,8 @@ function get_centreon_parameters() {
 ## @Stdin Path with must contain $FILE_CONF
 #----
 function get_centreon_configuration_location() {
-    echo ""
-    echo "$line"
-    echo -e "\tLoad parameters"
-    echo "$line"
+    write_header "Load Centreon parameters" ""
+
     err=1
     while [ $err != 0 ]
     do
@@ -176,14 +174,14 @@ function get_agent_install_directory_location() {
 	echo -e "Where do you want to install Discovery Agent ? [$AGENT_DIR]"
 	echo -n "> "
 	read temp_read
-	
+	echo ""
 	if [ -z $temp_read ]; then
 	    temp_read=$AGENT_DIR
 	    err=0
 	fi
 	
 	if [ -d $temp_read ] ; then
-	    yes_no_default "The directory exist. Do you want overwrite it?"
+	    yes_no_default "The directory exist. Do you want to overwrite it?"
 	    if [ "$?" -eq 0 ] ; then
 		err=0
 		AGENT_DIR=$temp_read
@@ -215,10 +213,8 @@ function get_agent_install_directory_location() {
 ## @Stderr Log into $LOG_FILE
 #----
 function install_modPython() {
-    echo ""
-    echo "$line"
-    echo -e "\tInstall Python modules"
-    echo "$line"
+#    write_header "Install Python modules"
+
     echo -ne "Module PyCrypto ..."
     cd $BASE_DIR/modPython/pycrypto-2.5
     ${PYTHON} setup.py install >> $LOG_FILE 2>&1
@@ -282,46 +278,55 @@ function install_modPython() {
 ## @return 0      install security ok
 ## @return 1      install security fail
 #----
-
 install_security_agent() {
-   local key=""
-   local key2="."
-   yes_no_default "Do you want to secure exchanges between agents?"
-   if [ "$?" -eq 0 ] ; then
-       while [ "$key" != "$key2" ]
-       do
-	   echo -e "\nPlease specify the shared secret key []"
-	   echo -n "> "
-	   read -s key
-	   echo -e "\nConfirm the shared secret key []"
-	   echo -n "> "
-	   read -s key2
-	   echo -e "\n"
-	   if [ "$key" != "$key2" ] ; then
-	       echo -e "Sorry, keys do not match !"
-	   fi
-       done
-       key=$(echo -n "$key" | md5sum | awk '{print $1}')
+   local key="" key2="." tmp="" file=""
+   
+   if [ $UPDATE -eq 1 ]; then
+       yes_no_default "Do you want to secure exchanges between agents?"
+       tmp=$?
+       SECURE=$tmp
+   else
+       tmp=$SECURE
+       key=$KEY
+   fi
+   
+   if [ $tmp -eq 0 ]; then
+       if [ $UPDATE -eq 1 ]; then
+	   while [ "$key" != "$key2" ]
+	   do
+	       echo -e "Please specify the shared secret key []"
+	       echo -n "> "
+	       read -s key
+	       echo -e "\nConfirm the shared secret key []"
+	       echo -n "> "
+	       read -s key2
+	       echo -e "\n"
+	       if [ "$key" != "$key2" ] ; then
+		   echo -e "Sorry, keys do not match !"
+	       fi
+	   done
+	   key=$(echo -n "$key" | md5sum | awk '{print $1}')
+       fi
        echo -n "Configuring secret key for "
        case $TYPE_INSTALL in
 	   poller )
 	       echo -n "poller agent"
-	       FILE="DiscoveryAgent_poller.py"
-	       $SED -i -e 's|@KEY@|'"$key"'|g' $TEMP_D/$FILE >> $LOG_FILE 2>&1	
+	       file="DiscoveryAgent_poller.py"
+	       $SED -i -e 's|@KEY@|'"$key"'|g' $TEMP_D/$file >> $LOG_FILE 2>&1	
 	       display_return "$?" "Configuring secret key for DiscoveryAgent_poller.py"
 	       ;;
 	   central )
 	       echo -n "central agent"
-	       FILE="DiscoveryAgent_central.py"
-	       $SED -i -e 's|@KEY@|'"$key"'|g' $TEMP_D/$FILE >> $LOG_FILE 2>&1	
+	       file="DiscoveryAgent_central.py"
+	       $SED -i -e 's|@KEY@|'"$key"'|g' $TEMP_D/$file >> $LOG_FILE 2>&1	
 	       display_return "$?" "Configuring secret key for DiscoveryAgent_central.py"
 	       ;;
 	   both )
 	       echo -n "poller and central agents"
-	       FILE="DiscoveryAgent_poller.py"
-	       $SED -i -e 's|@KEY@|'"$key"'|g' $TEMP_D/$FILE >> $LOG_FILE 2>&1	
-	       FILE="DiscoveryAgent_central.py"
-	       $SED -i -e 's|@KEY@|'"$key"'|g' $TEMP_D/$FILE >> $LOG_FILE 2>&1	
+	       file="DiscoveryAgent_poller.py"
+	       $SED -i -e 's|@KEY@|'"$key"'|g' $TEMP_D/$file >> $LOG_FILE 2>&1	
+	       file="DiscoveryAgent_central.py"
+	       $SED -i -e 's|@KEY@|'"$key"'|g' $TEMP_D/$file >> $LOG_FILE 2>&1	
 	       display_return "$?" "Configuring secret key for DiscoveryAgent_central.py"
 	       ;;
 	   * )
@@ -332,18 +337,18 @@ install_security_agent() {
        key=""
        case $TYPE_INSTALL in
 	   poller )
-	       FILE="DiscoveryAgent_poller.py"
-	       $SED -i -e 's|@KEY@|'"$key"'|g' $TEMP_D/$FILE >> $LOG_FILE 2>&1	
+	       file="DiscoveryAgent_poller.py"
+	       $SED -i -e 's|@KEY@|'"$key"'|g' $TEMP_D/$file >> $LOG_FILE 2>&1	
 	       ;;
 	   central )
-	       FILE="DiscoveryAgent_central.py"
-	       $SED -i -e 's|@KEY@|'"$key"'|g' $TEMP_D/$FILE >> $LOG_FILE 2>&1	
+	       file="DiscoveryAgent_central.py"
+	       $SED -i -e 's|@KEY@|'"$key"'|g' $TEMP_D/$file >> $LOG_FILE 2>&1	
 	       ;;
 	   both )
-	       FILE="DiscoveryAgent_poller.py"
-	       $SED -i -e 's|@KEY@|'"$key"'|g' $TEMP_D/$FILE >> $LOG_FILE 2>&1	
-	       FILE="DiscoveryAgent_central.py"
-	       $SED -i -e 's|@KEY@|'"$key"'|g' $TEMP_D/$FILE >> $LOG_FILE 2>&1	
+	       file="DiscoveryAgent_poller.py"
+	       $SED -i -e 's|@KEY@|'"$key"'|g' $TEMP_D/$file >> $LOG_FILE 2>&1	
+	       file="DiscoveryAgent_central.py"
+	       $SED -i -e 's|@KEY@|'"$key"'|g' $TEMP_D/$file >> $LOG_FILE 2>&1	
 	       ;;
 	   * )
 	       ;;
@@ -388,6 +393,41 @@ function install_init_service() {
     return 0
 }
 
+#----
+## (Uninstall init script on distrib)
+##
+## use this fonction to uninstall a init script on your system
+##    debian    update-rc.d
+##    redhat    chkconfig
+##    Suse      chkconfig
+##    FreeBSD   add ${service}_enable=YES in /etc/rc.conf
+##
+## @param         name of service
+## @return 0      uninstall service ok
+## @return 1      uninstall service fail
+#----
+function uninstall_init_service() {
+    local service=$1
+    if [ "$DISTRIB" = "DEBIAN" ] || [ "$DISTRIB" = "UBUNTU" ]; then
+        update-rc.d $service remove >> $LOG_FILE 2>&1
+    elif [ "$DISTRIB" = "SUSE" ] ; then
+        chkconfig --del $service  >> $LOG_FILE 2>&1
+    elif [ "$DISTRIB" = "REDHAT"  ] || [ "DISTRIB" = "CENTOS" ]; then
+# Just for CentOS :p bug #1148
+      	if [ -x /sbin/chkconfig ] ; then
+      	    /sbin/chkconfig --del $service >> $LOG_FILE 2>&1
+      	else
+            chkconfig --del $service >> $LOG_FILE 2>&1
+      	fi
+    elif [ "$DISTRIB" = "FREEBSD" ] ; then
+        echo_info "You must configure your /etc/rc.conf with": ${service}
+    else
+	echo_faillure "Impossible to uninstall your run level for " ${service} "$fail"
+        return 1
+    fi
+    return 0
+}
+
 #---
 ## {Install Init Discovery-agent}
 ##
@@ -395,19 +435,23 @@ function install_init_service() {
 ## @Stderr Log into $LOG_FILE
 #----
 function install_init_discovery-agent() {
-    yes_no_default "Do you want to install discovery-agent run level ?" $yes
-    if [ "$?" -eq 0 ] ; then
-	copy_init_discovery-agent;
-	echo -n "Creating init links"
-	install_init_service $SCRIPT_AGENT_INIT
-	display_return "$?" "Creating init links"
-	return 0
-    else
-	echo "Don't forget to execute poller agent after each reboot/start machine :"
-	echo -e "\t$INIT_D/$SCRIPT_AGENT_INIT start"
-	return 1
-    
-    fi
+    if [ $UPDATE -eq 1 ]; then
+	echo ""
+        yes_no_default "Do you want to install discovery-agent run level ?" $yes
+	if [ "$?" -eq 0 ] ; then
+	    SCRIPT_START="0"
+	    copy_init_discovery-agent;
+	    echo -n "Creating init links"
+	    install_init_service $SCRIPT_AGENT_INIT
+	    display_return "$?" "Creating init links"
+	    return 0
+	else
+	    SCRIPT_START="1"
+	    echo "Don't forget to execute poller agent after each reboot/start machine :"
+	    echo -e "\t$INIT_D/$SCRIPT_AGENT_INIT start"
+	    return 1
+	fi
+   fi
 }
 	
 #---
@@ -417,13 +461,10 @@ function install_init_discovery-agent() {
 ## @Stderr Log into $LOG_FILE
 #----
 function install_module() {
-    echo ""
-    echo "$line"
-    echo -e "\tInstall Discovery Module"
-    echo "$line"
+    local file=""
+    write_header "Install Discovery Module" ""
     
     echo -n "Creating temp install directory"
-    TEMP_D="/tmp/Install_module"
     /bin/mkdir -p $TEMP_D >> $LOG_FILE 2>&1
     display_return "$?" "Creating temp install directory"
     /bin/cp -Rf $BASE_DIR/www/modules/Discovery/* $TEMP_D/ >> $LOG_FILE 2>&1
@@ -438,39 +479,39 @@ function install_module() {
     display_return "$?" "Setting owner/group"
     
     echo "Changing macro"
-    FILE="include/update.php"
+    file="include/update.php"
     echo -ne "\tfor update.php"
-    $SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$FILE >> $LOG_FILE 2>&1
-    $SED -i -e 's|@AGENT_DIR@|'"$AGENT_DIR"'|g' $TEMP_D/$FILE >> $LOG_FILE 2>&1
+    $SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$file >> $LOG_FILE 2>&1
+    $SED -i -e 's|@AGENT_DIR@|'"$AGENT_DIR"'|g' $TEMP_D/$file >> $LOG_FILE 2>&1
     display_return "$?" "Changing macro for update.php"
-    FILE="include/verif_discovery_status.php"
+    file="include/verif_discovery_status.php"
     echo -ne "\tfor verif_discovery_status.php"
-    $SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$FILE >> $LOG_FILE 2>&1
+    $SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$file >> $LOG_FILE 2>&1
     display_return "$?" "Changing macro for verif_discovery_status.php"
-    FILE="include/ips.php"
+    file="include/ips.php"
     echo -ne "\tfor ips.php"
-    $SED -i -e 's|@AGENT_DIR@|'"$AGENT_DIR"'|g' $TEMP_D/$FILE >> $LOG_FILE 2>&1
+    $SED -i -e 's|@AGENT_DIR@|'"$AGENT_DIR"'|g' $TEMP_D/$file >> $LOG_FILE 2>&1
     display_return "$?" "Changing macro for ips.php"
-    FILE="include/results.php"
+    file="include/results.php"
     echo -ne "\tfor results.php"
-    $SED -i -e 's|@AGENT_DIR@|'"$AGENT_DIR"'|g' $TEMP_D/$FILE >> $LOG_FILE 2>&1
+    $SED -i -e 's|@AGENT_DIR@|'"$AGENT_DIR"'|g' $TEMP_D/$file >> $LOG_FILE 2>&1
     display_return "$?" "Changing macro for results.php"
     echo -ne "\tfor refresh_result.php"
-    FILE="include/refresh_result.php"
-    $SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$FILE >> $LOG_FILE 2>&1
+    file="include/refresh_result.php"
+    $SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$file >> $LOG_FILE 2>&1
     display_return "$?" "Changing macro for refresh_result.php"
-    FILE="sql/install.sql"
+    file="sql/install.sql"
     echo -ne "\tfor install.sql"
-    $SED -i -e 's|@DB_NAME_CENTREON@|'"$DB_NAME_CENTREON"'|g' $TEMP_D/$FILE >> $LOG_FILE 2>&1
+    $SED -i -e 's|@DB_NAME_CENTREON@|'"$DB_NAME_CENTREON"'|g' $TEMP_D/$file >> $LOG_FILE 2>&1
     display_return "$?" "Changing macro for install.sql"
-    FILE="sql/uninstall.sql"
+    file="sql/uninstall.sql"
     echo -ne "\tfor uninstall.sql"
-    $SED -i -e 's|@DB_NAME_CENTREON@|'"$DB_NAME_CENTREON"'|g' $TEMP_D/$FILE >> $LOG_FILE 2>&1
+    $SED -i -e 's|@DB_NAME_CENTREON@|'"$DB_NAME_CENTREON"'|g' $TEMP_D/$file >> $LOG_FILE 2>&1
     display_return "$?" "Changing macro for uninstall.sql"
     
     INSTALL_DIR_MODULE=$INSTALL_DIR_CENTREON/$MODULE_DIR
     
-    if [ -d $INSTALL_DIR_MODULE ] ; then
+    if [ -d $INSTALL_DIR_MODULE ] && [ $UPDATE -eq 1 ] ; then
 	if [ -d  $INSTALL_DIR_CENTREON/$BACKUP ] ; then
 	    echo -n "Delete old Discovery backup"
 	    /bin/rm -Rf $INSTALL_DIR_CENTREON/$BACKUP/* >> $LOG_FILE 2>&1
@@ -481,7 +522,7 @@ function install_module() {
 	    display_return "$?" "Create a directory to backup old files"
 	fi
 	echo -n "Backup old installation"
-	mv $INSTALL_DIR_MODULE/* $INSTALL_DIR_CENTREON/$BACKUP >> $LOG_FILE 2>&1
+	/bin/mv $INSTALL_DIR_MODULE/* $INSTALL_DIR_CENTREON/$BACKUP >> $LOG_FILE 2>&1
 	display_return "$?" "Backup old installation"
     fi
     
@@ -495,18 +536,15 @@ function install_module() {
 	echo -n "Change rights on module directory"
 	${CHMOD} -R 755 $INSTALL_DIR_MODULE >> $LOG_FILE 2>&1
 	display_return "$?" "Change rights on module directory"
-	fi
+    fi
     
     echo -n "Copying module"
     /bin/cp -Rf --preserve $TEMP_D/* $INSTALL_DIR_CENTREON/$MODULE_DIR >> $LOG_FILE 2>&1
     display_return "$?" "Copying module"
     
     echo -n "Delete temp install directory"
-    /bin/rm -Rf $TEMP_D $TEMP >> $LOG_FILE 2>&1
+    /bin/rm -Rf $TEMP_D >> $LOG_FILE 2>&1
     display_return "$?" "Delete temp install directory"
-    
-    echo_success "\nThe $LOG_VERSION is finished" "$ok"
-    echo -e  "See README and the log file for more details."
 }
 
 #----
@@ -516,10 +554,8 @@ function install_module() {
 ## @Stderr Log into $LOG_FILE
 #----
 function install_agent() {
-    echo ""
-    echo "$line"
-    echo -e "\tInstall Discovery Agent"
-    echo "$line"
+    local file=""
+    write_header "Install Discovery Agent" ""
 
     echo -n "Creating temp install directory"
     TEMP_D="/tmp/Install_agent"
@@ -527,8 +563,11 @@ function install_agent() {
     display_return "$?" "Creating temp install directory"
     /bin/cp -Rf $BASE_DIR/agents/* $TEMP_D/ >> $LOG_FILE 2>&1
   
-    get_agent_install_directory_location;
-    
+    if [ $UPDATE -eq 1 ]; then
+	echo ""
+	get_agent_install_directory_location;
+    fi
+
     install_security_agent;
 
     echo -n "Setting rights"
@@ -546,19 +585,19 @@ function install_agent() {
 	    display_return "$?" "Creating the directory $AGENT_DIR"
 	fi
         echo -ne "Changing macro for DiscoveryAgent_central.py"
-        FILE="DiscoveryAgent_central.py"
-        $SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$FILE >> $LOG_FILE 2>&1
-        $SED -i -e 's|@AGENT_DIR@|'"$AGENT_DIR"'|g' $TEMP_D/$FILE >> $LOG_FILE 2>&1
+        file="DiscoveryAgent_central.py"
+        $SED -i -e 's|@CENTREON_ETC@|'"$CENTREON_CONF"'|g' $TEMP_D/$file >> $LOG_FILE 2>&1
+        $SED -i -e 's|@AGENT_DIR@|'"$AGENT_DIR"'|g' $TEMP_D/$file >> $LOG_FILE 2>&1
         display_return "$?" "Changing macros for DiscoveryAgent_central.py"
         echo -ne "Changing macro for DiscoveryAgent_poller.py"
-        FILE="DiscoveryAgent_poller.py"
-        $SED -i -e 's|@AGENT_DIR@|'"$AGENT_DIR"'|g' $TEMP_D/$FILE >> $LOG_FILE 2>&1
+        file="DiscoveryAgent_poller.py"
+        $SED -i -e 's|@AGENT_DIR@|'"$AGENT_DIR"'|g' $TEMP_D/$file >> $LOG_FILE 2>&1
         display_return "$?" "Changing macro for DiscoveryAgent_poller.py"
 	
 	echo -ne "Creating the log directory"
 	/bin/mkdir -p $AGENT_DIR/log >> $LOG_FILE 2>&1
 	display_return "$?" "Creating the log directory ($AGENT_DIR/log)"
-	echo -ne "Setting owner/rights on log directory"
+	echo -ne "Setting rights"
 	${CHOWN} -R $WEB_USER:$WEB_GROUP $AGENT_DIR/log >> $LOG_FILE 2>&1
 	${CHMOD} -R 755 $AGENT_DIR/log >> $LOG_FILE 2>&1
 	display_return "$?" "Setting rights"
@@ -589,12 +628,12 @@ function install_agent() {
 	esac
 
 	echo -n "Delete temp install directory"
-	/bin/rm -Rf $TEMP_D $TEMP >> $LOG_FILE 2>&1
+	/bin/rm -Rf $TEMP_D >> $LOG_FILE 2>&1
 	display_return "$?" "Delete temp install directory"
 	return 0
     else
 	echo -n "Delete temp install directory"
-	/bin/rm -Rf $TEMP_D $TEMP >> $LOG_FILE 2>&1
+	/bin/rm -Rf $TEMP_D >> $LOG_FILE 2>&1
 	display_return "$?" "Delete temp install directory"
 	return 1
     fi
@@ -611,8 +650,17 @@ function install_agent() {
 ## @return 1      starting ko
 #----
 function execute_discovery-agent() {
-    yes_no_default "Do you want execute discovery poller agent now ?" $yes
-    if [ "$?" -eq 0 ] ; then
+    local tmp=""
+    
+    if [ "$UPDATE" -eq 1 ]; then
+	echo ""
+	yes_no_default "Do you want to execute discovery poller agent now ?" $yes
+	tmp=$?
+    else
+	tmp=$SCRIPT_START
+    fi
+    
+    if [ "$tmp" -eq 0 ] ; then
 	$INIT_D/$SCRIPT_AGENT_INIT status >> $LOG_FILE 2>&1			
 	if [ "$?" -eq 0 ] ; then
 	    echo -ne "Restarting discovery agent" 
@@ -647,7 +695,7 @@ function find_OS() {
     local lsb_release=""
     system="$(uname -s)"
     if [ "$system" = "Linux" ] ; then
-        if [ "$(lsb_release; echo $?)" -eq "0" ] ; then
+        if [ "$(lsb_release > /dev/null 2>&1; echo $?)" -eq "0" ] ; then
             lsb_release="$(lsb_release -i -s)"
         else
             lsb_release="NOT_FOUND"
@@ -706,8 +754,8 @@ function check_package() {
 #----
 ## check the minimum version number for a binary
 ## @param1      binary to check
-## @param2      number version minimum (major)
-## @param3      number version minimum (minor)
+## @param2      major number version minimum
+## @param3      minor number version minimum
 ## @return 0    ok
 ## @return 1    ko
 ## @Globals     PATH
@@ -742,30 +790,38 @@ function check_min_version() {
     fi
 }
 
-
+#---
+## (Check version)
+##
+## @param1        file to read with version numbers
+## @return 0      ok for all binaries
+## @return 1      ko for at least a binary
+#---
 function check_version(){
-    local pgm major_min minor_min
-    local major minor
+    local pgm major_min minor_min major minor type_install
     local error=0 result
     while read ligne
     do
         if [ -n "${ligne:0:1}" ] && [ "${ligne:0:1}" != '#' ] ; then
-            pgm=$(echo $ligne | cut -f1 -d "=")
-            major_min=$(echo $ligne | cut -f2 -d "=")
-            minor_min=$(echo $ligne | cut -f3 -d "=")
+	    type_install=$(echo $ligne | cut -f1 -d "=")
+            pgm=$(echo $ligne | cut -f2 -d "=")
+            major_min=$(echo $ligne | cut -f3 -d "=")
+            minor_min=$(echo $ligne | cut -f4 -d "=")
 	    if [ -z $minor_min ] ; then
 		minor_min="0"
 	    fi
-	    echo -ne "$pgm"
-	    check_min_version $pgm $major_min $minor_min
-	    result=$?
-	    echo -ne "\t\t\t\t$major.$minor\t(min. $major_min.$minor_min)"
-	    if [ $result -eq 0 ] ; then
-		display_return "0" "$pgm (min. $major_min.$minor_min)"
-	    else
-		display_return "1" "$pgm (min. $major_min.$minor_min)"
-		error=1
-            fi
+	    if [ "$type_install" == "$TYPE_INSTALL" ] ; then
+		echo -ne "$pgm"
+		check_min_version $pgm $major_min $minor_min
+		result=$?
+		echo -ne "\t\t\t\t$major.$minor\t(min. $major_min.$minor_min)"
+		if [ $result -eq 0 ] ; then
+		    display_return "0" "$pgm (min. $major_min.$minor_min)"
+		else
+		    display_return "1" "$pgm (min. $major_min.$minor_min)"
+		    error=1
+		fi
+	    fi
 	fi
     done < $1
     if [ $error == 1 ]; then
@@ -782,15 +838,17 @@ function check_version(){
 ## @return 1      copy script fail || don't overwrite
 #----
 function copy_init_discovery-agent() {
+    local file=""
     ${CHOWN} root:root $TEMP_D/$SCRIPT_AGENT_INIT >> $LOG_FILE 2>&1
     ${CHMOD} 755 $TEMP_D/$SCRIPT_AGENT_INIT >> $LOG_FILE 2>&1
     echo -n "Changing macro for init script"
-    FILE="$SCRIPT_AGENT_INIT"
-    $SED -i -e 's|@AGENT_DIR@|'"$AGENT_DIR"'|g' $TEMP_D/$FILE >> $LOG_FILE 2>&1
+    file="$SCRIPT_AGENT_INIT"
+    $SED -i -e 's|@AGENT_DIR@|'"$AGENT_DIR"'|g' $TEMP_D/$file >> $LOG_FILE 2>&1
     display_return "$?" "Changing macro for init script"
     
     if [ -f $INIT_D/$SCRIPT_AGENT_INIT ] ; then
-	yes_no_default "The script exists. Do you want overwrite it?"
+	echo ""
+	yes_no_default "The script exists. Do you want to overwrite it?"
         if [ "$?" -eq 1 ] ; then
 	    return 1
         fi
@@ -799,4 +857,211 @@ function copy_init_discovery-agent() {
     cp $TEMP_D/$SCRIPT_AGENT_INIT $INIT_D >> $LOG_FILE 2>&1
     display_return "$?" "Copying init script"
     return $?
+}
+
+#---
+## (Check old install)
+##
+## @return 0      install exists
+## @return 1      install doesn t exist
+#---
+function check_old_install(){
+    local temp="" file="" update_version="" major_update_version="" minor_update_version=""
+    
+    write_header "Detect previous installation"
+
+    if [ -f $DIR_CONF_DISCO/$FILE_CONF_DISCO ] && [ `grep "# Discovery version" $DIR_CONF_DISCO/$FILE_CONF_DISCO | wc -l` -eq 1 ] ; then
+	update_version=$(grep "# Discovery version" $DIR_CONF_DISCO/$FILE_CONF_DISCO | cut -d " " -f4)
+	major_update_version=$(echo $update_version | cut -d "." -f1)
+	minor_update_version=$(echo $update_version | cut -d "." -f2)
+	#check install.sh version is more recent than instCentDisco.conf
+	if [ $major_update_version -le `echo $VERSION | cut -d "." -f1` ] && [ $minor_update_version -le `echo $VERSION | cut -d "." -f2` ] ; then
+	    echo_success "Finding configuration in: $DIR_CONF_DISCO" "$ok"
+	    echo -e "\nYou seem to have an existing Discovery install."
+	else
+	    echo_failure "The configuration file (version $major_update_version.$minor_update_version) was created for another more recent version. The install script version is $VERSION" "$fail"
+	exit 1;
+	fi
+   else
+	echo_failure "Finding configuration file in: $DIR_CONF_DISCO" "$fail"
+	exit 1;
+    fi
+    yes_no_default "Do you want to use the previous Discovery install parameters ?" $yes
+    if [ "$?" -ne 0 ] ; then
+	echo -e "\nYou need to remove the current install. Execute install script with \"-r\" parameter and then execute it again with \"-i\" parameter for a new fresh install ;-)"
+	exit 1;
+    else
+	return 0;
+    fi
+}
+
+#---
+## (Execute SQL script)
+##
+## @param1        SQL script
+## @return 0      ok
+## @return 1      ko
+#---
+function execute_sql(){
+    local db_login=`${CAT} $CENTREON_CONF/$FILE_CONF_CENT | grep "\$conf_centreon\['user'\]" | cut -d '=' -f2 | ${SED} -e s/\"//g -e s/\ //g -e s/\;//g`
+    local db_pass=`${CAT} $CENTREON_CONF/$FILE_CONF_CENT | grep "\$conf_centreon\['password'\]" | cut -d '=' -f2 | ${SED} -e s/\"//g -e s/\ //g -e s/\;//g`
+
+    mysql -u $db_login -p$db_pass $DB_NAME_CENTREON < $1 >> $LOG_FILE 2>&1
+    return $?
+}
+
+#---
+## (Execute SQL script for update)
+##
+## @param1        SQL script
+## @return 0      always
+#---
+function execute_sql_update(){
+    local file=""
+#    INSTALL_DIR_MODULE=$INSTALL_DIR_CENTREON/$MODULE_DIR
+    
+    write_header "Execute SQL scripts"
+
+    echo -n "Creating temp install directory"
+    /bin/mkdir -p $TEMP_D >> $LOG_FILE 2>&1
+    display_return "$?" "Creating temp install directory"
+    
+    echo "Changing macro"
+    file="update.sql"
+    echo -ne "\tfor $file"
+    # update.sql from new install
+    /bin/cp -Rf $INSTALL_DIR/$file $TEMP_D/ >>$LOG_FILE 2>&1
+    $SED -i -e 's|@VERSION@|'"$VERSION"'|g' $TEMP_D/$file >> $LOG_FILE 2>&1
+    display_return "$?" "Changing macro for $file"
+
+    file="install.sql"
+    echo -ne "\tfor $file"
+    # install.sql from new install
+    /bin/cp -Rf $BASE_DIR/www/modules/Discovery/sql/$file* $TEMP_D/ >> $LOG_FILE 2>&1
+    $SED -i -e 's|@DB_NAME_CENTREON@|'"$DB_NAME_CENTREON"'|g' $TEMP_D/$file >> $LOG_FILE 2>&1
+    display_return "$?" "Changing macro for $file"
+    # uninstall.sql from old install
+    file="uninstall.sql"
+    echo -n "Executing old $file"
+    execute_sql "$INSTALL_DIR_CENTREON/$MODULE_DIR/sql/$file"
+    display_return "$?" "Executing old $file"
+    # install.sql from new install
+    file="install.sql"
+    echo -n "Executing $file"
+    execute_sql "$TEMP_D/$file"
+    display_return "$?" "Executing $file"
+    # update.sql from new install
+    file="update.sql"
+    echo -n "Executing $file"
+    execute_sql "$TEMP_D/$file"
+    display_return "$?" "Executing $file"
+
+    /bin/rm -Rf $TEMP_D >> $LOG_FILE 2>&1
+    return 0
+}
+
+#---
+## (Create instCentDisco.conf file)
+##
+## @return 0      always
+#---
+function create_CentDiscoConf(){
+#    write_header "Create CentDiscoConf file"
+    echo "Creating CentDiscoConf file" >> $LOG_FILE
+    if [ -f $AGENT_DIR/$FILE_CONF_DISCO ] ; then
+	/bin/mv $AGENT_DIR/$FILE_CONF_DISCO $AGENT_DIR/$FILE_CONF_DISCO.old >> $LOG_FILE 2>&1
+    fi
+    echo "# Discovery version $VERSION" >> $AGENT_DIR/$FILE_CONF_DISCO
+    echo "# `date`" >> $AGENT_DIR/$FILE_CONF_DISCO
+    echo "AGENT_DIR=$AGENT_DIR" >> $AGENT_DIR/$FILE_CONF_DISCO
+    echo "CENTREON_CONF=$CENTREON_CONF" >> $AGENT_DIR/$FILE_CONF_DISCO
+    echo "TYPE_INSTALL=$TYPE_INSTALL" >> $AGENT_DIR/$FILE_CONF_DISCO
+    echo "SECURE=$SECURE" >> $AGENT_DIR/$FILE_CONF_DISCO
+    echo "KEY=$KEY" >> $AGENT_DIR/$FILE_CONF_DISCO
+    echo "SCRIPT_START=$SCRIPT_START" >> $AGENT_DIR/$FILE_CONF_DISCO
+    return 0
+}
+
+#---
+## (Check list packages)
+##
+## @return 0      if all packages found
+## @return 1      if at least package not found
+#---
+function check_list_packages(){
+    local error=0 package=""
+
+    write_header "Checking all needed packages" ""
+    for package in $PACKAGES; do
+        echo -n $package
+        check_package $package;
+        if [ $? -eq 0 ] ; then
+        #package not installed !
+	    display_return "1" "$package"
+	    error=1
+        else
+        #package installed !
+	    display_return "0" "$package"
+        fi
+    done
+    if [ $error == 1 ]; then
+        echo_info "\nPlease check fail packages and retry"
+        exit 1
+    fi
+}
+
+#---
+## (Delete all files' module)
+##
+## @return 0      suppression ok
+## @return 1      suppression ko
+#---
+function delete_module(){
+    if [ $TYPE_INSTALL != "poller" ] ; then
+	echo -ne "Executing uninstall.sql"
+	execute_sql "$INSTALL_DIR_CENTREON/$MODULE_DIR/sql/uninstall.sql"
+	display_return "$?" "Executing uninstall.sql"
+	echo -n "Executing remove_module.sql"
+	execute_sql "$INSTALL_DIR/remove_module.sql"
+	display_return "$?" "Executing remove_module.sql"
+	echo -ne "Deleting Discovery module directory"
+	/bin/rm -Rf $INSTALL_DIR_CENTREON/$MODULE_DIR >> $LOG_FILE 2>&1
+	display_return "$?" "Deleting Discovery module directory"
+	delete_backup_discovery;
+    fi
+    
+    if [ $TYPE_INSTALL != "central" ] ; then
+	echo -ne "Stopping discovery agent"
+	$INIT_D/$SCRIPT_AGENT_INIT stop >> $LOG_FILE 2>&1
+	display_return "$?" "Stopping discovery agent"
+	echo -ne "Deleting init links"
+	uninstall_init_service $SCRIPT_AGENT_INIT >> $LOG_FILE 2>&1
+	display_return "$?" "Deleting init links"
+	echo -ne "Deleting init script"
+	/bin/rm -Rf $INIT_D/$SCRIPT_AGENT_INIT >> $LOG_FILE	2>&1
+	display_return "$?" "Deleting init script"
+    fi
+    echo -ne "Deleting Discovery agent directory"
+    /bin/rm -Rf $AGENT_DIR >> $LOG_FILE 2>&1
+    display_return "$?" "Deleting Discovery agent directory"
+}
+
+#---
+## (Delete backup Discovery module directory)
+##
+## @return 0      suppression ok
+## @return 1      suppression ko
+#---
+function delete_backup_discovery(){
+    if [ -d  $INSTALL_DIR_CENTREON/$BACKUP ] ; then
+	echo ""
+	yes_no_default "Do you want to delete Discovery module backup directory ?" $yes
+	if [ "$?" -eq 0 ] ; then
+	    echo -n "Deleting Discovery module backup directory"
+	    /bin/rm -Rf $INSTALL_DIR_CENTREON/$BACKUP >> $LOG_FILE 2>&1
+	    display_return "$?" "Deleting Discovery module backup directory"
+	else
+	    echo_info "\nThe $INSTALL_DIR_CENTREON/$BACKUP doesn't delete"
+	fi
+    fi
 }

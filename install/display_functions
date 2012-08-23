@@ -124,11 +124,12 @@ function yes_no_default() {
 	local default=${2:-$no}
 	local res="not_define"
 	while [ "$res" != "$yes" ] && [ "$res" != "$no" ] && [ ! -z "$res" ] ; do
-		echo -e "\n$message\n[y/n], default to [$default]:"
+		echo -e "$message\n[y/n], default to [$default]:"
 		echo -en "> "
 		read res
 		[ -z "$res" ] && res="$default"
 	done
+	echo ""
 	if [ "$res" = "$yes" ] ; then 
 		return 0
 	else 
@@ -155,4 +156,24 @@ function display_return(){
 	echo -e "$2 : $fail" >> $LOG_FILE
 	return $1
     fi
+}
+
+#---
+## (Write header)
+##
+## @param1        text
+## @param2        if it exists, then insert a line at begin
+## @return 0      always
+#---
+function write_header(){
+    if [ $# -eq 2 ] ; then
+	echo ""
+    fi
+    echo -e "$line"
+    echo "$line" >> $LOG_FILE
+    echo -e "\t$1"
+    echo "$1" >> $LOG_FILE
+    echo -e "$line\n"
+    echo "$line" >> $LOG_FILE
+    return 0
 }

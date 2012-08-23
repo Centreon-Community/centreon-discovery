@@ -31,11 +31,11 @@
 
 # Define Discovery version
 NAME="Discovery"
-VERSION="2.2"
+VERSION="2.3"
 MODULE=$NAME.$VERSION
 
 # Global vars
-LOG_VERSION="Centreon Module $MODULE installation"
+LOG_VERSION="Centreon Module $MODULE"
 FILE_CONF="instCentWeb.conf"
 FILE_CONF_CENT="centreon.conf.php"
 FILE_CONF_CENTPLUGIN="instCentPlugins.conf"
@@ -43,6 +43,7 @@ CENTREON_CONF="/etc/centreon"
 AGENT_DIR="/usr/share/centreon-discovery"
 MODULE_DIR="www/modules/Discovery"
 INSTALL_DIR_CENTREON=""
+#BASE_DIR="" <-- ne pas décommenter ;-)
 WEB_USER=""
 WEB_GROUP=""
 NAGIOS_USER=""
@@ -52,12 +53,18 @@ DB_NAME_CENTREON=""
 BACKUP="www/modules/Discovery_backup"
 INIT_D="/etc/init.d"
 PWD=`pwd`
-TEMP=/tmp/install.$$
+TEMP_D="/tmp/Install_module_Centreon-Discovery"
 _tmp_install_opts="0"
-silent_install="0"
+# 0 : update / 1 : install / 2 : uninstall
+UPDATE="0"
 DISTRIB=""
 TYPE_INSTALL=""
 SCRIPT_AGENT_INIT="centreon-discovery.sh"
+DIR_CONF_DISCO=""
+FILE_CONF_DISCO="instCentDisco.conf"
+KEY=""
+SECURE=""
+SCRIPT_START=""
 
 BINARIES="rm cp mv ${CHMOD} ${CHOWN} echo more mkdir find ${GREP} ${CAT} ${SED} ${PYTHON} ${GCC}"
 
@@ -87,9 +94,3 @@ SETCOLOR_SUCCESS="\\033[1;32m"
 SETCOLOR_FAILURE="\\033[1;31m"
 SETCOLOR_WARNING="\\033[1;33m"
 SETCOLOR_NORMAL="\\033[0;39m"
-
-
-#INSTALL_DIR="$BASE_DIR/install"
-#export INSTALL_DIR
-
-#export line

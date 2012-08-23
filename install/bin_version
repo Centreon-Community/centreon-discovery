@@ -28,5 +28,8 @@
 # This feature if command execution "pgm -V" is ok ;-)
 # Don't forget to press ENTER at end of file. You need a blank line
 
-python=2=4
-nmap=5
+both=python=2=4
+poller=python=2=4
+central=python=2=4
+both=nmap=5
+poller=nmap=5

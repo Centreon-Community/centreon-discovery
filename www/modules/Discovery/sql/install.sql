@@ -72,11 +72,11 @@ CREATE TABLE IF NOT EXISTS `mod_discovery_rangeip` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=0 ;
 
-INSERT INTO `centreon`.`mod_discovery_rangeip` (`id`, `plage`, `masque`, `cidr`, `nmap_profil`, `nmap_max_retries`, `nmap_host_timeout`, `nmap_max_rtt_timeout`, `oid_hostname`, `oid_os`, `snmp_version`, `snmp_port`, `snmp_community`, `snmp_timeout`, `snmp_retries`, `nagios_server_id`, `done`, `poller_status`) VALUES ('1', 'default', '0', '0', 'Insane(T5)', '1', '15000', '100', '.1.3.6.1.2.1.1.5.0', '.1.3.6.1.2.1.1.1.0', "2c", '161', 'public', '5', '1', '0', '0', '0');
-UPDATE  `centreon`.`mod_discovery_rangeip` SET  `id` =  '0' WHERE  `mod_discovery_rangeip`.`id` =1 LIMIT 1 ;
+INSERT INTO `@DB_NAME_CENTREON@`.`mod_discovery_rangeip` (`id`, `plage`, `masque`, `cidr`, `nmap_profil`, `nmap_max_retries`, `nmap_host_timeout`, `nmap_max_rtt_timeout`, `oid_hostname`, `oid_os`, `snmp_version`, `snmp_port`, `snmp_community`, `snmp_timeout`, `snmp_retries`, `nagios_server_id`, `done`, `poller_status`) VALUES ('1', 'default', '0', '0', 'Insane(T5)', '1', '15000', '100', '.1.3.6.1.2.1.1.5.0', '.1.3.6.1.2.1.1.1.0', "2c", '161', 'public', '5', '1', '0', '0', '0');
+UPDATE  `@DB_NAME_CENTREON@`.`mod_discovery_rangeip` SET  `id` =  '0' WHERE  `mod_discovery_rangeip`.`id` =1 LIMIT 1 ;
 
-INSERT INTO `centreon`.`mod_discovery_rangeip` (`id`, `plage`, `masque`, `cidr`, `nmap_profil`, `nmap_max_retries`, `nmap_host_timeout`, `nmap_max_rtt_timeout`, `oid_hostname`, `oid_os`, `snmp_version`, `snmp_port`, `snmp_community`, `snmp_timeout`, `snmp_retries`, `nagios_server_id`, `done`, `poller_status`) VALUES ('2', 'default', '0', '0', 'Insane(T5)', '1', '15000', '100', '.1.3.6.1.2.1.1.5.0', '.1.3.6.1.2.1.1.1.0', "2c", '161', 'public', '5', '1', '0', '0', '0');
-UPDATE  `centreon`.`mod_discovery_rangeip` SET  `id` =  '-1' WHERE  `mod_discovery_rangeip`.`id` =2 LIMIT 1 ;
+INSERT INTO `@DB_NAME_CENTREON@`.`mod_discovery_rangeip` (`id`, `plage`, `masque`, `cidr`, `nmap_profil`, `nmap_max_retries`, `nmap_host_timeout`, `nmap_max_rtt_timeout`, `oid_hostname`, `oid_os`, `snmp_version`, `snmp_port`, `snmp_community`, `snmp_timeout`, `snmp_retries`, `nagios_server_id`, `done`, `poller_status`) VALUES ('2', 'default', '0', '0', 'Insane(T5)', '1', '15000', '100', '.1.3.6.1.2.1.1.5.0', '.1.3.6.1.2.1.1.1.0', "2c", '161', 'public', '5', '1', '0', '0', '0');
+UPDATE  `@DB_NAME_CENTREON@`.`mod_discovery_rangeip` SET  `id` =  '-1' WHERE  `mod_discovery_rangeip`.`id` =2 LIMIT 1 ;
 
 
 -- DATABASE : @DB_NAME_CENTREON@
@@ -120,5 +120,5 @@ CREATE TABLE IF NOT EXISTS `mod_discovery_config` (
   `consider_fqdn` int(1) NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-INSERT INTO `mod_discovery_config` (`host_exists_color`, `ip_exists_color`, `host_missing_color`, `consider_fqdn`) VALUES
+INSERT INTO `@DB_NAME_CENTREON@`.`mod_discovery_config` (`host_exists_color`, `ip_exists_color`, `host_missing_color`, `consider_fqdn`) VALUES
 ('#008000', '#ffa500', '#ff0000', '1');

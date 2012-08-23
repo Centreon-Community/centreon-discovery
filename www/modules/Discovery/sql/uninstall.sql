@@ -29,12 +29,12 @@
 -- TABLE : topology
 --	
 -- Suppression des pages du module Centreon Discovery
-DELETE FROM `topology` WHERE `topology_page` = '612';
-DELETE FROM `topology` WHERE `topology_page` = '61201';
-DELETE FROM `topology` WHERE `topology_page` = '61202';
-DELETE FROM `topology` WHERE `topology_page` = '61203';
-DELETE FROM `topology` WHERE `topology_page` = '61204';
-DELETE FROM `topology` WHERE `topology_page` = '61205';
+DELETE FROM `@DB_NAME_CENTREON@`.`topology` WHERE `topology_page` = '612';
+DELETE FROM `@DB_NAME_CENTREON@`.`topology` WHERE `topology_page` = '61201';
+DELETE FROM `@DB_NAME_CENTREON@`.`topology` WHERE `topology_page` = '61202';
+DELETE FROM `@DB_NAME_CENTREON@`.`topology` WHERE `topology_page` = '61203';
+DELETE FROM `@DB_NAME_CENTREON@`.`topology` WHERE `topology_page` = '61204';
+DELETE FROM `@DB_NAME_CENTREON@`.`topology` WHERE `topology_page` = '61205';
 
 -- DATABASE : @DB_NAME_CENTREON@
 -- TABLE : mod_discovery_*
@@ -52,12 +52,12 @@ DROP TABLE `mod_discovery_rangeip`;
 -- TABLE : mod_discovery_results
 --	
 -- Suppression de la table mod_discovery_results
-DROP TABLE `mod_discovery_results`;
+DROP TABLE `@DB_NAME_CENTREON@`.`mod_discovery_results`;
 
 
 -- DATABASE : @DB_NAME_CENTREON@
 -- TABLE : mod_discovery_template_os_relation
 --	
 -- Suppression des tables mod_discovery_template_os_relation et mod_discovery_config
-DROP TABLE `mod_discovery_template_os_relation`;
-DROP TABLE `mod_discovery_config`;
+DROP TABLE `@DB_NAME_CENTREON@`.`mod_discovery_template_os_relation`;
+DROP TABLE `@DB_NAME_CENTREON@`.`mod_discovery_config`;

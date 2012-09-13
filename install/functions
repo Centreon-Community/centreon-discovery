@@ -377,7 +377,7 @@ function install_init_service() {
         update-rc.d $service start 99 2 3 4 5 . stop 30 0 1 6 . >> $LOG_FILE 2>&1
     elif [ "$DISTRIB" = "SUSE" ] ; then
         chkconfig --add $service  >> $LOG_FILE 2>&1
-    elif [ "$DISTRIB" = "REDHAT"  ] || [ "DISTRIB" = "CENTOS" ]; then
+    elif [ "$DISTRIB" = "REDHAT"  ] || [ "$DISTRIB" = "CENTOS" ]; then
 # Just for CentOS :p bug #1148
       	if [ -x /sbin/chkconfig ] ; then
       	    /sbin/chkconfig --add $service >> $LOG_FILE 2>&1
@@ -387,7 +387,7 @@ function install_init_service() {
     elif [ "$DISTRIB" = "FREEBSD" ] ; then
         echo_info "You must configure your /etc/rc.conf with": ${service}
     else
-	echo_faillure "Impossible to install your run level for " ${service} "$fail"
+	echo_failure "Impossible to install your run level for " ${service} "$fail"
         return 1
     fi
     return 0
@@ -412,7 +412,7 @@ function uninstall_init_service() {
         update-rc.d $service remove >> $LOG_FILE 2>&1
     elif [ "$DISTRIB" = "SUSE" ] ; then
         chkconfig --del $service  >> $LOG_FILE 2>&1
-    elif [ "$DISTRIB" = "REDHAT"  ] || [ "DISTRIB" = "CENTOS" ]; then
+    elif [ "$DISTRIB" = "REDHAT" ] || [ "DISTRIB" = "CENTOS" ]; then
 # Just for CentOS :p bug #1148
       	if [ -x /sbin/chkconfig ] ; then
       	    /sbin/chkconfig --del $service >> $LOG_FILE 2>&1
@@ -422,7 +422,7 @@ function uninstall_init_service() {
     elif [ "$DISTRIB" = "FREEBSD" ] ; then
         echo_info "You must configure your /etc/rc.conf with": ${service}
     else
-	echo_faillure "Impossible to uninstall your run level for " ${service} "$fail"
+	echo_failure "Impossible to uninstall your run level for " ${service} "$fail"
         return 1
     fi
     return 0

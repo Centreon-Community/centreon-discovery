@@ -868,8 +868,6 @@ function copy_init_discovery-agent() {
 function check_old_install(){
     local temp="" file="" update_version="" major_update_version="" minor_update_version=""
     
-    write_header "Detect previous installation"
-
     if [ -f $DIR_CONF_DISCO/$FILE_CONF_DISCO ] && [ `grep "# Discovery version" $DIR_CONF_DISCO/$FILE_CONF_DISCO | wc -l` -eq 1 ] ; then
 	update_version=$(grep "# Discovery version" $DIR_CONF_DISCO/$FILE_CONF_DISCO | cut -d " " -f4)
 	major_update_version=$(echo $update_version | cut -d "." -f1)
@@ -906,7 +904,7 @@ function execute_sql(){
     local db_login=`${CAT} $CENTREON_CONF/$FILE_CONF_CENT | grep "\$conf_centreon\['user'\]" | cut -d '=' -f2 | ${SED} -e s/\"//g -e s/\ //g -e s/\;//g`
     local db_pass=`${CAT} $CENTREON_CONF/$FILE_CONF_CENT | grep "\$conf_centreon\['password'\]" | cut -d '=' -f2 | ${SED} -e s/\"//g -e s/\ //g -e s/\;//g`
 
-    mysql -u $db_login -p$db_pass $DB_NAME_CENTREON < $1 >> $LOG_FILE 2>&1
+    /usr/bin/mysql -u $db_login -p$db_pass $DB_NAME_CENTREON < $1 >> $LOG_FILE 2>&1
     return $?
 }
 
@@ -920,7 +918,7 @@ function execute_sql_update(){
     local file=""
 #    INSTALL_DIR_MODULE=$INSTALL_DIR_CENTREON/$MODULE_DIR
     
-    write_header "Execute SQL scripts"
+    write_header "Execute SQL scripts" ""
 
     echo -n "Creating temp install directory"
     /bin/mkdir -p $TEMP_D >> $LOG_FILE 2>&1
@@ -967,7 +965,7 @@ function execute_sql_update(){
 #---
 function create_CentDiscoConf(){
 #    write_header "Create CentDiscoConf file"
-    echo "Creating CentDiscoConf file" >> $LOG_FILE
+    echo -n "Creating CentDiscoConf file : " >> $LOG_FILE
     if [ -f $AGENT_DIR/$FILE_CONF_DISCO ] ; then
 	/bin/mv $AGENT_DIR/$FILE_CONF_DISCO $AGENT_DIR/$FILE_CONF_DISCO.old >> $LOG_FILE 2>&1
     fi
@@ -979,7 +977,8 @@ function create_CentDiscoConf(){
     echo "SECURE=$SECURE" >> $AGENT_DIR/$FILE_CONF_DISCO
     echo "KEY=$KEY" >> $AGENT_DIR/$FILE_CONF_DISCO
     echo "SCRIPT_START=$SCRIPT_START" >> $AGENT_DIR/$FILE_CONF_DISCO
-    return 0
+    echo "OK" >> $LOG_FILE
+	return 0
 }
 
 #---
@@ -1017,6 +1016,8 @@ function check_list_packages(){
 ## @return 1      suppression ko
 #---
 function delete_module(){
+	local nb_lines=0
+	
     if [ $TYPE_INSTALL != "poller" ] ; then
 	echo -ne "Executing uninstall.sql"
 	execute_sql "$INSTALL_DIR_CENTREON/$MODULE_DIR/sql/uninstall.sql"
@@ -1038,12 +1039,38 @@ function delete_module(){
 	uninstall_init_service $SCRIPT_AGENT_INIT >> $LOG_FILE 2>&1
 	display_return "$?" "Deleting init links"
 	echo -ne "Deleting init script"
-	/bin/rm -Rf $INIT_D/$SCRIPT_AGENT_INIT >> $LOG_FILE	2>&1
+	/bin/rm -f $INIT_D/$SCRIPT_AGENT_INIT >> $LOG_FILE	2>&1
 	display_return "$?" "Deleting init script"
     fi
-    echo -ne "Deleting Discovery agent directory"
-    /bin/rm -Rf $AGENT_DIR >> $LOG_FILE 2>&1
-    display_return "$?" "Deleting Discovery agent directory"
+    echo -e "Deleting Discovery agent files"
+    echo -ne "\tDeleting Python files"
+    /bin/rm -f $AGENT_DIR/DiscoveryAgent_*.py >> $LOG_FILE 2>&1
+    display_return "$?" "Deleting Python files and log directory"
+    echo -ne "\tDeleting log files"
+    /bin/rm -Rf $AGENT_DIR/log >> $LOG_FILE 2>&1
+    display_return "$?" "Deleting log files and log directory"	
+    
+	nb_lines=$(/bin/ls -A1 $AGENT_DIR | grep -v $FILE_CONF_DISCO | wc -l)
+	if [ $nb_lines -ne 0 ] ; then
+		echo_warning "$AGENT_DIR is not empty" "warning"
+		# list and format $AGENT_DIR directory
+		/bin/ls -A1 $AGENT_DIR | grep -v $FILE_CONF_DISCO | awk '{print "\t",$0}' | head -n 5
+		if [ $nb_lines -gt 5 ] ; then
+			echo -e "\t ...\n"
+		fi
+		yes_no_default "Do you confirm the directory deletion anyway?"
+		if [ "$?" -eq 1 ] ; then
+			echo -n "Deleting $FILE_CONF_DISCO"
+			# don't delete the $AGENT_DIR directory but delete $FILE_CONF_DISCO anyway
+			/bin/rm -f $AGENT_DIR/$FILE_CONF_DISCO* >> $LOG_FILE 2>&1
+			display_return "$?" "Deleting $FILE_CONF_DISCO"
+			return 1
+		fi
+	fi
+	echo -n "Deleting agent(s) directory"
+	/bin/rm -Rf $AGENT_DIR/ >> $LOG_FILE 2>&1
+	display_return "$?" "Deleting agent(s) directory"
+
 }
 
 #---

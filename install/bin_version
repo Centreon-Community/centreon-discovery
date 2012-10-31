@@ -23,7 +23,7 @@
 # Used by install.sh  #
 #---------------------#
 
-# Syntaxe : programme=MAJOR(=MINOR)
+# Syntax : type_install=programme=MAJOR(=MINOR)
 #
 # This feature if command execution "pgm -V" is ok ;-)
 # Don't forget to press ENTER at end of file. You need a blank line

@@ -1,4 +1,5 @@
-#!/bin/bash
+
+q#!/bin/bash
 
 # This file is part of Centreon-Discovery module.
 #
@@ -34,14 +35,16 @@ function usage() {
     local program=$0
     echo -e "\nUsage: $program -u <directory> / -r <directory> / -i -t <type> / -h"
     echo -e "  -i\tinstall Discovery module"
-    echo -e "  -u\tupgrade Discovery with specify your directory with instCentDisco.conf file"
     echo -e "  -t\tdefine type install : central/poller/both"
-    echo -e "  -r\tremove Discovery module"
+    echo -e "  -u\tupgrade Discovery with specify your directory with instCentDisco.conf file"
+    echo -e "  -r\tremove Discovery with specify your directory with instCentDisco.conf file"
     echo -e "  -h\tdisplay this message"
     echo -e "\nExample for poller:"
     echo -e "  ./install.sh -i -t poller"
     echo -e "\nExample for update:"    
     echo -e "  ./install.sh -u /usr/share/centreon-discovery"
+    echo -e "\nExample for uninstall:"    
+    echo -e "  ./install.sh -r /usr/share/centreon-discovery"
     exit 1
 }
 
@@ -262,7 +265,8 @@ fi
 
 if [ $UPDATE -eq 0 ] ; then
     # Case update
-    check_old_install $DIR_CONF_DISCO/$FILE_CONF_DISCO;
+    write_header "Detect previous installation" ""
+	check_old_install $DIR_CONF_DISCO/$FILE_CONF_DISCO;
 
     echo -n "Loading parameters"
     . $DIR_CONF_DISCO/$FILE_CONF_DISCO
@@ -323,9 +327,9 @@ else
 		if [ "$?" -eq 0 ] ; then
 		    echo ""
 		    echo_success "Parameters were loaded with success" "$ok"
-		    install_module;
 		    # NE PAS FACTORISER : "install_agent"
 		    install_agent;
+		    install_module;
 		else
 		    echo -e "\nUnable to load all parameters in \"$FILE_CONF\""
 		    echo -e "\tINSTALL ABORT"

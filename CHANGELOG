@@ -1,3 +1,14 @@
+## Centreon-Discovery 2.3
+- bug correction (Bug #1616)
+- bug correction (Bug #1624)
+- bug correction (Bug #1625)
+- bug correction (Bug #1626)
+- bug correction (Bug #1628)
+- bug correction (Bug #1637)
+- uninstall feature (Enhancement #1574)
+- update feature (Enhancement #1614)
+- minor improvements
+
 ## Centreon-Discovery 2.2
 - bug correction (Bug #1602)
 - support "#" in hostname (Enhancement #1579)

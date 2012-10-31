@@ -2,7 +2,7 @@
 #	Description:
 ------------------------------------------------
 Nom: Centreon-Discovery
-Version: 2.2
+Version: 2.3
 Distribution : Debian/CentOS
 
 ------------------------------------------------
@@ -77,6 +77,24 @@ Supprimer le module
 Le chemin "/usr/local/centreon/www/modules" est à adapter en fonction de votre configuration.
 
 4. Aller à "#	Installation:"
+
+------------------------------------------------
+#	DESINSTALLATION (version 2.3 minimum)
+------------------------------------------------
+1. Télécharger la version du module installée depuis la page de téléchargement
+
+Se rendre sur la page http://community.centreon.com/projects/centreon-discovery
+
+2. Extraire le contenu de l'archive
+
+	# tar xzf centreon-discovery-x.x.tar.gz
+
+3. Désinstallation du module
+
+Lancer la désinstallation automatique
+	# ./install.sh -r /usr/share/centreon-discovery
+
+Une fois le processus terminé sans erreur, le module a été entièrement supprimé de Centreon et de votre système.
 
 ------------------------------------------------
 #	FAQ

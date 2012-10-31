@@ -2,7 +2,7 @@
 #	Description:
 ------------------------------------------------
 Name: Centreon-Discovery
-Version: 2.2
+Version: 2.3
 Distribution: Debian/CentOS
 
 ------------------------------------------------
@@ -76,6 +76,24 @@ Delete module
 Change directory "/usr/local/centreon/www/modules" depending on your configuration.
 
 4. Go to "#	Installation:"
+
+------------------------------------------------
+#	UNINSTALL (version 2.3 minimum)
+------------------------------------------------
+1. Get last version of Discovery module here http://community.centreon.com/projects/centreon-discovery
+
+Go to the page http://community.centreon.com/projects/centreon-discovery
+
+2. Extract files from the archive
+
+	# tar xzf centreon-discovery-x.x.tar.gz
+	
+3. Uninstall module
+
+Launch uninstall script
+	# ./install.sh -r /usr/share/centreon-discovery
+
+Once uninstall process done without error, the module has been entirely deleted from Centreon and your system.
 
 ------------------------------------------------
 #	FAQ

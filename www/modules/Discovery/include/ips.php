@@ -146,11 +146,7 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 					echo '         </tr>'," \n ";
 					echo ' </form>',"\n";
 					
-					echo '<br><form method="post" action="main.php" onSubmit="return valider_form(this);">',"\n";	
-					
-					//On récupere les valeurs de la configuration par défaut
-					$default_conf = findDefaultConfig();
-					
+					echo '<br><form method="post" action="main.php" onSubmit="return valider_form(this);">',"\n";					
 					$list1="list_one";
 					$list2="list_two";
 					$listcnt=1;
@@ -173,6 +169,9 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
                      	echo ' <td class="ListColCenter"><a href="#"><img style="border:none" type="image" src="./modules/Discovery/include/images/delete16x16.png" title="Delete one from list" name="ClearRow" onClick="self.location=\'./main.php?p=61201&id='.$data["id"].'\'"></a></td>',"\n ";
 						echo ' <td class="ListColCenter" onClick="afficher_cacher(\'td_toggle'.$i.'\',\'td_toggle\');"><img style="border:none" type="image" src="./modules/Discovery/include/images/options.jpg" title="Options"></td></tr>'."\n ";
 						echo ' <tr class="list_one" id="tr'.$i.'">'," \n ";
+
+						//On récupere les valeurs de la configuration par défaut
+						$default_conf = findDefaultConfig($data["id"]);
 						echo ' 		<td></td>
 									<td colspan="7">
 										<div style="display:none" id="td_toggle'.$i.'" class="td_toggle">
@@ -323,8 +322,8 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 				 * {Find default configuration for a scan}
 				 *
 				 */
-				function findDefaultConfig (){
-					$sql = mysql_query("SELECT * FROM mod_discovery_rangeip WHERE id=0;");					
+				function findDefaultConfig ($id){
+					$sql = mysql_query("SELECT * FROM mod_discovery_rangeip WHERE id='$id';");					
 					while ($result = mysql_fetch_array($sql,MYSQL_ASSOC)){			
 						return $result;
 					}

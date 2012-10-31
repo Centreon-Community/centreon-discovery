@@ -22,9 +22,9 @@
 # SVN: http://svn.modules.centreon.com/centreon-discovery
 
 ### BEGIN INIT INFO
-# Provides:           discovery-agent.sh
+# Provides:           centreon-discovery.sh
 # Required-Start:     $all
-# Required-Stop:      $all
+# Required-Stop:      
 # Default-Start:      2 3 4 5
 # Default-Stop:       0 1 6
 # Short-Description:  Discovery Agent poller

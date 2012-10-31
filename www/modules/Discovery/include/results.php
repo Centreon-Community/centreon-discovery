@@ -113,7 +113,8 @@ if (!empty($_POST)){
 				if (isset($_POST["$cbgroup_name"]) && count($_POST["$cbgroup_name"])>0)
 				{
 					foreach ($_POST["$cbgroup_name"] as $key => $value){
-						if ($key>=0){
+						// Correction du bug lorsqu'on cocher la checkbox globale (bug #1637)
+						if (($key>=0) && !(preg_match('#^([0-9]{1,3}\.){3}[0-9]{1,3}$#', $value))){
 							$listHost[]=$value;
 						}
 					}

@@ -307,15 +307,26 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 				 */	
 				 
 				function findPoller ($plage_addr,$cidr){
-					$sql = mysql_query("SELECT id,name,ns_ip_address FROM nagios_server WHERE ns_activate=1;");					
-					while($poller= mysql_fetch_array($sql,MYSQL_ASSOC)){					
-						if (isPoller($poller["ns_ip_address"],$plage_addr,$cidr) == 0){
-							$result = array ("poller_id" => $poller["id"], "poller_name" => $poller["name"], "poller_ip" => $poller["ns_ip_address"]);	
+					$cidr=cidrToMask($cidr);
+					$requete="SELECT id,name,ns_ip_address FROM nagios_server WHERE ns_activate=1 AND (INET_ATON(ns_ip_address) & INET_ATON('".$cidr."')) = INET_ATON('".$plage_addr."') LIMIT 1;";
+					$sql = mysql_query($requete);
+					$poller=mysql_fetch_array($sql,MYSQL_ASSOC);
+					if(!empty($poller)){ // Si on a trouvé un poller
+						$result = array ("poller_id" => $poller["id"], "poller_name" => $poller["name"], "poller_ip" => $poller["ns_ip_address"]);
+						return $result;
+					}
+					else { // Sinon -> On prend l'id minimum
+						$requete="SELECT MIN(id) as id,name,ns_ip_address FROM nagios_server WHERE ns_activate=1 LIMIT 1;";
+						$sql = mysql_query($requete);
+						$poller=mysql_fetch_array($sql,MYSQL_ASSOC);
+						if(!empty($poller)){
+							$result = array ("poller_id" => $poller["id"], "poller_name" => $poller["name"], "poller_ip" => $poller["ns_ip_address"]);
 							return $result;
 						}
+						else { // Si on trouve rien
+							echo 'Erreur : Aucun poller trouvé !';
+						}
 					}
-					$result = array ("poller_id" => "1", "poller_name" => "Localhost", "poller_ip" => "127.0.0.1");
-					return $result;
 				}
 				
 				/*

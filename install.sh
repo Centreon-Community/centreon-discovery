@@ -1,5 +1,4 @@
-
-q#!/bin/bash
+#!/bin/bash
 
 # This file is part of Centreon-Discovery module.
 #

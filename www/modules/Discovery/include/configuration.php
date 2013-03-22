@@ -33,7 +33,6 @@
 		<meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
 		<title>Discovery</title>
         <link rel="stylesheet" media="screen" type="text/css" title="Discovery" href="./modules/Discovery/css/discovery.css"/>
-		<link href="./Themes/Centreon-2/style.css" rel="stylesheet" type="text/css"/>
 		<script type="text/javascript" src="./include/common/javascript/color_picker_mb.js"></script>
 		<script type="text/javascript" src="./modules/Discovery/include/colorPicker.js"></script>
 		<meta content="Discovery - Configuration Page" name="Nicolas DIETRICH">

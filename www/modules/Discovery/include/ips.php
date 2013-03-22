@@ -39,7 +39,6 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 	<head>
 		<meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
 		<title>Discovery</title>
-		<link href="./Themes/Centreon-2/style.css" />
 		<meta content="Centreon-Discovery - Subnet Declaration Page" name="Nicolas DIETRICH">
 		<!-- Fonctions JavaScript -->
 		<script type="text/javascript" src="./modules/Discovery/include/jquery.min.js"></script>

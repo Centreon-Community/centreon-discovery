@@ -50,7 +50,6 @@ function findVersion (){
 	<head>
 		<meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
 		<title>Centreon-Discovery</title>
-		<link href="./Themes/Centreon-2/style.css" rel="stylesheet" type="text/css"/>
 		<meta content="Centreon-Discovery" name="Baptiste GAZUI"> 			
 	</head>
 	<center>

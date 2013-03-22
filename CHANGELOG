@@ -1,3 +1,10 @@
+## Centreon-Discovery 2.3.1
+- Added compatibility to Centreon 2.4.1 (#1670)
+- Bug correction (Bug #1643)
+- Bug correction (Bug #1660)
+- Deleted short open tags to improve compatibility (Enhancement #1663)
+- Deleted unused CSS (Enhancement #1664)
+
 ## Centreon-Discovery 2.3
 - bug correction (Bug #1616)
 - bug correction (Bug #1624)

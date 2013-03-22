@@ -104,24 +104,24 @@
 						echo '	<tr class="list_lvl_1"><td class="ListColLvl1_name" colspan="2">&nbsp;<img src="./img/icones/16x16/text_rich_colored.gif">&nbsp;&nbsp;Display Settings</td></tr>'."\n";
 						?>
 						<tr class="list_one"><td class="FormRowField">Host exists color</td><td class="FormRowValue">
-							<input type="text" name="host_exists" size="7" maxlength="7" value="<? echo $CONFIG['host_exists_color']; ?>" style="text-align:center;" />
-							<input style="width:50px; height:15px; background-color: <? echo $CONFIG['host_exists_color']; ?>; border-width:0px; padding-bottom:2px;" onclick="popup_color_picker('host_exists','Hosts Exists Color');" name="host_exists_color" value="" type="button" />
+							<input type="text" name="host_exists" size="7" maxlength="7" value="<?php echo $CONFIG['host_exists_color']; ?>" style="text-align:center;" />
+							<input style="width:50px; height:15px; background-color: <?php echo $CONFIG['host_exists_color']; ?>; border-width:0px; padding-bottom:2px;" onclick="popup_color_picker('host_exists','Hosts Exists Color');" name="host_exists_color" value="" type="button" />
 						</td>
 						<tr class="list_two"><td class="FormRowField">IP exists color</td><td class="FormRowValue">
-							<input type="text" name="ip_exists" size="7" maxlength="7" value="<? echo $CONFIG['ip_exists_color']; ?>" style="text-align:center;" />
-							<input style="width:50px; height:15px; background-color: <? echo $CONFIG['ip_exists_color']; ?>; border-width:0px; padding-bottom:2px;" onclick="popup_color_picker('ip_exists','IP Exists Color');" name="ip_exists_color" value="" type="button" />
+							<input type="text" name="ip_exists" size="7" maxlength="7" value="<?php echo $CONFIG['ip_exists_color']; ?>" style="text-align:center;" />
+							<input style="width:50px; height:15px; background-color: <?php echo $CONFIG['ip_exists_color']; ?>; border-width:0px; padding-bottom:2px;" onclick="popup_color_picker('ip_exists','IP Exists Color');" name="ip_exists_color" value="" type="button" />
 						</td>
 						</td>
 						<tr class="list_one"><td class="FormRowField">Host missing color</td><td class="FormRowValue">
-							<input type="text" name="host_missing" size="7" maxlength="7" value="<? echo $CONFIG['host_missing_color']; ?>" style="text-align:center;" />
-							<input style="width:50px; height:15px; background-color: <? echo $CONFIG['host_missing_color']; ?>; border-width:0px; padding-bottom:2px;" onclick="popup_color_picker('host_missing','Host Missing Color');" name="host_missing_color" value="" type="button" />
+							<input type="text" name="host_missing" size="7" maxlength="7" value="<?php echo $CONFIG['host_missing_color']; ?>" style="text-align:center;" />
+							<input style="width:50px; height:15px; background-color: <?php echo $CONFIG['host_missing_color']; ?>; border-width:0px; padding-bottom:2px;" onclick="popup_color_picker('host_missing','Host Missing Color');" name="host_missing_color" value="" type="button" />
 						</td>
 						</td>
 						<tr class="list_two"><td class="FormRowField">Filtering hostname's FQDN</td><td class="FormRowValue">
-								<input type="radio" name="consider_fqdn" value="1" <? echo ($CONFIG['consider_fqdn']=='1')? 'checked':''; ?>> Yes
-								<input type="radio" name="consider_fqdn" value="0" <? echo ($CONFIG['consider_fqdn']=='0')? 'checked':''; ?>> No
+								<input type="radio" name="consider_fqdn" value="1" <?php echo ($CONFIG['consider_fqdn']=='1')? 'checked':''; ?>> Yes
+								<input type="radio" name="consider_fqdn" value="0" <?php echo ($CONFIG['consider_fqdn']=='0')? 'checked':''; ?>> No
 						</td>
-<?
+<?php
 						
 						echo '	<tr class="list_lvl_1"><td class="ListColLvl1_name" colspan="2">&nbsp;<img src="./modules/Discovery/include/images/nmap_logo16x16.png">&nbsp;&nbsp;NMAP Settings</td></tr>'."\n";
 						echo '	<tr class="list_one"><td class="FormRowField">Profil</td><td class="FormRowValue">'."\n";

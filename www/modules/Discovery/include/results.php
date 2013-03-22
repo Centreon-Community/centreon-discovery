@@ -1,4 +1,4 @@
-<?
+<?php
 
 /* This file is part of Centreon-Discovery module.
  *
@@ -37,7 +37,7 @@
 	var hostsNew=new Array();
 	var hostsNewOrig=new Array();
 </script>
-<?
+<?php
 if (!isset ($oreon)) {
 	exit ();
 }
@@ -88,7 +88,7 @@ if (!empty($_POST)){
 	</tr>
 </table>
 <form method="POST" action="main.php?p=61202" name="results">
-<?
+<?php
 	if(isset($_GET['delid'])){
 		$delid=(int)$_GET['delid'];
 		if(mysql_query("DELETE FROM mod_discovery_results WHERE id='".$delid."'")){
@@ -193,7 +193,7 @@ if (!empty($_POST)){
 		</tr>
 	</table>
 	<br /><br /><br />
-	<?	
+	<?php
 	$cbgroup = 0;
 	$subnetsDone = mysql_query("SELECT count(plage_id) as cnt, disco.id,plage,masque,cidr,done,nagios_server_id FROM (mod_discovery_rangeip AS disco) LEFT JOIN mod_discovery_results AS res ON disco.id=res.plage_id WHERE disco.id!=0 AND disco.done!=0 GROUP BY disco.id") or die(mysql_error());
 	while($subnetDoneData = mysql_fetch_array($subnetsDone,MYSQL_ASSOC)){
@@ -236,11 +236,11 @@ if (!empty($_POST)){
 	if($subnetDoneData["done"]==2){ // Recherche terminée
 			$cbgroup++;
 	?>
-	<font size="3px" style="font-weight:bold;"><? echo $subnetDoneData["plage"].' / '.$subnetDoneData["cidr"].' polled by '.$poller["name"].' ('.$poller["ns_ip_address"].') | <a href="#" title="View addresses" onClick="$j(\'#scan'.$subnetDoneData["id"].'\').slideToggle(\'fast\');"><font color="green" size="2px"> '.$subnetDoneData["cnt"].' address(es) discovered</font></a><br>'; ?>
-			<div id="scan<? echo $subnetDoneData["id"]; ?>">
+	<font size="3px" style="font-weight:bold;"><?php echo $subnetDoneData["plage"].' / '.$subnetDoneData["cidr"].' polled by '.$poller["name"].' ('.$poller["ns_ip_address"].') | <a href="#" title="View addresses" onClick="$j(\'#scan'.$subnetDoneData["id"].'\').slideToggle(\'fast\');"><font color="green" size="2px"> '.$subnetDoneData["cnt"].' address(es) discovered</font></a><br>'; ?>
+			<div id="scan<?php echo $subnetDoneData["id"]; ?>">
 				<br><br><table class="ListTable">
 				<tr class="ListHeader">
-					<td width="5%" class="ListColHeaderCenter"><input type="checkbox" name="cb<? echo $cbgroup; ?>[]" value="<? echo $subnetDoneData["plage"]; ?>" OnClick="checkall(document.getElementsByName('cb<? echo $cbgroup; ?>[]'));"/></td>
+					<td width="5%" class="ListColHeaderCenter"><input type="checkbox" name="cb<?php echo $cbgroup; ?>[]" value="<?php echo $subnetDoneData["plage"]; ?>" OnClick="checkall(document.getElementsByName('cb<?php echo $cbgroup; ?>[]'));"/></td>
 						<input type="hidden" name="group_list[]" value="'. $cbgroup .'" />
 						<td width="10%" class="ListColHeaderCenter"><a href="./main.php?p=61202&orderby=ip_asc"><img src="./img/icones/7x7/sort_asc.gif" style="position:relative;bottom:5px;left:-3px;"></a>Host<a href="./main.php?p=61202&orderby=ip_desc"><img src="./img/icones/7x7/sort_desc.gif" style="position:relative;bottom:5px;left:3px;"></a></td>
 						<td width="15%" class="ListColHeaderCenter"><a href="./main.php?p=61202&orderby=hostname_asc"><img src="./img/icones/7x7/sort_asc.gif" style="position:relative;bottom:5px;left:-3px;"></a>Hostname<a href="./main.php?p=61202&orderby=hostname_desc"><img src="./img/icones/7x7/sort_desc.gif" style="position:relative;bottom:5px;left:3px;"></a></td>
@@ -249,9 +249,9 @@ if (!empty($_POST)){
 						<td width="15%" class="ListColHeaderCenter">Host Group</td>
 						<td width="8%" class="ListColHeaderCenter">Status</td>
 						<td width="5%" class="ListColHeaderCenter"><a href="#">
-						<img style="border:none" type="image" src="./modules/Discovery/include/images/clearAll1.png" title="Delete all from list" onMouseOver="javascript:this.src='./modules/Discovery/include/images/clearAll2.png';" onMouseOut="javascript:this.src='./modules/Discovery/include/images/clearAll1.png';" onClick="self.location='./main.php?p=61202&delall=<? echo $subnetDoneData["id"]; ?>'" /></a></td>
+						<img style="border:none" type="image" src="./modules/Discovery/include/images/clearAll1.png" title="Delete all from list" onMouseOver="javascript:this.src='./modules/Discovery/include/images/clearAll2.png';" onMouseOut="javascript:this.src='./modules/Discovery/include/images/clearAll1.png';" onClick="self.location='./main.php?p=61202&delall=<?php echo $subnetDoneData["id"]; ?>'" /></a></td>
 						</tr>
-				<?
+				<?php
 				$list1="list_one";
 				$list2="list_two";
 				$listcnt=1;
@@ -268,10 +268,10 @@ if (!empty($_POST)){
 					}
 				?>
 					<script type="text/javascript">
-						hostsNew[<? echo $subnetHostData["id"]; ?>]='<? echo $subnetHostData["hostname"]; ?>';
-						hostsNewOrig[<? echo $subnetHostData["id"]; ?>]='<? echo $subnetHostData["hostname"]; ?>';
+						hostsNew[<?php echo $subnetHostData["id"]; ?>]='<?php echo $subnetHostData["hostname"]; ?>';
+						hostsNewOrig[<?php echo $subnetHostData["id"]; ?>]='<?php echo $subnetHostData["hostname"]; ?>';
 					</script>
-				<?
+				<?php
 						echo '            	<tr class="'.$list.'">'," \n";
 						echo '                  <td width="5%" class="ListColCenter"><input type="checkbox" name="cb'.$cbgroup.'[]" value="'.$subnetHostData["id"].'"/></td>';
 						echo '                  <td width="10%" class="ListColCenter" name="ip'.$subnetHostData["id"].'">'.$subnetHostData["ip"].'</td>';
@@ -281,8 +281,8 @@ if (!empty($_POST)){
 						$default = findOs($subnetHostData["os"]);
 						foreach($Hosts_Templates as $Hosts_TmPL){
 						?>
-							<option value="<? echo $Hosts_TmPL["host_id"]; ?>" <? echo ($default == $Hosts_TmPL["host_name"])? 'selected':''; ?> ><? echo $Hosts_TmPL["host_name"]; ?></option>
-						<?
+							<option value="<?php echo $Hosts_TmPL["host_id"]; ?>" <?php echo ($default == $Hosts_TmPL["host_name"])? 'selected':''; ?> ><?php echo $Hosts_TmPL["host_name"]; ?></option>
+						<?php
 						}
 						echo '					</select></td>';
 						echo '					<td width="17%" class="ListColCenter"><select name="select_group'.$subnetHostData["id"].'" width="95%"><option value="-1">None</option>';
@@ -301,7 +301,7 @@ if (!empty($_POST)){
 		</div>
 	</form>
 	<br />
-		<?
+		<?php
 		}
 		elseif ($subnetDoneData["done"]==1){ // Recherche en cours
 				echo '<script type="text/javascript">refresh_div();</script>';
@@ -347,7 +347,7 @@ if (!empty($_POST)){
 		</tr>
 	</table>
 	<br />
-<?
+<?php
 
 				function findOs($sysDescr)
 				{

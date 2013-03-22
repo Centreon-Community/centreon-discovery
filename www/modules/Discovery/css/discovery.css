@@ -54,18 +54,6 @@ form {
     padding-bottom:10px;
     margin-left: 10px;
 }
-	
-#header {
-    height:83px;
-    padding-left:20px;
-    background-color: #F4F9FD;
-}
-
-#logo {
-    position:absolute;
-    left:15px;
-    top:10px;
-}
 
 #onglets{
     list-style-type: none;

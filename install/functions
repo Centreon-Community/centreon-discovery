@@ -120,11 +120,15 @@ function get_centreon_parameters() {
     WEB_GROUP=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "WEB_GROUP" | cut -d '=' -f2`;
     NAGIOS_PLUGIN=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "NAGIOS_PLUGIN" | cut -d '=' -f2`;
     NAGIOS_USER=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "NAGIOS_USER" | cut -d '=' -f2`;
-    NAGIOS_GROUP=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "NAGIOS_GROUP" | cut -d '=' -f2`;
-    DB_NAME_CENTREON=`${CAT} $CENTREON_CONF/$FILE_CONF_CENT | grep "\$conf_centreon\['db'\]" | cut -d '=' -f2 | ${SED} -e s/\"//g -e s/\ //g -e s/\;//g`
+	if [ "$NAGIOS_PLUGIN" == "" ] && [ "$NAGIOS_USER" == "" ]; then
+		NAGIOS_PLUGIN=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "PLUGIN_DIR" | cut -d '=' -f2`;
+		NAGIOS_USER=`${CAT} $CENTREON_CONF/$FILE_CONF | ${GREP} "MONITORINGENGINE_USER" | cut -d '=' -f2`;
+	fi
+
+	DB_NAME_CENTREON=`${CAT} $CENTREON_CONF/$FILE_CONF_CENT | grep "\$conf_centreon\['db'\]" | cut -d '=' -f2 | ${SED} -e s/\"//g -e s/\ //g -e s/\;//g`
     INIT_D=`${CAT} $CENTREON_CONF/$FILE_CONF_CENTPLUGIN | grep "INIT_D" | cut -d '=' -f2`
-    
-    if [ "$INSTALL_DIR_CENTREON" != "" ] && [ "$WEB_USER" != "" ] && [ "$WEB_GROUP" != "" ] && [ "$NAGIOS_PLUGIN" != "" ] && [ "$NAGIOS_USER" != "" ] && [ "$NAGIOS_GROUP" != "" ] && [ "DB_NAME_CENTREON" != "" ] && [ "$INIT_D" != "" ]; then
+
+    if [ "$INSTALL_DIR_CENTREON" != "" ] && [ "$WEB_USER" != "" ] && [ "$WEB_GROUP" != "" ] && [ "$NAGIOS_PLUGIN" != "" ] && [ "$NAGIOS_USER" != "" ] && [ "DB_NAME_CENTREON" != "" ] && [ "$INIT_D" != "" ]; then
 	return 0;
     else
 	return 1;

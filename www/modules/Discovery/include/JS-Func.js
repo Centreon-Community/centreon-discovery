@@ -50,7 +50,7 @@
 						$j(':checkbox[value="'+id+'"]').attr("disabled", true);
 						$j('td [name="exist'+id+'"]').html('Empty Hostname').css('color', 'red');
 					}
-					else if(inputVar=='\* TIMEOUT SNMP \*'){ // Hostname introuvable
+					else if(inputVar==' TIMEOUT SNMP '){ // Hostname introuvable
 						$j(this).css("background-color", "yellow");
 						$j(':checkbox[value="'+id+'"]').attr("disabled", true);
 						$j('td [name="exist'+id+'"]').html('Invalid Hostname').css('color', 'red');
@@ -59,6 +59,11 @@
 						$j(this).css("background-color", "yellow");
 						$j(':checkbox[value="'+id+'"]').attr("disabled", true);
 						$j('td [name="exist'+id+'"]').html('Hostname already exist').css('color', CONFIG["host_exists_color"]);
+					}
+					else if(IllegalCharsRegex.test(inputVar)){ // Hostname invalide
+						$j(this).css("background-color", "yellow");
+						$j(':checkbox[value="'+id+'"]').attr("disabled", true);
+						$j('td [name="exist'+id+'"]').html('Invalid hostname').css('color', 'red');
 					}
 					else if($j.inArray(ipVar, hostsIPExist) >= 1){ // Ip existe déjà
 						$j(this).css("background-color", "white");

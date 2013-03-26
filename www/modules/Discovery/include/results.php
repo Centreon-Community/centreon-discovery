@@ -28,7 +28,7 @@
  
 ?>
 <link href="./modules/Discovery/css/discovery.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript" src="./modules/Discovery/include/jquery.min.js"></script>
+<script type="text/javascript" src="./modules/Discovery/include/jquery-1.9.1.min.js"></script>
 <script type="text/javascript" src="./modules/Discovery/include/JS-Func.js"></script>
 <script type="text/javascript" src="./modules/Discovery/include/script.js"></script>
 <script type="text/javascript">
@@ -184,7 +184,24 @@ if (!empty($_POST)){
 				$HostGroup[]=$Groups_SQL;
 			}
 		}
+		
+		
+		function getIllegalChars(){
+			global $IllegalChars;
+				$GetIllegalChars_SQL=mysql_query("SELECT illegal_object_name_chars FROM cfg_nagios LIMIT 1") or die(mysql_error());
+				$IllegalCharsArray=mysql_fetch_array($GetIllegalChars_SQL,MYSQL_ASSOC);
+				$IllegalChars=html_entity_decode($IllegalCharsArray['illegal_object_name_chars']);
+				$IllegalChars=str_replace('&#039;', "", $IllegalChars);
+				$IllegalChars=str_split($IllegalChars);
+				$IllegalCharsjs=implode("', '", $IllegalChars);
+				$IllegalCharsjsRegex='['.implode("\\", $IllegalChars).']';
+				echo '<script type="text/javascript">'."\n";
+					echo "var IllegalCharsRegex = new RegExp(/".$IllegalCharsjsRegex."+/);"."\n";
+				echo '</script>'."\n";
+		}
+		
 	getTemplateHostsGroups();
+	getIllegalChars();
 	?>
 	<table align="right">
 		<tr>
@@ -259,6 +276,7 @@ if (!empty($_POST)){
 					if($CONFIG['consider_fqdn']==1){
 						$subnetHostData["hostname"]=explode('.', $subnetHostData["hostname"]);
 						$subnetHostData["hostname"]=$subnetHostData["hostname"][0];
+						$subnetHostData["hostname"]=str_replace('"', '', $subnetHostData["hostname"]);
 					}
 					if($listcnt%2==0){
 						$list=$list2;
@@ -275,7 +293,7 @@ if (!empty($_POST)){
 						echo '            	<tr class="'.$list.'">'," \n";
 						echo '                  <td width="5%" class="ListColCenter"><input type="checkbox" name="cb'.$cbgroup.'[]" value="'.$subnetHostData["id"].'"/></td>';
 						echo '                  <td width="10%" class="ListColCenter" name="ip'.$subnetHostData["id"].'">'.$subnetHostData["ip"].'</td>';
-						echo '                  <td width="17%" class="ListColCenter"><input type="text" name="hostname['.$subnetHostData["id"].']" value="'.$subnetHostData["hostname"].'" onKeyUp="updateNameBox(\''.$subnetHostData["id"].'\');" />&nbsp;<a href="#"><img src="./modules/Discovery/include/images/undo_16.png" title="Rollback to detected hostname" onClick="Hostname_rollback(\''.$subnetHostData["id"].'\');" /></a></td>';
+						echo '                  <td width="17%" class="ListColCenter"><input type="text" name="hostname['.$subnetHostData["id"].']" value="'.htmlspecialchars($subnetHostData["hostname"]).'" onKeyUp="updateNameBox(\''.$subnetHostData["id"].'\');" />&nbsp;<a href="#"><img src="./modules/Discovery/include/images/undo_16.png" title="Rollback to detected hostname" onClick="Hostname_rollback(\''.$subnetHostData["id"].'\');" /></a></td>';
 						echo '                  <td width="17%" class="ListColCenter" title="'.$subnetHostData["os"].'">'.strCut($subnetHostData["os"]).'</td>';
 						echo '					<td width="17%" class="ListColCenter"><select name="select_template'.$subnetHostData["id"].'" width="95%"><option value="-1">None</option>';
 						$default = findOs($subnetHostData["os"]);

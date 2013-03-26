@@ -191,7 +191,7 @@ if (!empty($_POST)){
 				$GetIllegalChars_SQL=mysql_query("SELECT illegal_object_name_chars FROM cfg_nagios LIMIT 1") or die(mysql_error());
 				$IllegalCharsArray=mysql_fetch_array($GetIllegalChars_SQL,MYSQL_ASSOC);
 				$IllegalChars=html_entity_decode($IllegalCharsArray['illegal_object_name_chars']);
-				$IllegalChars=str_replace('&#039;', "", $IllegalChars);
+				$IllegalChars=str_replace('&#039;', "'", $IllegalChars);
 				$IllegalChars=str_split($IllegalChars);
 				$IllegalCharsjs=implode("', '", $IllegalChars);
 				$IllegalCharsjsRegex='['.implode("\\", $IllegalChars).']';

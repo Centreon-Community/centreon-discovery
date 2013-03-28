@@ -84,20 +84,22 @@
 			global $oreon;  
 			global $centreon;  
 			
+			$host = $data["host"];
+			$macro = $data["macro"];
 			require_once $centreon_path."www/include/configuration/configObject/host/DB-Func.php";
 			require_once $centreon_path."www/include/configuration/configObject/service/DB-Func.php";
 			
 			//Création de l'hôte dans la bdd
-			$host_id = insertHostInDB($data);
+			$host_id = insertHostInDB($host, $macro);
 			
 			//Mise à jour du template associé à cette hôte
-			$req = mysql_query("INSERT INTO host_template_relation (host_host_id,host_tpl_id,`order`) VALUES('".$host_id."','".$data["host_template_model_htm_id"]."','1');");
+			$req = mysql_query("INSERT INTO host_template_relation (host_host_id,host_tpl_id,`order`) VALUES('".$host_id."','".$host["host_template_model_htm_id"]."','1');");
 			
 			//Mise à jour du host_group
-			if (isset($data["host_hgs"])) {updateHostHostGroup($host_id, $data);}
+			if (isset($host["host_hgs"])) {updateHostHostGroup($host_id, $host);}
 						
 			//Association des services au template
-			$req2 = mysql_query("SELECT service_service_id FROM `host_service_relation` WHERE host_host_id = '".$data["host_template_model_htm_id"]."';");
+			$req2 = mysql_query("SELECT service_service_id FROM `host_service_relation` WHERE host_host_id = '".$host["host_template_model_htm_id"]."';");
 			while ($values=mysql_fetch_array($req2))
 			{
 				$alias = getMyServiceAlias($values["service_service_id"]);
@@ -111,13 +113,13 @@
 					$service_id = insertServiceInDB($service);
 				}
 			}			
-			generateHostServiceMultiTemplate($host_id, $data["host_template_model_htm_id"]);
+			generateHostServiceMultiTemplate($host_id, $host["host_template_model_htm_id"]);
 	
 			//Mise à jour du poller associé à cette hôte
-			updateNagiosServerRelation($host_id, $data);
+			updateNagiosServerRelation($host_id, $host);
 			
 			$centreon->user->access->updateACL();
-			insertHostExtInfos($host_id, $data);
+			insertHostExtInfos($host_id, $host);
 
 			return $host_id;
 		}

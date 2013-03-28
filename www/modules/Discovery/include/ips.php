@@ -176,14 +176,14 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 										<div style="display:none" id="td_toggle'.$i.'" class="td_toggle">
 										<input type="hidden" name="id'.$i.'" value="'.$data["id"].'">
 										<table>
-											<td>
+											<td valign="top">
 												<b>NMAP</b><br>
 												Profil:<br>
 												Host Timeout :<br>
 												Max RTT Timeout :<br>
 												Max Retries :<br>
 											</td>
-											<td><br>'," \n ";
+											<td valign="top"><br>'," \n ";
 						switch ($default_conf["nmap_profil"]){
 							case 'Sneaky (T1)';
 								$select1="selected";
@@ -218,7 +218,7 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 												<input type="text" name="nmap_retries'.$i.'" tabindex="3" value="'.$default_conf["nmap_max_retries"].'"><br>
 											</td>
 											<td width="40px"></td>
-											<td>
+											<td valign="top">
 												<b>SNMP</b><br>
 												Port :<br>
 												Version :<br>
@@ -226,24 +226,57 @@ $agentDir = "@AGENT_DIR@/DiscoveryAgent_central.py";
 												Timeout :<br>
 												Retries :<br>
 											</td>
-											<td><br>'."\n ";
+											<td valign="top"><br>'."\n ";
 						echo '					<input type="text" name="port'.$i.'" tabindex="3" value="'.$default_conf["snmp_port"].'"><br>'."\n";
-						if ($default_conf["snmp_version"] == "2c"){
-							echo '				<select name="snmp_version'.$i.'" tabindex="10" title="Choose the SNMP version to use"><option value="1">1</option><option selected="selected" value="2c">2c</option></select><br>'."\n ";
+if ($default_conf["snmp_version"] == "3"){
+							echo '				<select name="snmp_version'.$i.'" tabindex="10" title="Choose the SNMP version to use"><option value="1">1</option><option value="2c">2c</option><option selected="selected" value="3">3</option></select><br>'."\n ";
+						}else if ($default_conf["snmp_version"] == "2c"){
+							echo '				<select name="snmp_version'.$i.'" tabindex="10" title="Choose the SNMP version to use"><option value="1">1</option><option selected="selected" value="2c">2c</option><option value="3">3</option></select><br>'."\n ";
 						}else{
-							echo '				<select name="snmp_version'.$i.'" tabindex="10" title="Choose the SNMP version to use"><option selected="selected" value="1">1</option><option value="2c">2c</option></select><br>'."\n ";								
-						}	
-						echo '					<input type="text" name="snmp_community'.$i.'" tabindex="11" value="'.$default_conf["snmp_community"].'" title="Enter your SNMP community"><br>'."\n";
+							echo '				<select name="snmp_version'.$i.'" tabindex="10" title="Choose the SNMP version to use"><option selected="selected" value="1">1</option><option value="2c">2c</option><option value="3">3</option></select><br>'."\n ";	
+						}							
+						echo '					<input type="text" name="snmp_community'.$i.'" tabindex="11" value="'.$default_conf["snmp_community"].'" title="Enter your SNMP community - || to separate community" ><br>'."\n";	
 						echo '					<input type="text" name="timeout'.$i.'" tabindex="3" value="'.$default_conf["snmp_timeout"].'"><br>'."\n";
 						echo '					<input type="text" name="retries'.$i.'" tabindex="3" value="'.$default_conf["snmp_retries"].'"><br>'."\n";
 						echo '				</td>
+											<td width="40px" valign="top"></td>
+											<td valign="top">
+												<b>SNMPv3 Authentification</b><br>
+												SNMPv3 Login :<br>
+												SNMPv3 Level :<br>
+												SNMPv3 AuthType :<br>
+												SNMPv3 PrivType :<br>
+											</td>
+											<td valign="top"><br>'."\n ";
+						
+						echo '					<input type="text" name="snmp_v3login'.$i.'" tabindex="11" value="'.$default_conf["snmp_v3login"].'"><br>'."\n";
+						
+						if($default_conf["snmp_v3level"] == "NoAuthNoPriv"){
+							echo '				<select name="snmp_v3level'.$i.'" tabindex="11"><option selected="selected" value="NoAuthNoPriv">NoAuthNoPriv</option><option value="AuthNoPriv">AuthNoPriv</option><option value="AuthPriv">AuthPriv</option></select><br>'."\n";
+						}else if ($default_conf["snmp_v3level"] == "AuthNoPriv"){
+							echo '				<select name="snmp_v3level'.$i.'" tabindex="11"><option value="NoAuthNoPriv">NoAuthNoPriv</option><option selected="selected" value="AuthNoPriv">AuthNoPriv</option><option value="AuthPriv">AuthPriv</option></select><br>'."\n";
+						}else{
+							echo '				<select name="snmp_v3level'.$i.'" tabindex="11"><option value="NoAuthNoPriv">NoAuthNoPriv</option><option value="AuthNoPriv">AuthNoPriv</option><option selected="selected" value="AuthPriv">AuthPriv</option></select><br>'."\n";
+						}
+						
+						if($default_conf["snmp_v3authtype"] == "MD5"){
+							echo '				<select name="snmp_v3authtype'.$i.'" tabindex="11"><option selected="selected" value="MD5">MD5</option><option value="SHA">SHA</option></select>Pass :';
+						}else{
+							echo '				<select name="snmp_v3authtype'.$i.'" tabindex="11"><option value="MD5">MD5</option><option selected="selected" value="SHA">SHA</option></select>Pass :';
+						}	
+						echo '					<input type="text" name="snmp_v3authpass'.$i.'" tabindex="11" value="'.$default_conf["snmp_v3authpass"].'" title="Enter your auth passphrase" ><br>'."\n";	
+
+						echo '					<select name="snmp_v3privtype'.$i.'" tabindex="11"><option selected="selected" value="DES">DES</option></select>Pass :';
+						echo '					<input type="text" name="snmp_v3privpass'.$i.'" tabindex="11" value="'.$default_conf["snmp_v3privpass"].'" title="Enter your auth passphrase" ><br>'."\n";	
+						
+						echo '				</td>
 											<td width="40px"></td>
-											<td>
+											<td valign="top">
 												<b>OID</b><br>
 												Hostname :<br>
 												OS :<br>
 											</td>
-											<td><br>
+											<td valign="top"><br>
 												<input type="text" name="oid_hostname'.$i.'" tabindex="8" value="'.$default_conf["oid_hostname"].'" title="Exemple: .1.3.6.1.4.1.5518.1.5.47"><br>
 												<input type="text" name="oid_os'.$i.'" tabindex="9" value="'.$default_conf["oid_os"].'" title="Exemple: .1.3.6.1.4.1.5518.1.5.47"><br>							
 											</td>

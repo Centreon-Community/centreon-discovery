@@ -64,6 +64,12 @@ CREATE TABLE IF NOT EXISTS `mod_discovery_rangeip` (
   `snmp_version` varchar(2) DEFAULT "2c",
   `snmp_port` int(5) DEFAULT 161,
   `snmp_community` varchar(256) COLLATE utf8_bin DEFAULT 'public',
+  `snmp_v3login` varchar(256) COLLATE utf8_bin DEFAULT NULL,
+  `snmp_v3level` varchar(256) COLLATE utf8_bin DEFAULT NULL,
+  `snmp_v3authtype` varchar(256) COLLATE utf8_bin NOT NULL DEFAULT 'MD5',
+  `snmp_v3authpass` varchar(256) COLLATE utf8_bin DEFAULT NULL,
+  `snmp_v3privtype` varchar(256) COLLATE utf8_bin NOT NULL DEFAULT 'DES',
+  `snmp_v3privpass` varchar(256) COLLATE utf8_bin DEFAULT NULL,
   `snmp_timeout` int(6) NOT NULL DEFAULT 5,
   `snmp_retries` int(2) NOT NULL DEFAULT 1,
   `nagios_server_id` int(11) DEFAULT '0',
@@ -91,6 +97,7 @@ CREATE TABLE IF NOT EXISTS `mod_discovery_results` (
   `os` varchar(400) DEFAULT NULL,
   `new_host` int(1) NOT NULL DEFAULT '1',
   `plage_id` int(11) DEFAULT NULL,
+  `snmp_community` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 

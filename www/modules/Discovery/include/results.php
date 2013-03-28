@@ -131,26 +131,46 @@ if (!empty($_POST)){
 				$hostToCreate = mysql_fetch_array($reqHostToCreate,MYSQL_ASSOC);
 				
 				//On récupere des infos sur l'hotes à créer
-				$reqHostInfos = mysql_query("SELECT snmp_community,snmp_version,nagios_server_id FROM mod_discovery_rangeip WHERE id=".$hostToCreate["plage_id"].";");
+				$reqHostInfos = mysql_query("SELECT snmp_community,snmp_version,snmp_v3login, snmp_v3level, snmp_v3authtype, snmp_v3authpass, snmp_v3privtype, snmp_v3privpass, nagios_server_id FROM mod_discovery_rangeip WHERE id=".$hostToCreate["plage_id"].";");
 				$hostInfos = mysql_fetch_array($reqHostInfos,MYSQL_ASSOC);
 				
 				//On rempli la variable tmpConf qui sera envoyée à la fonction callInsertHostInDb()
 				$tmpConf = array();
 				$id=$hostToCreate["id"];
-				$tmpConf["host_name"] = $_POST["hostname"][$id];
-				$tmpConf["host_alias"] = $_POST["hostname"][$id];
-				$tmpConf["host_address"] = $hostToCreate["ip"];
-				$tmpConf["nagios_server_id"] = $hostInfos["nagios_server_id"];
-				$tmpConf["host_snmp_community"] =  $hostInfos["snmp_community"];
-				$tmpConf["host_snmp_version"] =  $hostInfos["snmp_version"];
-				$tmpConf["host_register"]["host_register"] = "1";
-				$tmpConf["host_activate"]["host_activate"] = "1";
-				$tmpConf["host_template_model_htm_id"] = $_POST["select_template".$host];
+				$tmpConf["host"]["host_name"] = $_POST["hostname"][$id];
+				$tmpConf["host"]["host_alias"] = $_POST["hostname"][$id];
+				$tmpConf["host"]["host_address"] = $hostToCreate["ip"];
+				$tmpConf["host"]["nagios_server_id"] = $hostInfos["nagios_server_id"];
+				if($hostToCreate["snmp_community"]!='nocomm'){
+					$tmpConf["host"]["host_snmp_community"] =  $hostToCreate["snmp_community"];
+				}
+				else {
+					// Ajout macros
+				}
+				$tmpConf["host"]["host_snmp_version"] =  $hostInfos["snmp_version"];
+				$tmpConf["host"]["host_register"]["host_register"] = "1";
+				$tmpConf["host"]["host_activate"]["host_activate"] = "1";
+				$tmpConf["host"]["host_template_model_htm_id"] = $_POST["select_template".$host];
 				if ($_POST["select_group".$host]!= -1)
 				{
-					$tmpConf["host_hgs"] = array($_POST["select_group".$host]);
+					$tmpConf["host"]["host_hgs"] = array($_POST["select_group".$host]);
 				}
-				$tmpConf["dupSvTplAssoc"]["dupSvTplAssoc"] = "1";
+				$tmpConf["host"]["dupSvTplAssoc"]["dupSvTplAssoc"] = "1";
+				
+				$tmpConf["macro"]["macroInput_0"] = 'HOSTSNMPV3_LOGIN';
+				$tmpConf["macro"]["macroValue_0"] = $hostInfos["snmp_v3login"];				
+				$tmpConf["macro"]["macroInput_1"] = 'HOSTSNMPV3_LEVEL';
+				$tmpConf["macro"]["macroValue_1"] = $hostInfos["snmp_v3level"];				
+				$tmpConf["macro"]["macroInput_2"] = 'HOSTSNMPV3_AUTHTYPE';
+				$tmpConf["macro"]["macroValue_2"] = $hostInfos["snmp_v3authtype"];				
+				$tmpConf["macro"]["macroInput_3"] = 'HOSTSNMPV3_AUTHPASS';
+				$tmpConf["macro"]["macroValue_3"] = $hostInfos["snmp_v3authpass"];				
+				$tmpConf["macro"]["macroInput_4"] = 'HOSTSNMPV3_PRIVTYPE';
+				$tmpConf["macro"]["macroValue_4"] = $hostInfos["snmp_v3privtype"];				
+				$tmpConf["macro"]["macroInput_5"] = 'HOSTSNMPV3_PRIVPASS';
+				$tmpConf["macro"]["macroValue_5"] = $hostInfos["snmp_v3privpass"];
+				$tmpConf["macro"]["nbOfMacro"] = 6;
+
 				callInsertHostInDb($tmpConf);
 			}
 			if (count($hostList)>1){
@@ -259,8 +279,9 @@ if (!empty($_POST)){
 				<tr class="ListHeader">
 					<td width="5%" class="ListColHeaderCenter"><input type="checkbox" name="cb<?php echo $cbgroup; ?>[]" value="<?php echo $subnetDoneData["plage"]; ?>" OnClick="checkall(document.getElementsByName('cb<?php echo $cbgroup; ?>[]'));"/></td>
 						<input type="hidden" name="group_list[]" value="'. $cbgroup .'" />
-						<td width="10%" class="ListColHeaderCenter"><a href="./main.php?p=61202&orderby=ip_asc"><img src="./img/icones/7x7/sort_asc.gif" style="position:relative;bottom:5px;left:-3px;"></a>Host<a href="./main.php?p=61202&orderby=ip_desc"><img src="./img/icones/7x7/sort_desc.gif" style="position:relative;bottom:5px;left:3px;"></a></td>
+						<td width="7%" class="ListColHeaderCenter"><a href="./main.php?p=61202&orderby=ip_asc"><img src="./img/icones/7x7/sort_asc.gif" style="position:relative;bottom:5px;left:-3px;"></a>Host<a href="./main.php?p=61202&orderby=ip_desc"><img src="./img/icones/7x7/sort_desc.gif" style="position:relative;bottom:5px;left:3px;"></a></td>
 						<td width="15%" class="ListColHeaderCenter"><a href="./main.php?p=61202&orderby=hostname_asc"><img src="./img/icones/7x7/sort_asc.gif" style="position:relative;bottom:5px;left:-3px;"></a>Hostname<a href="./main.php?p=61202&orderby=hostname_desc"><img src="./img/icones/7x7/sort_desc.gif" style="position:relative;bottom:5px;left:3px;"></a></td>
+						<td width="5%" class="ListColHeaderCenter">Communaut&eacute;</td>
 						<td width="15%" class="ListColHeaderCenter"><a href="./main.php?p=61202&orderby=os_asc"><img src="./img/icones/7x7/sort_asc.gif" style="position:relative;bottom:5px;left:-3px;"></a>Operating System<a href="./main.php?p=61202&orderby=os_desc"><img src="./img/icones/7x7/sort_desc.gif" style="position:relative;bottom:5px;left:3px;"></a></td>
 						<td width="15%" class="ListColHeaderCenter">Host Template</td>
 						<td width="15%" class="ListColHeaderCenter">Host Group</td>
@@ -292,10 +313,11 @@ if (!empty($_POST)){
 				<?php
 						echo '            	<tr class="'.$list.'">'," \n";
 						echo '                  <td width="5%" class="ListColCenter"><input type="checkbox" name="cb'.$cbgroup.'[]" value="'.$subnetHostData["id"].'"/></td>';
-						echo '                  <td width="10%" class="ListColCenter" name="ip'.$subnetHostData["id"].'">'.$subnetHostData["ip"].'</td>';
-						echo '                  <td width="17%" class="ListColCenter"><input type="text" name="hostname['.$subnetHostData["id"].']" value="'.htmlspecialchars($subnetHostData["hostname"]).'" onKeyUp="updateNameBox(\''.$subnetHostData["id"].'\');" />&nbsp;<a href="#"><img src="./modules/Discovery/include/images/undo_16.png" title="Rollback to detected hostname" onClick="Hostname_rollback(\''.$subnetHostData["id"].'\');" /></a></td>';
-						echo '                  <td width="17%" class="ListColCenter" title="'.$subnetHostData["os"].'">'.strCut($subnetHostData["os"]).'</td>';
-						echo '					<td width="17%" class="ListColCenter"><select name="select_template'.$subnetHostData["id"].'" width="95%"><option value="-1">None</option>';
+						echo '                  <td width="7%" class="ListColCenter" name="ip'.$subnetHostData["id"].'">'.$subnetHostData["ip"].'</td>';
+						echo '                  <td width="15%" class="ListColCenter"><input type="text" name="hostname['.$subnetHostData["id"].']" value="'.htmlspecialchars($subnetHostData["hostname"]).'" onKeyUp="updateNameBox(\''.$subnetHostData["id"].'\');" />&nbsp;<a href="#"><img src="./modules/Discovery/include/images/undo_16.png" title="Rollback to detected hostname" onClick="Hostname_rollback(\''.$subnetHostData["id"].'\');" /></a></td>';
+						echo '                  <td width="5%" class="ListColCenter">'.$subnetHostData["snmp_community"].'</td>';
+						echo '                  <td width="15%" class="ListColCenter" title="'.$subnetHostData["os"].'">'.strCut($subnetHostData["os"]).'</td>';
+						echo '					<td width="15%" class="ListColCenter"><select name="select_template'.$subnetHostData["id"].'" width="95%"><option value="-1">None</option>';
 						$default = findOs($subnetHostData["os"]);
 						foreach($Hosts_Templates as $Hosts_TmPL){
 						?>
@@ -303,14 +325,14 @@ if (!empty($_POST)){
 						<?php
 						}
 						echo '					</select></td>';
-						echo '					<td width="17%" class="ListColCenter"><select name="select_group'.$subnetHostData["id"].'" width="95%"><option value="-1">None</option>';
+						echo '					<td width="15%" class="ListColCenter"><select name="select_group'.$subnetHostData["id"].'" width="95%"><option value="-1">None</option>';
 						foreach($HostGroup as $Host_Group){
 							echo '<option value="'.$Host_Group["hg_id"].'">'.$Host_Group["hg_name"].'</option>';
 						}					
 						echo 					'</select></td>';
-						echo '					<td width="17%" class="ListColCenter" name="exist'.$subnetHostData["id"].'" style="font-weight:bold;">';
+						echo '					<td width="8%" class="ListColCenter" name="exist'.$subnetHostData["id"].'" style="font-weight:bold;">';
 						echo '</td>';
-						echo ' 					<td width="10%" class="ListColCenter"><a href="#"><img style="border:none" type="image" src="./modules/Discovery/include/images/delete16x16.png" title="Delete one from list" name="ClearRow" onClick="self.location=\'./main.php?p=61202&delid='.$subnetHostData["id"].'\'"></a></td>';
+						echo ' 					<td width="5%" class="ListColCenter"><a href="#"><img style="border:none" type="image" src="./modules/Discovery/include/images/delete16x16.png" title="Delete one from list" name="ClearRow" onClick="self.location=\'./main.php?p=61202&delid='.$subnetHostData["id"].'\'"></a></td>';
 						echo '				</tr>';
 				$listcnt++;
 				}
@@ -429,7 +451,7 @@ if (!empty($_POST)){
 							}
 							/* SNMP */
 							if (isset($_POST["snmp_community".$i]) && !strpos($_POST["snmp_community".$i]," ") && !empty($_POST["snmp_community".$i]) && isset($_POST["timeout".$i]) && is_int(intval($_POST["timeout".$i])) && $_POST["timeout".$i]>0 && $_POST["timeout".$i]<100 && isset($_POST["retries".$i]) && is_int(intval($_POST["retries".$i])) && $_POST["retries".$i]>=0 && $_POST["retries".$i]<100 && isset($_POST["port".$i]) && is_int(intval($_POST["port".$i])) && $_POST["port".$i]>0 && $_POST["port".$i]<65536 && isset($_POST["snmp_version".$i])){
-								$upd_SQL.="snmp_community='".$_POST["snmp_community".$i]."', snmp_timeout='".$_POST["timeout".$i]."', snmp_retries='".$_POST["retries".$i]."', snmp_version='".$_POST["snmp_version".$i]."', snmp_port='".$_POST["port".$i]."', ";
+								$upd_SQL.="snmp_community='".$_POST["snmp_community".$i]."', snmp_timeout='".$_POST["timeout".$i]."', snmp_retries='".$_POST["retries".$i]."', snmp_version='".$_POST["snmp_version".$i]."', snmp_port='".$_POST["port".$i]."', snmp_v3login='".$_POST["snmp_v3login".$i]."', snmp_v3level='".$_POST["snmp_v3level".$i]."', snmp_v3authtype='".$_POST["snmp_v3authtype".$i]."', snmp_v3authpass='".$_POST["snmp_v3authpass".$i]."', snmp_v3privtype='".$_POST["snmp_v3privtype".$i]."', snmp_v3privpass='".$_POST["snmp_v3privpass".$i]."', ";
 							}
 							/* OID */
 							if (isset($_POST["oid_os".$i]) && !empty($_POST["oid_os".$i]) && ereg("^(\.([1-9][0-9]+|[0-9]))+$", $_POST["oid_os".$i]) && isset($_POST["oid_hostname".$i]) && !empty($_POST["oid_hostname".$i]) && ereg("^(\.([1-9][0-9]+|[0-9]))+$", $_POST["oid_hostname".$i])){

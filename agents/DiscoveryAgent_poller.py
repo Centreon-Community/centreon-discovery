@@ -81,7 +81,7 @@ def connectToCentral():
 				elif data.startswith("#scanip#"):
 					strSplit = data.lstrip().split("#$#")
 					plage = strSplit[1]
-					args = [strSplit[2], strSplit[3], strSplit[4], strSplit[5], strSplit[6], strSplit[7], strSplit[8], strSplit[9], strSplit[10], strSplit[11], strSplit[12]]
+					args = [strSplit[2], strSplit[3], strSplit[4], strSplit[5], strSplit[6], strSplit[7], strSplit[8], strSplit[9], strSplit[10], strSplit[11], strSplit[12], strSplit[13], strSplit[14], strSplit[15], strSplit[16], strSplit[17], strSplit[18]]
 					print 'DiscoveryAgent_poller.py : SCAN_RANGEIP for ' + plage
 					scanRangeIP(plage, conn, s, args)
 					data = "#scanip#done"		
@@ -138,18 +138,64 @@ def scanRangeIP(rangeIP, conn, s, args):
 		return
 
 def getHostOS(host,args,status,conn):
-	req_snmp = "snmpget -c %s -v %s -t %s -r %s -O nq %s:%s %s 2>&1 | grep %s" % (args[8], args[6], args[9], args[10], host, args[7], args[4], args[4])
-	hostname = commands.getoutput(req_snmp)
+	complete_snmp=" -v %s -t %s -r %s -O nq %s:%s %s 2>&1 | grep %s" % (args[6], args[15], args[16], host, args[7], args[4], args[4])
+	hostname=""
+	i=0
+	communities=[]
+	#SNMP v1-v2c
+	if args[6] != '3':
+		communities=args[8].lstrip().split("||")
+		while hostname == '' and i < len(communities):
+			req_snmp="snmpget -c %s" % (communities[i])
+			req_snmp=req_snmp+complete_snmp
+			print req_snmp
+			hostname = commands.getoutput(req_snmp)	
+			i+=1
+		save_community=communities[i-1]
+	#SNMP v3
+	else:
+		if args[10] == 'NoAuthNoPriv':
+			req_snmp = "snmpget -u %s -l %s" % (args[9], args[10])
+		elif args[10] == 'AuthNoPriv' :
+			req_snmp = "snmpget -u %s -l %s -a %s -A %s" % (args[9], args[10], args[11], args[12])
+		elif args[10] == 'AuthPriv' :
+			req_snmp = "snmpget -u %s -l %s -a %s -A %s -x %s -X %s" % (args[9], args[10], args[11], args[12], args[13], args[14])
+		req_snmp=req_snmp+complete_snmp
+		print req_snmp
+		hostname = commands.getoutput(req_snmp)
+		save_community="nocomm"
 	if hostname == "":
 		hostname = "* TimeOut SNMP *"
 		os_name = "* TimeOut SNMP *"
+		save_community="nocomm"
 	else:
 		hostname = hostname.split(' ',1)[1]
 		#hostname = hostname.replace(hostname, hostname[hostname.find("STRING")+len("STRING: "):])
-		req_snmp = "snmpget -c %s -v %s -t %s -r %s -O nq %s:%s %s 2>&1 | grep %s" % (args[8], args[6], args[9], args[10], host, args[7], args[5], args[5])
+		complete_snmp=" -v %s -t %s -r %s -O nq %s:%s %s 2>&1 | grep %s" % (args[6], args[15], args[16], host, args[7], args[5], args[5])
+		os_name=""		
+		i=0
+		#SNMP v1-v2c
+		if args[6] != '3':
+			communities=args[8].lstrip().split("||")
+			while os_name == '' and i < len(communities):
+				req_snmp="snmpget -c %s" % (communities[i])
+				req_snmp=req_snmp+complete_snmp
+				print req_snmp
+				os_name = commands.getoutput(req_snmp)	
+				i+=1
+		#SNMP v3
+		else:
+			if args[10] == 'NoAuthNoPriv':
+				req_snmp = "snmpget -u %s -l %s" % (args[9], args[10])
+			elif args[10] == 'AuthNoPriv' :
+				req_snmp = "snmpget -u %s -l %s -a %s -A %s" % (args[9], args[10], args[11], args[12])
+			elif args[10] == 'AuthPriv' :
+				req_snmp = "snmpget -u %s -l %s -a %s -A %s -x %s -X %s" % (args[9], args[10], args[11], args[12], args[13], args[14])
+			req_snmp=req_snmp+complete_snmp
+		
 		os_name = commands.getoutput(req_snmp)
 		os_name = os_name.split(' ',1)[1]
-	state = "#state#$#%s#$#%s#$#%s#$#%s"%(host,status,hostname,os_name)
+	state = "#state#$#%s#$#%s#$#%s#$#%s#$#%s"%(host,status,hostname,os_name,save_community)
 	state = "%475s"%state
 	print "Send : ",state.lstrip()
 	if KEY != "":

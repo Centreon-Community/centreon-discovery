@@ -79,7 +79,7 @@ def scanRangeIP(db):
 	c=db.cursor()
 	# Set done = 1 while checking pollers
 	c.execute("""UPDATE mod_discovery_rangeip SET done = 1 WHERE id=0""")
-	c.execute("""SELECT R.id, S.ns_ip_address, R.plage, R.cidr, R.nmap_profil, R.nmap_max_retries, R.nmap_host_timeout, R.nmap_max_rtt_timeout, R.oid_hostname, R.oid_os, R.snmp_version, R.snmp_port, R.snmp_community, R.snmp_timeout, R.snmp_retries\
+	c.execute("""SELECT R.id, S.ns_ip_address, R.plage, R.cidr, R.nmap_profil, R.nmap_max_retries, R.nmap_host_timeout, R.nmap_max_rtt_timeout, R.oid_hostname, R.oid_os, R.snmp_version, R.snmp_port, R.snmp_community, R.snmp_v3login, R.snmp_v3level, R.snmp_v3authtype, R.snmp_v3authpass, R.snmp_v3privtype, R.snmp_v3privpass, R.snmp_timeout, R.snmp_retries\
 			 FROM nagios_server S, mod_discovery_rangeip R\
 			 WHERE S.id=R.nagios_server_id AND R.poller_status=1 AND R.done=1;""")
 	pollers = c.fetchall()
@@ -157,7 +157,7 @@ def getHostsFromPoller(poller):
 	try:
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		s.connect((poller[IP], 1080))
-		data = "#scanip#$#%s/%s#$#%s#$#%s#$#%s#$#%s#$#%s#$#%s#$#%s#$#%s#$#%s#$#%s#$#%s"%(poller[PLAGE],poller[CIDR],poller[4],poller[5],poller[6],poller[7],poller[8],poller[9],poller[10],poller[11],poller[12],poller[13],poller[14])
+		data = "#scanip#$#%s/%s#$#%s#$#%s#$#%s#$#%s#$#%s#$#%s#$#%s#$#%s#$#%s#$#%s#$#%s#$#%s#$#%s#$#%s#$#%s#$#%s#$#%s"%(poller[PLAGE],poller[CIDR],poller[4],poller[5],poller[6],poller[7],poller[8],poller[9],poller[10],poller[11],poller[12],poller[13],poller[14],poller[15],poller[16],poller[17],poller[18],poller[19],poller[20])
 		if KEY != "":
 			data = enc_dec(data, 1)
 		s.send(data)
@@ -181,7 +181,8 @@ def getHostsFromPoller(poller):
 				adr_ip = strSplit[1]
 				hostname = strSplit[3]
 				os_name = strSplit[4]
-				req = "INSERT INTO mod_discovery_results(ip, plage_id,hostname,os) VALUES ('%s', %d, '%s', '%s')" % (adr_ip, poller[ID], hostname, os_name)
+				community = strSplit[5]
+				req = "INSERT INTO mod_discovery_results(ip, plage_id,hostname,os,snmp_community) VALUES ('%s', %d, '%s', '%s', '%s')" % (adr_ip, poller[ID], hostname, os_name,community)
 				c.execute(req)
 		req = "UPDATE mod_discovery_rangeip SET done = %d WHERE id=%d" % (2, poller[ID])
 		c.execute(req)
